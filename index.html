@@ -22,84 +22,71 @@
             min-height: 100vh;
         }
 
-        /* 標題設計 */
-        .header { margin-bottom: 30px; }
-        h1 { 
-            font-size: 3.5rem; margin: 0; 
-            background: linear-gradient(to right, #ff4e50, #f9d423, #00d2ff, #9d50bb);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            font-weight: 900; letter-spacing: 5px;
-        }
-        .subtitle { font-size: 1.5rem; opacity: 0.8; font-weight: 300; letter-spacing: 2px; }
+        h1 { font-size: 3rem; margin: 0; background: linear-gradient(to right, #ff4e50, #f9d423, #00d2ff, #9d50bb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; }
+        .subtitle { font-size: 1.2rem; opacity: 0.8; margin-bottom: 20px; }
 
         /* S 型跑道區域 */
-        #track-wrapper {
-            width: 100%; max-width: 600px; margin: 0 auto; position: relative;
-        }
-
+        #track-wrapper { width: 100%; max-width: 500px; margin: 0 auto; position: relative; }
         svg { width: 100%; height: auto; display: block; overflow: visible; }
         
-        /* 定義漸層路徑樣式 */
-        .st0 { fill: none; stroke: url(#track-gradient); stroke-width: 30; stroke-linecap: round; stroke-linejoin: round; }
-        .st-bg { fill: none; stroke: rgba(255,255,255,0.05); stroke-width: 35; stroke-linecap: round; }
+        /* 跑道樣式：使用圓角端點與平滑連接 */
+        .path-main { fill: none; stroke: url(#track-gradient); stroke-width: 28; stroke-linecap: round; stroke-linejoin: round; }
+        .path-shadow { fill: none; stroke: rgba(255,255,255,0.05); stroke-width: 32; stroke-linecap: round; }
 
-        /* 跑者標籤 */
+        /* 跑者頭像樣式 */
         .runner {
-            position: absolute; width: 60px; height: 60px;
+            position: absolute; width: 45px; height: 45px;
             display: flex; flex-direction: column; align-items: center;
-            transition: all 1.2s cubic-bezier(0.23, 1, 0.32, 1);
+            transition: all 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
             z-index: 100; pointer-events: none;
-            margin-left: -30px; margin-top: -50px; 
+            margin-left: -22.5px; margin-top: -45px; 
         }
 
-        .avatar { 
-            font-size: 32px; filter: drop-shadow(0 0 10px rgba(255,255,255,0.5));
-            animation: runnerBounce 0.5s infinite alternate;
+        .user-photo {
+            width: 35px; height: 35px;
+            border-radius: 8px; /* 圓角顯示 */
+            border: 2px solid white;
+            box-shadow: 0 0 12px rgba(0, 210, 255, 0.6);
+            object-fit: cover;
+            background: #222;
         }
-        @keyframes runnerBounce { from { transform: translateY(0); } to { transform: translateY(-8px); } }
 
         .label { 
-            background: rgba(0, 0, 0, 0.8); color: white; font-size: 11px; font-weight: bold;
-            padding: 4px 10px; border-radius: 20px; white-space: nowrap;
-            border: 1px solid var(--accent-blue); box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-            margin-top: 5px;
+            background: rgba(0, 0, 0, 0.85); color: white; font-size: 10px; font-weight: bold;
+            padding: 2px 8px; border-radius: 10px; white-space: nowrap;
+            border: 1px solid var(--accent-blue); margin-top: 4px;
         }
 
-        /* 底部控制面板 - 玻璃擬態樣式 */
+        /* 玻璃擬態面板 */
         .controls-container {
-            margin-top: 40px; padding: 25px;
-            background: var(--panel-bg);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 20px;
-            display: inline-flex; flex-wrap: wrap; justify-content: center; align-items: center;
-            gap: 20px; max-width: 95%;
+            margin-top: 30px; padding: 20px;
+            background: var(--panel-bg); backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 24px;
+            display: inline-flex; flex-wrap: wrap; justify-content: center; gap: 15px;
         }
 
-        .input-box {
-            display: flex; flex-direction: column; align-items: flex-start;
-        }
-        .input-box label { font-size: 12px; margin-bottom: 5px; color: var(--accent-blue); font-weight: bold; }
+        .input-box { display: flex; flex-direction: column; align-items: flex-start; }
+        label { font-size: 11px; margin-bottom: 4px; color: var(--accent-blue); font-weight: bold; }
 
-        input { 
-            background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2);
-            padding: 12px 15px; border-radius: 10px; color: white; outline: none; width: 120px;
-            font-size: 16px; transition: 0.3s;
+        input, select { 
+            background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
+            padding: 10px 12px; border-radius: 10px; color: white; outline: none; width: 130px;
+            font-size: 14px;
         }
-        input:focus { border-color: var(--accent-blue); background: rgba(255,255,255,0.15); }
+        select option { background: #1a2a44; color: white; }
 
-        .unit-input { position: relative; }
-        .unit-input::after { content: "min"; position: absolute; right: 10px; top: 50%; color: #888; font-size: 12px; }
+        #file-btn {
+            background: #2c5282; color: white; padding: 10px; border-radius: 10px;
+            font-size: 12px; cursor: pointer; border: 1px solid rgba(255,255,255,0.2);
+        }
 
         button { 
-            padding: 12px 35px; background: linear-gradient(to right, #00d2ff, #3a7bd5);
+            padding: 12px 35px; background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
             color: white; border: none; border-radius: 30px; cursor: pointer;
-            font-weight: bold; font-size: 16px; transition: 0.3s;
-            box-shadow: 0 5px 20px rgba(0, 210, 255, 0.3);
+            font-weight: bold; font-size: 16px; box-shadow: 0 4px 15px rgba(0, 210, 255, 0.4);
+            transition: 0.3s;
         }
-        button:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0, 210, 255, 0.5); }
-
-        .goal-text { position: absolute; right: 0; top: 380px; font-weight: 800; color: #ff4e50; font-size: 18px; }
+        button:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0, 210, 255, 0.6); }
     </style>
 </head>
 <body>
@@ -120,99 +107,25 @@
                     <stop offset="100%" style="stop-color:#00d2ff" />
                 </linearGradient>
             </defs>
-
-            <path class="st-bg" d="M 30 50 L 170 50 C 195 50 195 120 170 120 L 30 120 C 5 120 5 190 30 190 L 170 190 C 195 190 195 260 170 260 L 30 260 C 5 260 5 330 30 330 L 170 330 C 195 330 195 400 170 400 L 30 400" />
             
-            <path id="s-path" class="st0" d="M 30 50 L 170 50 C 195 50 195 120 170 120 L 30 120 C 5 120 5 190 30 190 L 170 190 C 195 190 195 260 170 260 L 30 260 C 5 260 5 330 30 330 L 170 330 C 195 330 195 400 170 400 L 30 400" />
+            <path class="path-shadow" d="M 35 50 H 165 A 35 35 0 0 1 165 120 H 35 A 35 35 0 0 0 35 190 H 165 A 35 35 0 0 1 165 260 H 35 A 35 35 0 0 0 35 330 H 165 A 35 35 0 0 1 165 400 H 35" />
+            <path id="s-path" class="path-main" d="M 35 50 H 165 A 35 35 0 0 1 165 120 H 35 A 35 35 0 0 0 35 190 H 165 A 35 35 0 0 1 165 260 H 35 A 35 35 0 0 0 35 330 H 165 A 35 35 0 0 1 165 400 H 35" />
             
-            <text x="20" y="30" fill="#ffffff" font-size="10" font-weight="bold">START</text>
-            <text x="20" y="440" fill="#ff4e50" font-size="12" font-weight="900">GOAL 7800</text>
+            <text x="25" y="32" fill="#fff" font-size="10" font-weight="bold">START</text>
+            <text x="25" y="435" fill="#ff4e50" font-size="12" font-weight="900">GOAL 7800</text>
         </svg>
     </div>
 
     <div class="controls-container">
         <div class="input-box">
             <label>運動家</label>
-            <input type="text" id="name" placeholder="大名">
+            <select id="user-select">
+                <option value="">+ 新運動家</option>
+            </select>
+            <input type="text" id="new-name" placeholder="輸入姓名" style="margin-top:8px;">
         </div>
-        <div class="input-box">
-            <label>今日時數</label>
-            <div class="unit-input">
-                <input type="number" id="mins" placeholder="0">
-            </div>
-        </div>
-        <div class="input-box">
-            <label>通關密語</label>
-            <input type="password" id="pw" placeholder="******">
-        </div>
-        <button onclick="addMins()">回報進度</button>
-    </div>
-
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyDqX_tZqqfw0txXpd-b4AWuolhgQgU6lLU",
-            authDomain: "runrundondon-31b12.firebaseapp.com",
-            databaseURL: "https://runrundondon-31b12-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "runrundondon-31b12",
-            storageBucket: "runrundondon-31b12.firebasestorage.app",
-            messagingSenderId: "466713105396",
-            appId: "1:466713105396:web:c0651103b028978cd9dfa1"
-        };
-
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-
-        function updateRunners(players) {
-            const path = document.getElementById('s-path');
-            const pathLength = path.getTotalLength();
-            const wrapper = document.getElementById('track-wrapper');
-            document.querySelectorAll('.runner').forEach(r => r.remove());
-
-            if (!players) return;
-            const GOAL = 7800;
-
-            Object.values(players).forEach(p => {
-                const progress = Math.min(p.score / GOAL, 1);
-                const point = path.getPointAtLength(progress * pathLength);
-                
-                // SVG 比例換算 (viewBox 200x450)
-                const xPercent = (point.x / 200) * 100;
-                const yPercent = (point.y / 450) * 100;
-
-                const runner = document.createElement('div');
-                runner.className = 'runner';
-                runner.style.left = `${xPercent}%`;
-                runner.style.top = `${yPercent}%`;
-                runner.innerHTML = `
-                    <span class="avatar">🏃</span>
-                    <span class="label">${p.name}: ${p.score}</span>
-                `;
-                wrapper.appendChild(runner);
-            });
-        }
-
-        window.addMins = function() {
-            const name = document.getElementById('name').value.trim();
-            const mins = parseInt(document.getElementById('mins').value);
-            const pw = document.getElementById('pw').value;
-
-            if (pw !== "hello") { alert("🔒 密語錯誤！"); return; }
-            if (!name || isNaN(mins)) { alert("請填寫姓名與時數"); return; }
-
-            const userRef = db.ref('players/' + name);
-            userRef.once('value').then(snapshot => {
-                const current = (snapshot.val() && snapshot.val().score) ? snapshot.val().score : 0;
-                return userRef.update({ name, score: current + mins });
-            }).then(() => {
-                document.getElementById('mins').value = '';
-                document.getElementById('pw').value = '';
-                alert("💪 挑戰進度更新成功！");
-            });
-        };
-
-        db.ref('players').on('value', (snapshot) => {
-            updateRunners(snapshot.val());
-        });
-    </script>
-</body>
-</html>
+        
+        <div class="input-box" id="photo-box">
+            <label>大頭貼 (圓角顯示)</label>
+            <label id="file-btn" for="photo-file">選擇圖片</label>
+            <input type="file" id="photo-
