@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+
+<html lang="zh-TW">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>運動馬拉松即時看板</title>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+    
+
+    <style>
+
+        /* 簡單的跑道樣式 */
+
+        body { font-family: "Microsoft JhengHei", sans-serif; text-align: center; background: #eceff1; }
+
+        #track { width: 90%; max-width: 800px; background: #333; margin: 20px auto; padding: 10px; border-radius: 8px; position: relative; }
+
+        .lane { height: 50px; border-bottom: 1px dashed #777; position: relative; display: flex; align-items: center; overflow: hidden; }
+
+        .runner { position: absolute; transition: left 1s; display: flex; align-items: center; }
+
+        .avatar { font-size: 24px; margin-right: 5px; }
+
+        .label { color: white; font-size: 12px; background: rgba(0,0,0,0.6); border-radius: 4px; padding: 2px 6px; white-space: nowrap; }
+
+        .controls { margin: 20px; padding: 20px; background: white; display: inline-block; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+
+    </style>
+
+</head>
+
+<body>
+
+
+
+    <h1>🏃‍♂️ 即時運動馬拉松 🏃‍♀️</h1>
+
+    
+
+    <div id="track">
+
+        </div>
+
+
+
+    <div class="controls">
+
+        <input type="text" id="name" placeholder="你的姓名">
+
+        <input type="number" id="mins" placeholder="運動分鐘數" style="width: 80px;">
+
+        <button onclick="addMins()">增加進度</button>
+
+    </div>
+
+
+
+    <script>
+
+// --- 1. 初始化 Firebase ---
+const firebaseConfig = {
+    apiKey: "AIzaSyDqX_tZqqfw0txXpd-b4AWuolhgQgU6lLU",
+    authDomain: "runrundondon-31b12.firebaseapp.com",
+    databaseURL: "https://runrundondon-31b12-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "runrundondon-31b12",
+    storageBucket: "runrundondon-31b12.firebasestorage.app",
+    messagingSenderId: "466713105396",
+    appId: "1:466713105396:web:c0651103b028978cd9dfa1",
+    measurementId: "G-D5D9SP15X4"
+};
+
+// 正確的相容版初始化方式
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database(); // 取得資料庫實例
+
+// --- 2. 增加時間的邏輯 ---
+function addMins() {
+    const name = document.getElementById('name').value.trim();
+    const mins = parseInt(document.getElementById('mins').value);
+
+    if (!name || isNaN(mins)) return alert("請填寫姓名與正確的分鐘數");
+
+    const userRef = db.ref('players/' + name);
+    userRef.once('value').then(snapshot => {
+        const current = snapshot.val() ? snapshot.val().score : 0;
+        userRef.set({
+            name: name,
+            score: current + mins
+        }).then(() => {
+            console.log("更新成功！");
+        }).catch((error) => {
+            console.error("更新失敗：", error);
+            alert("更新失敗，請檢查資料庫權限設定");
+        });
+    });
+    document.getElementById('mins').value = ''; // 清空輸入框
+}
+
+// --- 3. 監聽資料庫，即時繪製畫面 ---
+db.ref('players').on('value', (snapshot) => {
+    const players = snapshot.val();
+    const track = document.getElementById('track');
+    track.innerHTML = ''; // 重新整理跑道
+
+    const GOAL = 200; // 假設 200 分鐘跑完一圈
+
+    if (players) {
+        for (let id in players) {
+            const p = players[id];
+            const progress = Math.min((p.score / GOAL) * 90, 95); 
+            
+            const lane = document.createElement('div');
+            lane.className = 'lane';
+            lane.innerHTML = `
+                <div class="runner" style="left: ${progress}%">
+                    <span class="avatar">🏃</span>
+                    <span class="label">${p.name}: ${p.score} min</span>
+                </div>
+            `;
+            track.appendChild(lane);
+        }
+    }
+});
+
+            }
+
+        });
+
+    </script>
+
+</body>
+
+</html>
