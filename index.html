@@ -29,9 +29,19 @@
             display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
 
-        h1 { font-size: 2rem; margin: 10px 0; background: linear-gradient(to right, #ff4e50, #f9d423, #00d2ff, #9d50bb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; }
+        /* LOGO 圖片樣式 */
+        .logo-container {
+            margin: 15px auto;
+            max-width: 320px;
+            padding: 0 10px;
+        }
+        .main-logo {
+            width: 100%;
+            height: auto;
+            display: block;
+            filter: drop-shadow(0 0 8px rgba(0, 210, 255, 0.4));
+        }
 
-        /* 橫排控制區 */
         .controls-wrapper {
             display: flex; flex-direction: column; gap: 10px; align-items: center;
             margin: 10px auto; max-width: 600px;
@@ -54,8 +64,8 @@
         #comment-wall { margin: 20px auto; max-width: 450px; text-align: left; }
         .comment-item { 
             position: relative; background: var(--bubble-bg); border-radius: 12px; 
-            padding: 8px 15px; margin-bottom: 12px; font-size: 13px; 
-            border: 1px solid rgba(255,255,255,0.1); transition: 0.5s;
+            padding: 8px 15px; margin-bottom: 15px; font-size: 13px; 
+            border: 1px solid rgba(255,255,255,0.1);
         }
         .comment-item::after {
             content: ''; position: absolute; left: 20px; bottom: -8px;
@@ -63,9 +73,9 @@
         }
         .comment-time { font-size: 10px; color: rgba(255,255,255,0.4); margin-right: 8px; }
         .comment-name { color: var(--accent-gold); font-weight: bold; }
-        .comment-item:nth-child(1) { transform: scale(1.02); background: rgba(0, 210, 255, 0.15); border-color: var(--accent-blue); }
+        .comment-item:first-child { background: rgba(0, 210, 255, 0.15); border-color: var(--accent-blue); }
 
-        /* 跑道與標籤 */
+        /* 角色與標籤 */
         .runner {
             position: absolute; width: 40px; height: 40px;
             display: flex; flex-direction: column; align-items: center;
@@ -82,7 +92,7 @@
         .path-main { fill: none; stroke: url(#track-gradient); stroke-width: 26; stroke-linecap: round; }
         .path-shadow { fill: none; stroke: rgba(255,255,255,0.03); stroke-width: 32; stroke-linecap: round; }
         
-        /* 數字同步 ID 尺寸與粗度 */
+        /* 跑道數字調整為 10px */
         .milestone-text { fill: rgba(255,255,255,0.5); font-size: 10px; font-weight: 900; }
 
         #avatar-modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #1a2a44; padding: 20px; border-radius: 20px; border: 2px solid var(--accent-blue); z-index: 3000; width: 280px; }
@@ -96,13 +106,15 @@
 <body>
 
     <div id="auth-overlay">
-        <h1>跑跑動動</h1>
+        <div class="logo-container"><img src="https://raw.githubusercontent.com/adeerlulu/runrundondon/main/links/LOGO.png" class="main-logo"></div>
         <input type="password" id="entry-pw" placeholder="輸入密碼 1234" style="width: 180px; margin-bottom: 20px;">
         <button class="submit-btn" onclick="checkEntry()">進入網頁</button>
     </div>
 
     <div id="main-content">
-        <h1>跑跑動動</h1>
+        <div class="logo-container">
+            <img src="https://raw.githubusercontent.com/adeerlulu/runrundondon/main/links/LOGO.png" alt="跑跑動動" class="main-logo">
+        </div>
 
         <div class="controls-wrapper">
             <div class="control-row">
@@ -117,7 +129,6 @@
                     <button id="avatar-btn" style="background:#2c5282; color:white; border:none; padding:8px 12px; border-radius:10px; cursor:pointer; font-size:12px;" onclick="toggleModal(true)">選擇頭像</button>
                 </div>
             </div>
-
             <div class="control-row">
                 <div class="input-box">
                     <label>今日分鐘</label>
@@ -186,7 +197,7 @@
         }
         function toggleModal(show) { document.getElementById('avatar-modal').style.display = show ? 'block' : 'none'; document.getElementById('modal-overlay').style.display = show ? 'block' : 'none'; }
 
-        // 里程碑標註
+        // 里程碑標註 (10px)
         function drawMilestones() {
             const path = document.getElementById('s-path');
             const group = document.getElementById('milestones-group');
@@ -233,16 +244,10 @@
             const mins = parseInt(document.getElementById('mins').value);
             const thought = document.getElementById('thought-input').value.trim();
             if (!name || isNaN(mins)) { alert("資訊未填寫完整"); return; }
-            
             const userRef = db.ref('players/' + name);
             userRef.once('value').then(snapshot => {
                 const data = snapshot.val() || { score: 0, photo: "" };
-                const updates = { 
-                    name: name, 
-                    score: data.score + mins, 
-                    photo: window.selectedAvatarUrl || data.photo, 
-                    lastUpdate: Date.now() 
-                };
+                const updates = { name: name, score: data.score + mins, photo: window.selectedAvatarUrl || data.photo, lastUpdate: Date.now() };
                 if (thought) updates.lastThought = thought;
                 return userRef.update(updates);
             }).then(() => location.reload());
@@ -253,23 +258,11 @@
             const players = snapshot.val();
             const path = document.getElementById('s-path');
             if(!players || !path) return;
-            
             const playersArr = Object.values(players);
             userSelect.innerHTML = '<option value="">+ 新運動家</option>';
-            playersArr.forEach(p => { 
-                const opt = document.createElement('option'); opt.value = p.name; opt.innerText = p.name; userSelect.appendChild(opt); 
-            });
-
-            // 心得氣泡牆
+            playersArr.forEach(p => { const opt = document.createElement('option'); opt.value = p.name; opt.innerText = p.name; userSelect.appendChild(opt); });
             const thoughts = playersArr.filter(p => p.lastThought).sort((a,b) => b.lastUpdate - a.lastUpdate).slice(0,3);
-            document.getElementById('comment-list').innerHTML = thoughts.map(p => `
-                <div class="comment-item">
-                    <span class="comment-time">${formatROCDate(p.lastUpdate)}</span>
-                    <span class="comment-name">${p.name}</span> 說：${p.lastThought}
-                </div>
-            `).join('');
-
-            // 跑道角色
+            document.getElementById('comment-list').innerHTML = thoughts.map(p => `<div class="comment-item"><span class="comment-time">${formatROCDate(p.lastUpdate)}</span><span class="comment-name">${p.name}</span> 說：${p.lastThought}</div>`).join('');
             document.querySelectorAll('.runner').forEach(r => r.remove());
             playersArr.forEach(p => {
                 const point = path.getPointAtLength((Math.min(p.score/7800, 1)) * path.getTotalLength());
