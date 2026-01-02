@@ -27,6 +27,8 @@
 
         .section-header { width: 100%; margin: 0 auto 20px auto; } 
         .section-header-run { width: 100%; margin: 60px auto 5px auto; }
+        
+        /* 1. 精確控制間距：碎碎念標題上方固定 100px */
         .section-header-talk { width: 100%; margin: 100px auto 5px auto; }
         
         .section-title { font-size: 19px; font-weight: 900; color: var(--accent-gold); padding-left: 12px; border-left: 5px solid var(--accent-gold); line-height: 1.2; }
@@ -53,12 +55,12 @@
 
         .confirm-btn { background-color: var(--btn-confirm) !important; color: white !important; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; transition: 0.3s; }
 
-        .total-counter-box { text-align: center; margin: 20px auto 20px auto; color: #fff; font-weight: bold; }
+        .total-counter-box { text-align: center; margin: 20px auto 0 auto; color: #fff; font-weight: bold; }
         .total-num { color: var(--accent-gold); font-size: 28px; font-weight: 900; margin: 0 8px; }
 
-        /* 跑道區域：固定高度為 300px */
-        .svg-container { position: relative; width: 100%; height: 300px; overflow: visible; }
-        #main-svg { width: 100%; height: 100%; overflow: visible; }
+        /* 2. 高度恢復為 auto，並確保下方無多餘間距 */
+        .svg-container { position: relative; width: 100%; height: auto; aspect-ratio: 1000 / 400; overflow: visible; margin-bottom: 0; }
+        #main-svg { width: 100%; height: auto; overflow: visible; display: block; }
 
         .path-main { fill: none; stroke: url(#track-gradient); stroke-width: 14; stroke-linecap: round; stroke-dasharray: 3000; stroke-dashoffset: 3000; animation: flowSlow 3s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
         @keyframes flowSlow { from { stroke-dashoffset: 3000; } to { stroke-dashoffset: 0; } }
@@ -80,8 +82,7 @@
             .runner { width: 30px; height: 30px; }
             .milestone-text { font-size: 14px; }
             .total-num { font-size: 24px; }
-            /* 手機版跑道高度也固定，確保座標一致 */
-            .svg-container { height: 180px; } 
+            .section-header-talk { margin: 100px auto 5px auto; } /* 手機版也維持 100px */
         }
 
         .comment-carousel-container { position: relative; width: 100%; margin: 5px auto 40px auto; display: flex; align-items: center; }
@@ -125,7 +126,7 @@
     
     <div id="track-wrapper">
         <div class="svg-container" id="runner-layer">
-            <svg viewBox="0 0 1000 450" id="main-svg">
+            <svg viewBox="0 0 1000 400" id="main-svg">
                 <defs><linearGradient id="track-gradient" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#00d2ff" /><stop offset="50%" stop-color="#f9d423" /><stop offset="100%" stop-color="#ff4e50" /></linearGradient></defs>
                 <path id="double-path" class="path-main" d="M 50,80 L 900,80 A 60,60 0 0 1 900,200 L 100,200 A 60,60 0 0 0 100,320 L 950,320" />
                 <g id="milestones-group"></g>
@@ -233,9 +234,9 @@
             const pt = path.getPointAtLength(Math.min(p.score/7500, 1) * pathLength);
             const r = document.createElement('div');
             r.className = 'runner';
-            // 3. 確保座標比例在手機版也能精準同步
             r.style.left = `${(pt.x / 1000) * 100}%`;
-            r.style.top = `${(pt.y / 450) * 100}%`; 
+            // 使用 viewBox 高度 400 為基準計算百分比，確保與 SVG 對齊
+            r.style.top = `${(pt.y / 400) * 100}%`; 
             r.innerHTML = `<img src="${p.photo}" class="user-photo">`;
             r.onclick = () => {
                 const d = new Date(p.lastUpdate);
