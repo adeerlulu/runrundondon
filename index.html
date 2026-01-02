@@ -29,12 +29,21 @@
         .logo-container { margin: 20px auto; max-width: 600px; padding: 0 10px; }
         .main-logo { width: 100%; height: auto; display: block; filter: drop-shadow(0 0 12px rgba(0, 210, 255, 0.5)); }
 
+        /* 統一標題樣式 */
+        .section-header { 
+            max-width: 550px; margin: 0 auto 15px auto; text-align: left;
+        }
+        .section-title { 
+            font-size: 18px; font-weight: 800; color: var(--accent-gold); 
+            padding-left: 10px; border-left: 4px solid var(--accent-gold); line-height: 1; 
+        }
+
         .controls-wrapper {
-            margin: 10px auto; max-width: 550px;
+            margin: 0 auto 30px auto; max-width: 550px;
             background: var(--panel-bg); 
             padding: 25px; border-radius: 40px; border: 2px solid var(--track-yellow); 
             box-shadow: 0 15px 30px rgba(0, 0, 0, 0.7), inset 0 0 20px rgba(11, 30, 59, 0.9);
-            display: flex; flex-direction: column; gap: 20px;
+            display: flex; flex-direction: column; gap: 20px; box-sizing: border-box;
         }
 
         .control-row { display: flex; justify-content: space-between; align-items: flex-end; width: 100%; gap: 15px; }
@@ -51,6 +60,7 @@
         @media (max-width: 480px) {
             .control-row:first-child { flex-direction: column; align-items: stretch; gap: 20px; }
             .input-group { width: 100%; }
+            .submit-btn { width: 100%; padding: 12px 0 !important; }
         }
 
         .submit-btn { 
@@ -62,7 +72,6 @@
 
         /* 碎碎念區域 */
         #comment-wall { margin: 30px auto; max-width: 550px; text-align: left; }
-        .section-title { font-size: 18px; font-weight: 800; color: var(--accent-gold); margin-bottom: 15px; padding-left: 5px; border-left: 4px solid var(--accent-gold); line-height: 1; }
         .comment-item { 
             position: relative; background: var(--bubble-bg); border-radius: 15px; 
             padding: 15px 20px; margin-bottom: 20px; font-size: 14px; border: 1.5px solid rgba(255,255,255,0.15);
@@ -75,10 +84,10 @@
         .comment-name { color: var(--accent-gold); font-weight: 800; }
         .comment-time { color: rgba(255,255,255,0.4); font-weight: 500; }
 
-        /* 跑道優化 */
+        /* 跑道優化 - 座標對齊 */
         #track-wrapper { width: 100%; max-width: 550px; margin: 0 auto; position: relative; }
         svg { width: 100%; height: auto; overflow: visible; }
-        .path-main { fill: none; stroke: url(#track-gradient); stroke-width: 3; stroke-linecap: round; }
+        .path-main { fill: none; stroke: url(#track-gradient); stroke-width: 3.5; stroke-linecap: round; }
         .milestone-dot { fill: #fff; }
         .milestone-text { 
             font-family: var(--font-round); fill: #ffffff; font-size: 7px; font-weight: 800; 
@@ -88,6 +97,7 @@
         .runner { 
             position: absolute; width: 44px; height: 44px; display: flex; flex-direction: column; align-items: center; 
             z-index: 5; pointer-events: none; margin-left: -22px; margin-top: -40px;
+            transition: all 1s ease;
             animation: runnerFloating 2s ease-in-out infinite !important;
         }
         @keyframes runnerFloating { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
@@ -106,8 +116,11 @@
     </div>
 
     <div id="main-content" style="display:none;">
-        <div class="logo-container"><img src="https://raw.githubusercontent.com/adeerlulu/runrundondon/main/links/LOGO.png" alt="跑跑動動" class="main-logo"></div>
+        <div class="logo-container">
+            <img src="https://raw.githubusercontent.com/adeerlulu/runrundondon/main/links/LOGO.png" alt="跑跑動動" class="main-logo">
+        </div>
 
+        <div class="section-header"><div class="section-title">今日工事</div></div>
         <div class="controls-wrapper">
             <div class="control-row">
                 <div class="input-group">
@@ -137,7 +150,7 @@
         </div>
 
         <div id="comment-wall">
-            <div class="section-title">動動碎碎念</div>
+            <div class="section-header"><div class="section-title">動動碎碎念</div></div>
             <div id="comment-list"></div>
         </div>
 
@@ -154,8 +167,8 @@
                         <stop offset="0%" style="stop-color:#00d2ff" /><stop offset="50%" style="stop-color:#f9d423" /><stop offset="100%" style="stop-color:#ff4e50" />
                     </linearGradient>
                 </defs>
-                <path id="s-path" class="path-main" d="M 10 50 H 165 A 35 35 0 0 1 165 120 H 35 A 35 35 0 0 0 35 190 H 165 A 35 35 0 0 1 165 260 H 35 A 35 35 0 0 0 35 330 H 165 A 35 35 0 0 1 165 400 H 35 A 35 35 0 0 0 35 470" />
-                <text x="10" y="505" fill="#ff4e50" font-size="12" font-weight="900">FINISH 7500</text>
+                <path id="s-path" class="path-main" d="M 0 50 H 165 A 35 35 0 0 1 165 120 H 35 A 35 35 0 0 0 35 190 H 165 A 35 35 0 0 1 165 260 H 35 A 35 35 0 0 0 35 330 H 165 A 35 35 0 0 1 165 400 H 35 A 35 35 0 0 0 35 470" />
+                <text x="0" y="505" fill="#ff4e50" font-size="12" font-weight="900" style="font-family: var(--font-round);">FINISH 7500</text>
                 <g id="milestones-group"></g>
             </svg>
         </div>
