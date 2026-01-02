@@ -24,7 +24,9 @@
         .logo-container { margin: 20px auto; max-width: 700px; text-align: center; }
         .main-logo { width: 100%; height: auto; filter: drop-shadow(0 0 15px rgba(0, 210, 255, 0.5)); }
 
-        .section-header { width: 100%; margin: 0 auto 20px auto; padding-top: 10px; } 
+        .section-header-work { width: 100%; margin: 0 auto 20px auto; } 
+        .section-header-run { width: 100%; margin: 80px auto 5px auto; } /* 標題與上方隔 80px */
+        
         .section-title { font-size: 19px; font-weight: 900; color: var(--accent-gold); padding-left: 12px; border-left: 5px solid var(--accent-gold); line-height: 1.2; }
 
         .controls-wrapper { 
@@ -39,8 +41,7 @@
         input, select { 
             font-family: var(--font-taipei); background: #1a2a44 !important; 
             border: 1px solid rgba(255, 255, 255, 0.3); padding: 12px; 
-            border-radius: 12px; color: #ffffff !important; outline: none; width: 100%; box-sizing: border-box;
-            height: 48px;
+            border-radius: 12px; color: #ffffff !important; outline: none; width: 100%; box-sizing: border-box; height: 48px;
         }
         
         .submit-btn { 
@@ -49,53 +50,44 @@
             color: #000; border: none; border-radius: 12px; cursor: pointer; font-weight: 900; font-size: 18px;
         }
 
-        /* 統計數字位置調整 */
-        .total-counter-box { text-align: center; margin: 20px auto; color: #fff; font-weight: bold; }
+        /* 統計數字間距修正 */
+        .total-counter-box { text-align: center; margin: 20px auto 20px auto; color: #fff; font-weight: bold; }
         .total-num { color: var(--accent-gold); font-size: 28px; font-weight: 900; margin: 0 8px; }
 
-        /* 跑道區域：刻度加密 */
-        #track-wrapper { width: 100%; margin: 20px auto; position: relative; }
-        .svg-container { position: relative; width: 100%; height: 380px; } /* 增加高度容納更多刻度 */
+        /* 跑道區域：三行 S 型 */
+        #track-wrapper { width: 100%; margin: 0 auto; position: relative; }
+        .svg-container { position: relative; width: 100%; height: 500px; }
         .path-main { 
             fill: none; stroke: url(#track-gradient); stroke-width: 14; stroke-linecap: round; 
-            stroke-dasharray: 2500; stroke-dashoffset: 2500;
+            stroke-dasharray: 3000; stroke-dashoffset: 3000;
             animation: flowOnce 1.5s cubic-bezier(0.23, 1, 0.32, 1) forwards;
         }
-        @keyframes flowOnce { from { stroke-dashoffset: 2500; } to { stroke-dashoffset: 0; } }
+        @keyframes flowOnce { from { stroke-dashoffset: 3000; } to { stroke-dashoffset: 0; } }
 
-        .milestone-dot { fill: #ffffff; opacity: 0.6; }
-        .milestone-text { font-size: 10px; fill: #ffffff; font-weight: 700; opacity: 0.8; paint-order: stroke; stroke: var(--bg-color); stroke-width: 2px; }
+        .milestone-dot { fill: #ffffff; opacity: 0.5; }
+        .milestone-text { font-size: 11px; fill: #ffffff; font-weight: 700; opacity: 0.9; paint-order: stroke; stroke: var(--bg-color); stroke-width: 2px; }
 
         .runner { 
-            position: absolute; width: 40px; height: 40px; z-index: 50; 
+            position: absolute; width: 42px; height: 42px; z-index: 50; 
             transform: translate(-50%, -50%); cursor: pointer;
             transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         .runner:hover { transform: translate(-50%, -50%) scale(1.3); z-index: 100; filter: drop-shadow(0 0 10px var(--accent-blue)); }
         .user-photo { width: 100%; height: 100%; border-radius: 50%; border: 2px solid #fff; background: rgba(255,255,255,0.2); }
 
-        /* 碎碎念導航按鈕更新 */
         .nav-btn { 
             background: transparent; border: 2px solid var(--accent-gold); color: var(--accent-gold); 
             width: 40px; height: 40px; border-radius: 50%; cursor: pointer; 
-            display: flex; align-items: center; justify-content: center; font-size: 18px;
-            transition: 0.3s;
+            display: flex; align-items: center; justify-content: center; font-size: 18px; transition: 0.3s;
         }
-        .nav-btn:hover { background: rgba(249, 212, 35, 0.1); transform: scale(1.1); }
 
-        /* 頭像挑選放大感 */
-        #avatar-picker img { width: 100%; cursor: pointer; border: 2px solid transparent; border-radius: 8px; transition: 0.2s; }
-        #avatar-picker img:hover { transform: scale(1.15); z-index: 10; }
+        /* 挑選頭像修正 */
+        #avatar-picker img { width: 100%; cursor: pointer; border: 3px solid transparent; border-radius: 12px; transition: 0.2s; box-sizing: border-box; }
+        #avatar-picker img:hover { transform: scale(1.1); }
+        #avatar-picker img.selected { border-color: var(--accent-blue); background: rgba(0, 210, 255, 0.2); }
 
         .ui-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 20000; }
         .ui-card { background: #1a2a44; border: 2px solid var(--accent-gold); padding: 40px; border-radius: 25px; text-align: center; color: white; min-width: 300px; }
-
-        .comment-carousel-container { position: relative; width: 100%; margin: 5px auto 40px auto; display: flex; align-items: center; }
-        .comment-window { overflow: hidden; width: 100%; padding: 20px 0; }
-        #comment-list { display: flex; transition: transform 0.6s ease; }
-        .comment-item { min-width: 300px; margin: 0 15px; background: var(--bubble-bg); padding: 20px; border-radius: 20px; opacity: 0.3; transform: scale(0.9); transition: 0.5s; border: 1px solid rgba(255,255,255,0.1); text-align: left; display: flex; gap: 12px; }
-        .comment-item.active { opacity: 1; transform: scale(1.05); border-color: var(--accent-gold); }
-        .comment-avatar { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--accent-gold); background: rgba(255,255,255,0.2); }
 
         footer { margin: 40px auto 20px auto; text-align: center; color: #fff; font-size: 11px; opacity: 0.5; }
     </style>
@@ -105,7 +97,7 @@
 <div class="main-container">
     <div class="logo-container"><img src="https://raw.githubusercontent.com/adeerlulu/runrundondon/main/links/LOGO.png" class="main-logo"></div>
 
-    <div class="section-header"><div class="section-title">今日工事</div></div>
+    <div class="section-header-work"><div class="section-title">今日工事</div></div>
     <div class="controls-wrapper">
         <div class="control-row">
             <div class="input-box"><label>是哪位運動家</label><select id="user-select"><option value="">+ 新成員</option></select></div>
@@ -119,26 +111,19 @@
         </div>
     </div>
 
-    <div class="section-header"><div class="section-title">跑跑跑！向前跑！</div></div>
+    <div class="section-header-run"><div class="section-title">跑跑跑！向前跑！</div></div>
     <div class="total-counter-box">
         恭喜恭喜！在座各位已經動了 <span class="total-num" id="total-minutes">0</span> 分鐘
     </div>
     
     <div id="track-wrapper">
         <div class="svg-container" id="runner-layer">
-            <svg viewBox="0 0 1000 380" id="main-svg" style="width:100%; height:100%;">
+            <svg viewBox="0 0 1000 500" id="main-svg" style="width:100%; height:100%;">
                 <defs><linearGradient id="track-gradient" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#00d2ff" /><stop offset="50%" stop-color="#f9d423" /><stop offset="100%" stop-color="#ff4e50" /></linearGradient></defs>
-                <path id="double-path" class="path-main" d="M 50,130 L 920,130 A 65,65 0 0 1 920,260 L 50,260" />
+                <path id="double-path" class="path-main" d="M 50,80 L 900,80 A 60,60 0 0 1 900,200 L 100,200 A 60,60 0 0 0 100,320 L 950,320" />
                 <g id="milestones-group"></g>
             </svg>
         </div>
-    </div>
-
-    <div class="section-header"><div class="section-title">動動碎碎念</div></div>
-    <div class="comment-carousel-container">
-        <button class="nav-btn" onclick="moveCarousel(-1)">❮</button>
-        <div class="comment-window"><div id="comment-list"></div></div>
-        <button class="nav-btn" onclick="moveCarousel(1)">❯</button>
     </div>
 
     <footer>2026 © Designed by 動不起來的我</footer>
@@ -149,8 +134,10 @@
 </div>
 
 <div id="modal-overlay" class="ui-modal" onclick="toggleModal(false)"></div>
-<div id="avatar-modal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:#1a2a44; padding:30px; border-radius:30px; z-index:12000; width: 90%; max-width: 500px; border: 2px solid var(--accent-blue);">
-    <div id="avatar-picker" style="display:grid; grid-template-columns: repeat(6, 1fr); gap:10px;"></div>
+<div id="avatar-modal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:#1a2a44; padding:30px; border-radius:30px; z-index:12000; width: 90%; max-width: 550px; border: 2px solid var(--accent-blue);">
+    <h3 style="margin-top:0; color:var(--accent-blue);">請選擇頭像</h3>
+    <div id="avatar-picker" style="display:grid; grid-template-columns: repeat(6, 1fr); gap:12px; max-height:400px; overflow-y:auto; padding:10px;"></div>
+    <button class="submit-btn" style="height:40px; margin-top:20px; width:100%;" onclick="toggleModal(false)">確定</button>
 </div>
 
 <script>
@@ -160,12 +147,7 @@
 
     function showUI(title, content, sub, isError=false) {
         const card = document.getElementById('ui-card-content');
-        card.innerHTML = `
-            <h2 style="margin:0; color:${isError?'#ff4e50': 'var(--accent-blue)'}">${title}</h2>
-            <div style="font-size:48px; font-weight:900; color:var(--accent-gold); margin:20px 0;">${content}</div>
-            <p style="margin:0; opacity:0.7">${sub}</p>
-            <button class="submit-btn" style="height:40px; margin-top:30px; padding:0 30px; font-size:14px;" onclick="document.getElementById('ui-overlay').style.display='none'">關閉</button>
-        `;
+        card.innerHTML = `<h2 style="color:${isError?'#ff4e50':'var(--accent-blue)'}">${title}</h2><div style="font-size:48px; font-weight:900; color:var(--accent-gold); margin:20px 0;">${content}</div><p style="opacity:0.7">${sub}</p><button class="submit-btn" style="height:40px; margin-top:30px;" onclick="document.getElementById('ui-overlay').style.display='none'">關閉</button>`;
         document.getElementById('ui-overlay').style.display = 'flex';
     }
 
@@ -175,50 +157,47 @@
             if (!startTimestamp) startTimestamp = timestamp;
             const progress = Math.min((timestamp - startTimestamp) / duration, 1);
             obj.innerHTML = Math.floor(progress * (end - start) + start).toLocaleString();
-            if (progress < 1) { window.requestAnimationFrame(step); }
+            if (progress < 1) window.requestAnimationFrame(step);
         };
         window.requestAnimationFrame(step);
     }
 
     function toggleModal(show) { document.getElementById('avatar-modal').style.display = show ? 'block' : 'none'; document.getElementById('modal-overlay').style.display = show ? 'block' : 'none'; }
     
+    // 初始化頭像選取功能
     const picker = document.getElementById('avatar-picker');
     for (let i = 1; i <= 24; i++) {
         const num = i < 10 ? '0' + i : i;
         const img = document.createElement('img');
         img.src = `https://raw.githubusercontent.com/adeerlulu/runrundondon/main/icons/${num}.png`;
         img.onclick = function() {
-            document.querySelectorAll('#avatar-picker img').forEach(i => i.style.borderColor='transparent');
-            this.style.borderColor = '#00d2ff';
+            document.querySelectorAll('#avatar-picker img').forEach(el => el.classList.remove('selected'));
+            this.classList.add('selected');
             window.selectedAvatarUrl = this.src;
         };
         picker.appendChild(img);
     }
 
-    let currentIndex = 0;
-    let allComments = [];
-
     db.ref('players').on('value', (snapshot) => {
         const players = snapshot.val() || {};
         const playersArr = Object.values(players);
-        
         const total = playersArr.reduce((acc, p) => acc + (p.score || 0), 0);
         animateValue(document.getElementById('total-minutes'), 0, total, 1500);
 
-        document.getElementById('user-select').innerHTML = '<option value="">+ 新成員</option>' + 
-            playersArr.map(p => `<option value="${p.name}">${p.name}</option>`).join('');
+        document.getElementById('user-select').innerHTML = '<option value="">+ 新成員</option>' + playersArr.map(p => `<option value="${p.name}">${p.name}</option>`).join('');
 
         const path = document.getElementById('double-path');
         const pathLength = path.getTotalLength();
         const mGroup = document.getElementById('milestones-group');
         mGroup.innerHTML = "";
         
-        // 更新刻度：每 300 一單位
         for (let score = 0; score <= 7500; score += 300) {
-            const pt = path.getPointAtLength((score/7500) * pathLength);
-            // 讓文字交錯顯示避免太擠
-            const yOffset = (score % 600 === 0) ? -25 : -12;
-            mGroup.innerHTML += `<circle cx="${pt.x}" cy="${pt.y}" r="3" class="milestone-dot"/><text x="${pt.x}" y="${pt.y + yOffset}" class="milestone-text" text-anchor="middle">${score}</text>`;
+            const ratio = score / 7500;
+            const pt = path.getPointAtLength(ratio * pathLength);
+            // 轉彎處判斷 (S型路徑的轉彎點約在總長 30%~40% 與 65%~75% 之間)
+            if ((ratio > 0.28 && ratio < 0.42) || (ratio > 0.62 && ratio < 0.74)) continue;
+
+            mGroup.innerHTML += `<circle cx="${pt.x}" cy="${pt.y}" r="3" class="milestone-dot"/><text x="${pt.x}" y="${pt.y - 20}" class="milestone-text" text-anchor="middle">${score}</text>`;
         }
 
         document.querySelectorAll('.runner').forEach(r => r.remove());
@@ -227,37 +206,16 @@
             const r = document.createElement('div');
             r.className = 'runner';
             r.style.left = `${(pt.x / 1000) * 100}%`;
-            r.style.top = `${(pt.y / 380) * 100}%`;
+            r.style.top = `${(pt.y / 500) * 100}%`;
             r.innerHTML = `<img src="${p.photo}" class="user-photo">`;
-            r.onclick = (e) => {
+            r.onclick = () => {
                 const d = new Date(p.lastUpdate);
-                const ts = p.lastUpdate ? `最後登記：${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${d.getMinutes().toString().padStart(2,'0')}:${d.getSeconds().toString().padStart(2,'0')}` : "尚無紀錄";
+                const ts = p.lastUpdate ? `最後登記：${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()} ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}:${d.getSeconds().toString().padStart(2,'0')}` : "尚無紀錄";
                 showUI(p.name, p.score, ts);
             };
             document.getElementById('runner-layer').appendChild(r);
         });
-
-        allComments = playersArr.filter(p => p.lastThought).sort((a,b) => b.lastUpdate - a.lastUpdate);
-        renderCarousel();
     });
-
-    function renderCarousel() {
-        const list = document.getElementById('comment-list');
-        list.innerHTML = allComments.map((p, i) => {
-            const d = new Date(p.lastUpdate);
-            return `<div class="comment-item ${i === currentIndex ? 'active' : ''}">
-                <img src="${p.photo}" class="comment-avatar">
-                <div><b style="color:var(--accent-gold)">${p.name}</b><p style="margin:5px 0 0 0; color:#fff; font-size:14px;">${p.lastThought}</p></div>
-            </div>`;
-        }).join('');
-        list.style.transform = `translateX(${-currentIndex * 330}px)`;
-    }
-
-    function moveCarousel(dir) {
-        if (allComments.length < 2) return;
-        currentIndex = (currentIndex + dir + allComments.length) % allComments.length;
-        renderCarousel();
-    }
 
     function handleUpdate() {
         const name = document.getElementById('user-select').value || document.getElementById('new-name').value.trim();
