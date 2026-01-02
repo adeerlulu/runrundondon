@@ -20,27 +20,15 @@
             --font-round: 'M PLUS Rounded 1c', 'Quicksand', 'Microsoft JhengHei', sans-serif;
         }
 
-        body { 
-            font-family: var(--font-round); 
-            background-color: var(--bg-color); 
-            margin: 0; padding: 10px; text-align: center; color: var(--text-main);
-        }
-
+        body { font-family: var(--font-round); background-color: var(--bg-color); margin: 0; padding: 10px; text-align: center; color: var(--text-main); }
         .logo-container { margin: 20px auto; max-width: 600px; padding: 0 10px; }
         .main-logo { width: 100%; height: auto; display: block; filter: drop-shadow(0 0 12px rgba(0, 210, 255, 0.5)); }
 
-        /* 統一標題樣式 */
-        .section-header { 
-            max-width: 550px; margin: 0 auto 15px auto; text-align: left;
-        }
-        .section-title { 
-            font-size: 18px; font-weight: 800; color: var(--accent-gold); 
-            padding-left: 10px; border-left: 4px solid var(--accent-gold); line-height: 1; 
-        }
+        .section-header { max-width: 550px; margin: 0 auto 15px auto; text-align: left; }
+        .section-title { font-size: 18px; font-weight: 800; color: var(--accent-gold); padding-left: 10px; border-left: 4px solid var(--accent-gold); line-height: 1; }
 
         .controls-wrapper {
-            margin: 0 auto 30px auto; max-width: 550px;
-            background: var(--panel-bg); 
+            margin: 0 auto 30px auto; max-width: 550px; background: var(--panel-bg); 
             padding: 25px; border-radius: 40px; border: 2px solid var(--track-yellow); 
             box-shadow: 0 15px 30px rgba(0, 0, 0, 0.7), inset 0 0 20px rgba(11, 30, 59, 0.9);
             display: flex; flex-direction: column; gap: 20px; box-sizing: border-box;
@@ -52,58 +40,45 @@
         
         label { font-size: 11px; margin-bottom: 5px; color: var(--accent-blue); font-weight: 800; }
         input, select { 
-            font-family: var(--font-round);
-            background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); 
+            font-family: var(--font-round); background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); 
             padding: 10px; border-radius: 12px; color: #ffffff; outline: none; font-size: 14px; width: 100%; box-sizing: border-box;
         }
 
         @media (max-width: 480px) {
             .control-row:first-child { flex-direction: column; align-items: stretch; gap: 20px; }
-            .input-group { width: 100%; }
             .submit-btn { width: 100%; padding: 12px 0 !important; }
         }
 
         .submit-btn { 
-            font-family: var(--font-round);
-            padding: 12px 100px; background: linear-gradient(135deg, #f9d423, #ff4e50); 
+            font-family: var(--font-round); padding: 12px 100px; background: linear-gradient(135deg, #f9d423, #ff4e50); 
             color: #000; border: none; border-radius: 30px; cursor: pointer; font-weight: 800; 
             font-size: 16px; box-shadow: 0 4px 15px rgba(255, 78, 80, 0.4);
         }
 
-        /* 碎碎念區域 */
         #comment-wall { margin: 30px auto; max-width: 550px; text-align: left; }
         .comment-item { 
-            position: relative; background: var(--bubble-bg); border-radius: 15px; 
-            padding: 15px 20px; margin-bottom: 20px; font-size: 14px; border: 1.5px solid rgba(255,255,255,0.15);
+            position: relative; background: var(--bubble-bg); border-radius: 15px; padding: 15px 20px; margin-bottom: 20px; 
+            font-size: 14px; border: 1.5px solid rgba(255,255,255,0.15);
         }
-        .comment-item::after {
-            content: ''; position: absolute; left: 25px; bottom: -10px;
-            border-width: 10px 10px 0; border-style: solid; border-color: rgba(255,255,255,0.1) transparent transparent;
-        }
+        .comment-item::after { content: ''; position: absolute; left: 25px; bottom: -10px; border-width: 10px 10px 0; border-style: solid; border-color: rgba(255,255,255,0.1) transparent transparent; }
         .comment-header { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 12px; }
         .comment-name { color: var(--accent-gold); font-weight: 800; }
         .comment-time { color: rgba(255,255,255,0.4); font-weight: 500; }
 
-        /* 跑道優化 - 座標對齊 */
         #track-wrapper { width: 100%; max-width: 550px; margin: 0 auto; position: relative; }
         svg { width: 100%; height: auto; overflow: visible; }
-        .path-main { fill: none; stroke: url(#track-gradient); stroke-width: 3.5; stroke-linecap: round; }
+        .path-main { fill: none; stroke: url(#track-gradient); stroke-width: 4; stroke-linecap: round; }
         .milestone-dot { fill: #fff; }
-        .milestone-text { 
-            font-family: var(--font-round); fill: #ffffff; font-size: 7px; font-weight: 800; 
-            paint-order: stroke; stroke: var(--bg-color); stroke-width: 1.5px;
-        }
+        .milestone-text { font-family: var(--font-round); fill: #ffffff; font-size: 7px; font-weight: 800; paint-order: stroke; stroke: var(--bg-color); stroke-width: 1.5px; pointer-events: none;}
 
         .runner { 
             position: absolute; width: 44px; height: 44px; display: flex; flex-direction: column; align-items: center; 
-            z-index: 5; pointer-events: none; margin-left: -22px; margin-top: -40px;
-            transition: all 1s ease;
+            z-index: 5; pointer-events: none; margin-left: -22px; margin-top: -40px; transition: all 1s ease;
             animation: runnerFloating 2s ease-in-out infinite !important;
         }
         @keyframes runnerFloating { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
         .user-photo { width: 34px; height: 34px; border-radius: 50%; border: 2px solid #fff; }
         .label { background: linear-gradient(135deg, #ff4e50, #f9d423); color: #000; font-size: 10px; font-weight: 800; padding: 1px 8px; border-radius: 10px; border: 1px solid #fff; }
-
         #auth-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
     </style>
 </head>
@@ -116,9 +91,7 @@
     </div>
 
     <div id="main-content" style="display:none;">
-        <div class="logo-container">
-            <img src="https://raw.githubusercontent.com/adeerlulu/runrundondon/main/links/LOGO.png" alt="跑跑動動" class="main-logo">
-        </div>
+        <div class="logo-container"><img src="https://raw.githubusercontent.com/adeerlulu/runrundondon/main/links/LOGO.png" alt="跑跑動動" class="main-logo"></div>
 
         <div class="section-header"><div class="section-title">今日工事</div></div>
         <div class="controls-wrapper">
@@ -168,7 +141,7 @@
                     </linearGradient>
                 </defs>
                 <path id="s-path" class="path-main" d="M 0 50 H 165 A 35 35 0 0 1 165 120 H 35 A 35 35 0 0 0 35 190 H 165 A 35 35 0 0 1 165 260 H 35 A 35 35 0 0 0 35 330 H 165 A 35 35 0 0 1 165 400 H 35 A 35 35 0 0 0 35 470" />
-                <text x="0" y="505" fill="#ff4e50" font-size="12" font-weight="900" style="font-family: var(--font-round);">FINISH 7500</text>
+                <text x="0" y="505" fill="#ff4e50" font-size="11" font-weight="900" style="font-family: var(--font-round);">FINISH 7500</text>
                 <g id="milestones-group"></g>
             </svg>
         </div>
@@ -191,18 +164,38 @@
             const pathLength = path.getTotalLength();
             group.innerHTML = "";
             for (let i = 0; i <= 7500; i += 500) {
-                const point = path.getPointAtLength((i / 7500) * pathLength);
+                const percent = i / 7500;
+                const point = path.getPointAtLength(percent * pathLength);
+                
+                // 點點
                 const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
                 dot.setAttribute("cx", point.x); dot.setAttribute("cy", point.y); dot.setAttribute("r", "2.5");
                 dot.setAttribute("class", "milestone-dot");
                 group.appendChild(dot);
 
+                // 數字邏輯調整
                 const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
                 text.setAttribute("class", "milestone-text");
                 text.textContent = i;
-                text.setAttribute("x", point.x);
-                text.setAttribute("y", point.y - 8);
-                text.setAttribute("text-anchor", "middle");
+                
+                let offsetX = 0;
+                let offsetY = 12; // 預設移到點點下方
+                let anchor = "middle";
+
+                // 判斷是否為圓弧區 (1500, 3000, 4500, 6000)
+                if (i > 0 && i % 1500 === 0) {
+                    if (point.x > 100) { // 右側圓弧：數字往左側移
+                        offsetX = -12; offsetY = 3; anchor = "end";
+                    } else { // 左側圓弧：數字往右側移
+                        offsetX = 12; offsetY = 3; anchor = "start";
+                    }
+                } else if (i === 0) {
+                    anchor = "start"; offsetX = 0; offsetY = 12; // 0 置左且在線下
+                }
+
+                text.setAttribute("x", point.x + offsetX);
+                text.setAttribute("y", point.y + offsetY);
+                text.setAttribute("text-anchor", anchor);
                 group.appendChild(text);
             }
         }
@@ -220,9 +213,7 @@
             };
             document.getElementById('avatar-picker').appendChild(img);
         }
-
         function toggleModal(show) { document.getElementById('avatar-modal').style.display = show ? 'block' : 'none'; document.getElementById('modal-overlay').style.display = show ? 'block' : 'none'; }
-
         function handleUpdate() {
             const name = document.getElementById('user-select').value || document.getElementById('new-name').value.trim();
             const mins = parseInt(document.getElementById('mins').value);
@@ -236,28 +227,18 @@
                 return userRef.update(updates);
             }).then(() => location.reload());
         }
-
         db.ref('players').on('value', (snapshot) => {
             const players = snapshot.val();
             const path = document.getElementById('s-path');
             if(!players || !path) return;
             const playersArr = Object.values(players);
             document.getElementById('user-select').innerHTML = '<option value="">+ 新成員</option>' + playersArr.map(p => `<option value="${p.name}">${p.name}</option>`).join('');
-            
             const thoughts = playersArr.filter(p => p.lastThought).sort((a,b) => b.lastUpdate - a.lastUpdate).slice(0,3);
             document.getElementById('comment-list').innerHTML = thoughts.map(p => {
                 const date = new Date(p.lastUpdate);
                 const timeStr = `${date.getMonth()+1}/${date.getDate()} ${date.getHours().toString().padStart(2,'0')}:${date.getMinutes().toString().padStart(2,'0')}`;
-                return `
-                <div class="comment-item">
-                    <div class="comment-header">
-                        <span class="comment-name">${p.name}</span>
-                        <span class="comment-time">${timeStr}</span>
-                    </div>
-                    <div>${p.lastThought}</div>
-                </div>`;
+                return `<div class="comment-item"><div class="comment-header"><span class="comment-name">${p.name}</span><span class="comment-time">${timeStr}</span></div><div>${p.lastThought}</div></div>`;
             }).join('');
-            
             document.querySelectorAll('.runner').forEach(r => r.remove());
             playersArr.forEach(p => {
                 const point = path.getPointAtLength((Math.min(p.score/7500, 1)) * path.getTotalLength());
@@ -270,7 +251,6 @@
             });
             drawMilestones();
         });
-
         document.getElementById('user-select').addEventListener('change', function() {
             const isNew = this.value === "";
             document.getElementById('new-name-box').style.display = isNew ? "block" : "none";
