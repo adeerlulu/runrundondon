@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>跑跑動動 RunRun! DonDon!</title>
     
+    <meta name="description" content="這樣到底能不能運動啊">
+    <meta property="og:description" content="這樣到底能不能運動啊">
+    <meta property="og:title" content="跑跑動動 RunRun! DonDon!">
+    
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/adeerlulu/runrundondon/main/links/favicons.png">
     
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
@@ -48,8 +52,6 @@
         
         .section-header { width: 100%; margin: 0 auto 20px auto; } 
         .section-header-talk { width: 100%; margin: 60px auto 20px auto; }
-        
-    
         .section-header-run { width: 100%; margin: 50px auto 5px auto; }
         
         .section-title { font-size: 19px; font-weight: 900; color: var(--accent-gold); padding-left: 12px; border-left: 5px solid var(--accent-gold); line-height: 1.2; }
@@ -64,7 +66,6 @@
         .total-counter-box { text-align: center; margin: 20px auto 0 auto; color: #fff; font-weight: bold; }
         .total-num { color: var(--accent-gold); font-size: 28px; font-weight: 900; margin: 0 8px; }
         
-        /* 跑道區域 */
         .svg-container { position: relative; width: 100%; height: auto; aspect-ratio: 1000 / 400; overflow: visible; margin-bottom: 0; }
         #main-svg { width: 100%; height: auto; overflow: visible; display: block; }
         .path-main { fill: none; stroke: url(#track-gradient); stroke-width: 14; stroke-linecap: round; stroke-dasharray: 3000; stroke-dashoffset: 3000; animation: flowSlow 3s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
@@ -88,7 +89,7 @@
             .runner { width: 30px; height: 30px; }
             .milestone-text { font-size: 14px; }
             .total-num { font-size: 24px; }
-            .section-header-run { margin: 80px auto 5px auto; } /* 手機端稍微縮減以利閱讀 */
+            .section-header-run { margin: 80px auto 5px auto; }
         }
 
         .ui-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 99999; }
@@ -311,4 +312,3 @@
 </script>
 </body>
 </html>
-
