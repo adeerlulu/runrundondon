@@ -23,7 +23,6 @@
             min-height: 100vh; overflow-x: hidden;
         }
 
-        /* 鎖定層 */
         #auth-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg-color); z-index: 2000;
@@ -45,11 +44,10 @@
         
         input, select { 
             background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
-            padding: 8px 12px; border-radius: 10px; color: #ffffff; outline: none; width: 120px;
+            padding: 8px 12px; border-radius: 10px; color: #ffffff; outline: none; width: 110px;
         }
         select option { color: #333333; background-color: #ffffff; }
 
-        /* 動態角色效果 */
         @keyframes runnerFloating {
             0% { transform: translateY(0px); }
             50% { transform: translateY(-8px); }
@@ -71,10 +69,9 @@
             object-fit: cover; background: #fff;
         }
 
-        /* 強化後的 ID 標籤 */
         .label { 
             background: linear-gradient(135deg, #ff4e50, #f9d423);
-            color: #000; font-size: 12px; font-weight: 900; 
+            color: #000; font-size: 11px; font-weight: 900; 
             padding: 2px 10px; border-radius: 20px; 
             white-space: nowrap; 
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
@@ -97,8 +94,8 @@
         .path-main { fill: none; stroke: url(#track-gradient); stroke-width: 26; stroke-linecap: round; stroke-linejoin: round; }
         .path-shadow { fill: none; stroke: rgba(255,255,255,0.05); stroke-width: 32; stroke-linecap: round; }
         
-        .milestone-flag { fill: var(--accent-gold); }
-        .milestone-text { fill: #ffffff; font-size: 8px; font-weight: 900; opacity: 0.7; }
+        .milestone-flag { fill: var(--accent-gold); opacity: 0.9; }
+        .milestone-text { fill: rgba(255,255,255,0.6); font-size: 7px; font-weight: bold; font-family: 'Arial'; }
 
         #main-content { display: none; }
         #modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2500; }
@@ -119,15 +116,15 @@
             <div class="input-box">
                 <label>角色</label>
                 <select id="user-select"><option value="">+ 新人註冊</option></select>
-                <input type="text" id="new-name" placeholder="輸入名字" style="margin-top:8px;">
+                <input type="text" id="new-name" placeholder="名字" style="margin-top:8px;">
             </div>
             <div class="input-box" id="avatar-box">
                 <label>頭像</label>
-                <button id="avatar-btn" style="background:#2c5282; color:white; border:none; padding:8px 15px; border-radius:10px; cursor:pointer;" onclick="toggleModal(true)">選擇</button>
+                <button id="avatar-btn" style="background:#2c5282; color:white; border:none; padding:8px 12px; border-radius:10px; cursor:pointer; font-size:12px;" onclick="toggleModal(true)">選擇</button>
             </div>
             <div class="input-box">
-                <label>今日 (min)</label>
-                <input type="number" id="mins" placeholder="分鐘">
+                <label>今日分鐘</label>
+                <input type="number" id="mins" placeholder="min">
             </div>
             <button class="submit-btn" onclick="handleUpdate()">GO!</button>
         </div>
@@ -156,6 +153,29 @@
     </div>
 
     <script>
+        // 登入檢查邏輯
+        function checkAuth() {
+            const lastLogin = localStorage.getItem('last_login_time');
+            if (lastLogin) {
+                const now = new Date().getTime();
+                if ((now - parseInt(lastLogin)) / 60000 < 30) { showApp(); return true; }
+            }
+            return false;
+        }
+        function showApp() {
+            document.getElementById('auth-overlay').style.display = 'none';
+            document.getElementById('main-content').style.display = 'block';
+            drawMilestones();
+        }
+        function checkEntry() {
+            if (document.getElementById('entry-pw').value === "1234") {
+                localStorage.setItem('last_login_time', new Date().getTime().toString());
+                showApp();
+            } else { alert("密碼錯誤"); }
+        }
+        window.onload = checkAuth;
+
+        // Firebase 設定
         const firebaseConfig = {
             apiKey: "AIzaSyDqX_tZqqfw0txXpd-b4AWuolhgQgU6lLU",
             authDomain: "runrundondon-31b12.firebaseapp.com",
@@ -165,12 +185,13 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // 頭像來源
+        // 頭像讀取邏輯：修正補零檔名
         const baseUrl = "https://raw.githubusercontent.com/adeerlulu/runrundondon/main/icons/";
         const avatarPicker = document.getElementById('avatar-picker');
         for (let i = 1; i <= 12; i++) {
+            const fileName = i < 10 ? '0' + i : i; // 1-9 變 01-09
             const img = document.createElement('img');
-            img.src = `${baseUrl}${i}.png?v=2`;
+            img.src = `${baseUrl}${fileName}.png?v=4`;
             img.className = 'avatar-option';
             img.onclick = function() { selectAvatar(this); };
             avatarPicker.appendChild(img);
@@ -189,28 +210,24 @@
             document.getElementById('modal-overlay').style.display = show ? 'block' : 'none';
         }
 
-        function checkEntry() {
-            if (document.getElementById('entry-pw').value === "1234") {
-                document.getElementById('auth-overlay').style.display = 'none';
-                document.getElementById('main-content').style.display = 'block';
-                drawMilestones();
-            } else { alert("密碼不對喔"); }
-        }
-
         function drawMilestones() {
             const path = document.getElementById('s-path');
+            if(!path) return;
             const pathLength = path.getTotalLength();
             const group = document.getElementById('milestones-group');
             group.innerHTML = "";
-            for (let i = 500; i < 7800; i += 500) {
+            for (let i = 250; i < 7800; i += 250) {
                 const point = path.getPointAtLength((i / 7800) * pathLength);
                 const flag = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                flag.setAttribute("d", `M ${point.x} ${point.y} L ${point.x} ${point.y-12} L ${point.x+10} ${point.y-9} L ${point.x} ${point.y-6}`);
+                flag.setAttribute("d", `M ${point.x} ${point.y} L ${point.x} ${point.y-8} L ${point.x+6} ${point.y-6} L ${point.x} ${point.y-4}`);
                 flag.setAttribute("class", "milestone-flag");
                 group.appendChild(flag);
                 const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                text.setAttribute("x", point.x + 3); text.setAttribute("y", point.y + 12);
-                text.setAttribute("class", "milestone-text"); text.textContent = i;
+                text.setAttribute("class", "milestone-text");
+                text.textContent = i;
+                if (point.x < 50) { text.setAttribute("x", point.x - 18); text.setAttribute("y", point.y + 3); text.setAttribute("text-anchor", "end"); }
+                else if (point.x > 150) { text.setAttribute("x", point.x + 8); text.setAttribute("y", point.y + 3); text.setAttribute("text-anchor", "start"); }
+                else { text.setAttribute("x", point.x); text.setAttribute("y", point.y + 12); text.setAttribute("text-anchor", "middle"); }
                 group.appendChild(text);
             }
         }
@@ -230,21 +247,17 @@
             const mins = parseInt(document.getElementById('mins').value);
             if (!name || isNaN(mins)) { alert("請填寫名字與分鐘"); return; }
             if (userSelect.value === "" && !selectedAvatarUrl) { alert("選個頭像吧"); return; }
-
             const userRef = db.ref('players/' + name);
             userRef.once('value').then(snapshot => {
                 const data = snapshot.val() || { score: 0, photo: "" };
-                return userRef.update({
-                    name: name,
-                    score: data.score + mins,
-                    photo: selectedAvatarUrl || data.photo
-                });
+                return userRef.update({ name: name, score: data.score + mins, photo: selectedAvatarUrl || data.photo });
             }).then(() => { location.reload(); });
         }
 
         db.ref('players').on('value', (snapshot) => {
             const players = snapshot.val();
             const path = document.getElementById('s-path');
+            if(!path) return;
             const pathLength = path.getTotalLength();
             const wrapper = document.getElementById('track-wrapper');
             document.querySelectorAll('.runner').forEach(r => r.remove());
@@ -255,8 +268,7 @@
                 const point = path.getPointAtLength((Math.min(p.score/7800, 1)) * pathLength);
                 const runner = document.createElement('div');
                 runner.className = 'runner';
-                // 讓每個角色的動畫錯開時間，看起來更亂序自然
-                runner.style.animationDelay = `${index * 0.5}s`;
+                runner.style.animationDelay = `${index * 0.4}s`;
                 runner.style.left = `${(point.x / 200) * 100}%`;
                 runner.style.top = `${((point.y+20) / 520) * 100}%`;
                 runner.innerHTML = `<img src="${p.photo}" class="user-photo"><span class="label">${p.name}</span>`;
