@@ -27,7 +27,7 @@
 
         .section-header { width: 100%; margin: 0 auto 20px auto; } 
         .section-header-run { width: 100%; margin: 80px auto 5px auto; }
-        .section-header-talk { width: 100%; margin: 100px auto 5px auto; } /* 間距改為 100px */
+        .section-header-talk { width: 100%; margin: 100px auto 5px auto; }
         
         .section-title { font-size: 19px; font-weight: 900; color: var(--accent-gold); padding-left: 12px; border-left: 5px solid var(--accent-gold); line-height: 1.2; }
 
@@ -48,41 +48,28 @@
         
         .submit-btn { 
             font-family: var(--font-taipei); height: 48px; padding: 0 60px; 
-            background: linear-gradient(135deg, #f9d423, #ff4e50); 
-            color: #000; border: none; border-radius: 12px; cursor: pointer; font-weight: 900; font-size: 18px;
+            background: var(--btn-confirm); color: #fff; border: none; border-radius: 12px; cursor: pointer; font-weight: 900; font-size: 18px; transition: 0.3s;
         }
+        .submit-btn:hover { background: #5599ee; transform: scale(1.02); }
 
-        /* 確定/關閉按鈕樣式 */
-        .confirm-btn {
-            background-color: var(--btn-confirm) !important;
-            color: white !important;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: 0.3s;
-        }
-        .confirm-btn:hover { background-color: #5599ee !important; }
+        .confirm-btn { background-color: var(--btn-confirm) !important; color: white !important; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; transition: 0.3s; }
 
         .total-counter-box { text-align: center; margin: 20px auto 20px auto; color: #fff; font-weight: bold; }
         .total-num { color: var(--accent-gold); font-size: 28px; font-weight: 900; margin: 0 8px; }
 
         .svg-container { position: relative; width: 100%; height: 500px; }
-        .path-main { fill: none; stroke: url(#track-gradient); stroke-width: 14; stroke-linecap: round; stroke-dasharray: 3000; stroke-dashoffset: 3000; animation: flowOnce 1.5s forwards; }
-        @keyframes flowOnce { from { stroke-dashoffset: 3000; } to { stroke-dashoffset: 0; } }
+        .path-main { fill: none; stroke: url(#track-gradient); stroke-width: 14; stroke-linecap: round; stroke-dasharray: 3000; stroke-dashoffset: 3000; animation: flowSlow 3s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        @keyframes flowSlow { from { stroke-dashoffset: 3000; } to { stroke-dashoffset: 0; } }
 
-        /* 頭像漂浮動畫 */
+        .milestone-text { font-size: 11px; fill: #ffffff; font-weight: 700; opacity: 1; paint-order: stroke; stroke: var(--bg-color); stroke-width: 2px; }
+
         @keyframes float {
             0% { transform: translate(-50%, -50%); }
-            50% { transform: translate(-50%, -65%); }
+            50% { transform: translate(-50%, -62%); }
             100% { transform: translate(-50%, -50%); }
         }
 
-        .runner { 
-            position: absolute; width: 42px; height: 42px; z-index: 50; 
-            transform: translate(-50%, -50%); cursor: pointer;
-            animation: float 3s ease-in-out infinite; /* 加入漂浮效果 */
-        }
+        .runner { position: absolute; width: 42px; height: 42px; z-index: 50; transform: translate(-50%, -50%); cursor: pointer; animation: float 3s ease-in-out infinite; }
         .runner:hover { animation-play-state: paused; transform: translate(-50%, -50%) scale(1.3); z-index: 100; filter: drop-shadow(0 0 10px var(--accent-blue)); }
         .user-photo { width: 100%; height: 100%; border-radius: 50%; border: 2px solid #fff; background: rgba(255,255,255,0.2); pointer-events: none; }
 
@@ -96,8 +83,6 @@
 
         .ui-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 99999; }
         .ui-card { background: #1a2a44; border: 2px solid var(--accent-gold); padding: 40px; border-radius: 25px; text-align: center; color: white; min-width: 300px; max-width: 500px; }
-        
-        /* 頭像選取縮放 */
         #avatar-picker img { width: 100%; cursor: pointer; border: 3px solid transparent; border-radius: 12px; transition: 0.3s; }
         #avatar-picker img:hover { transform: scale(1.2); }
         #avatar-picker img.selected { border-color: var(--accent-gold); background: rgba(249, 212, 35, 0.2); }
@@ -163,6 +148,18 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
+    // 數字跳動函數補回
+    function animateValue(obj, start, end, duration) {
+        let startTimestamp = null;
+        const step = (timestamp) => {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+            obj.innerHTML = Math.floor(progress * (end - start) + start).toLocaleString();
+            if (progress < 1) window.requestAnimationFrame(step);
+        };
+        window.requestAnimationFrame(step);
+    }
+
     function showUI(title, name, score, timeStr, isError=false) {
         const card = document.getElementById('ui-card-content');
         if(isError) {
@@ -204,23 +201,33 @@
 
     let currentIndex = 0;
     let allComments = [];
+    let hasAnimated = false; // 確保數字只跳一次
 
     db.ref('players').on('value', (snapshot) => {
         const players = snapshot.val() || {};
         const playersArr = Object.values(players);
         const total = playersArr.reduce((acc, p) => acc + (p.score || 0), 0);
-        document.getElementById('total-minutes').innerText = total.toLocaleString();
+        
+        // 執行跳動動畫
+        if (!hasAnimated) {
+            animateValue(document.getElementById('total-minutes'), 0, total, 1500);
+            hasAnimated = true;
+        } else {
+            document.getElementById('total-minutes').innerText = total.toLocaleString();
+        }
+
         document.getElementById('user-select').innerHTML = '<option value="">+ 新成員</option>' + playersArr.map(p => `<option value="${p.name}">${p.name}</option>`).join('');
 
         const path = document.getElementById('double-path');
         const pathLength = path.getTotalLength();
         const mGroup = document.getElementById('milestones-group');
         mGroup.innerHTML = "";
+        
         for (let score = 0; score <= 7500; score += 300) {
             const ratio = score / 7500;
             const pt = path.getPointAtLength(ratio * pathLength);
             if ((ratio > 0.28 && ratio < 0.42) || (ratio > 0.62 && ratio < 0.74)) continue;
-            mGroup.innerHTML += `<circle cx="${pt.x}" cy="${pt.y}" r="3" fill="#fff" opacity="0.5"/><text x="${pt.x}" y="${pt.y - 20}" class="milestone-text" text-anchor="middle">${score}</text>`;
+            mGroup.innerHTML += `<circle cx="${pt.x}" cy="${pt.y}" r="3" fill="#fff" opacity="0.3"/><text x="${pt.x}" y="${pt.y - 15}" class="milestone-text" text-anchor="middle">${score}</text>`;
         }
 
         document.querySelectorAll('.runner').forEach(r => r.remove());
