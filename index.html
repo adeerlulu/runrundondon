@@ -27,7 +27,7 @@
         .section-header { max-width: 550px; margin: 0 auto 15px auto; text-align: left; }
         .section-title { font-size: 18px; font-weight: 800; color: var(--accent-gold); padding-left: 10px; border-left: 4px solid var(--accent-gold); line-height: 1; }
 
-        /* 霧感 UI 控制項 */
+        /* 控制面板區域 */
         .controls-wrapper {
             margin: 0 auto 30px auto; max-width: 550px; background: var(--panel-bg); 
             padding: 25px; border-radius: 40px; border: 2px solid var(--track-yellow); 
@@ -36,19 +36,21 @@
         }
 
         .control-row { display: flex; justify-content: space-between; align-items: flex-end; width: 100%; gap: 15px; }
-        .input-group { display: flex; gap: 10px; align-items: flex-end; flex-grow: 3; } /* 增加左側比例 */
+        .input-group { display: flex; gap: 10px; align-items: flex-end; flex-grow: 3; }
         .input-box { display: flex; flex-direction: column; align-items: flex-start; }
         .input-box.grow { flex-grow: 1; }
-        .input-box.small { width: 80px; flex-shrink: 0; } /* 縮小運動量欄位 */
+        .input-box.small { width: 90px; flex-shrink: 0; }
         
         label { font-size: 11px; margin-bottom: 5px; color: var(--accent-blue); font-weight: 800; }
+        
+        /* 霧感選單與輸入框 */
         input, select { 
             font-family: var(--font-round); background: rgba(255, 255, 255, 0.15); 
             backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.3); 
             padding: 10px; border-radius: 12px; color: #ffffff; outline: none; font-size: 14px; width: 100%; box-sizing: border-box;
         }
-        select option { color: #333; background: #fff; } /* 修正選單文字色 */
+        select option { color: #0b1e3b; background: #ffffff; }
 
         .submit-btn { 
             font-family: var(--font-round); padding: 12px 100px; background: linear-gradient(135deg, #f9d423, #ff4e50); 
@@ -56,7 +58,23 @@
             font-size: 16px; box-shadow: 0 4px 15px rgba(255, 78, 80, 0.4);
         }
 
-        #track-wrapper { width: 100%; max-width: 550px; margin: 0 auto; position: relative; }
+        /* 修復碎碎念版型 */
+        #comment-wall { margin: 30px auto; max-width: 550px; text-align: left; }
+        .comment-item { 
+            position: relative; background: var(--bubble-bg); border-radius: 15px; padding: 15px 20px; margin-bottom: 20px; 
+            font-size: 14px; border: 1.5px solid rgba(255,255,255,0.15);
+        }
+        .comment-item::after { 
+            content: ''; position: absolute; left: 25px; bottom: -10px; 
+            border-width: 10px 10px 0; border-style: solid; 
+            border-color: rgba(255,255,255,0.1) transparent transparent; 
+        }
+        .comment-header { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 12px; }
+        .comment-name { color: var(--accent-gold); font-weight: 800; }
+        .comment-time { color: rgba(255,255,255,0.4); font-weight: 500; }
+
+        /* 跑道區域 */
+        #track-wrapper { width: 100%; max-width: 550px; margin: 40px auto; position: relative; }
         svg { width: 100%; height: auto; overflow: visible; }
         .path-main { fill: none; stroke: url(#track-gradient); stroke-width: 4; stroke-linecap: round; }
         .milestone-dot { fill: #fff; }
@@ -101,7 +119,7 @@
                     <button id="avatar-btn" style="font-family: var(--font-round); background:#2c5282; color:white; border:none; padding:10px; border-radius:12px; cursor:pointer; font-size:12px; height:41px; min-width:80px;" onclick="toggleModal(true)">選擇頭像</button>
                 </div>
                 <div class="input-box small">
-                    <label>今日運動量</label>
+                    <label>運動量</label>
                     <input type="number" id="mins" placeholder="mins" min="0">
                 </div>
             </div>
@@ -159,7 +177,7 @@
             const pathLength = path.getTotalLength();
             group.innerHTML = "";
             for (let i = 0; i <= 7500; i += 500) {
-                // 調整起點 0 到 x=35 的位置 (約佔路徑的 35 單位)
+                // 起點 0 位移至 x=35
                 let percent = (i === 0) ? (35 / pathLength) : (i / 7500);
                 const point = path.getPointAtLength(percent * pathLength);
                 
@@ -171,9 +189,8 @@
                 const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
                 text.setAttribute("class", "milestone-text");
                 text.textContent = i;
-                let offsetY = 12;
                 text.setAttribute("x", point.x);
-                text.setAttribute("y", point.y + offsetY);
+                text.setAttribute("y", point.y + 12);
                 text.setAttribute("text-anchor", "middle");
                 group.appendChild(text);
             }
@@ -216,16 +233,22 @@
             const playersArr = Object.values(players);
             document.getElementById('user-select').innerHTML = '<option value="">+ 新成員</option>' + playersArr.map(p => `<option value="${p.name}">${p.name}</option>`).join('');
             
+            // 碎碎念列表更新
             const thoughts = playersArr.filter(p => p.lastThought).sort((a,b) => b.lastUpdate - a.lastUpdate).slice(0,3);
             document.getElementById('comment-list').innerHTML = thoughts.map(p => {
                 const date = new Date(p.lastUpdate);
-                return `<div class="comment-item"><div class="comment-header"><span class="comment-name">${p.name}</span><span class="comment-time">${date.getMonth()+1}/${date.getDate()}</span></div><div>${p.lastThought}</div></div>`;
+                return `<div class="comment-item">
+                    <div class="comment-header">
+                        <span class="comment-name">${p.name}</span>
+                        <span class="comment-time">${date.getMonth()+1}/${date.getDate()}</span>
+                    </div>
+                    <div>${p.lastThought}</div>
+                </div>`;
             }).join('');
 
             document.querySelectorAll('.runner').forEach(r => r.remove());
             playersArr.forEach(p => {
                 const totalL = path.getTotalLength();
-                // 分數 0 的跑者定位在 35 單位處
                 let ratio = (p.score === 0) ? (35 / totalL) : (p.score / 7500);
                 const point = path.getPointAtLength(Math.min(ratio, 1) * totalL);
                 const runner = document.createElement('div');
@@ -239,8 +262,7 @@
         });
 
         document.getElementById('user-select').addEventListener('change', function() {
-            const isNew = this.value === "";
-            document.getElementById('new-name-box').style.display = isNew ? "block" : "none";
+            document.getElementById('new-name-box').style.display = (this.value === "") ? "block" : "none";
         });
     </script>
 </body>
