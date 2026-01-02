@@ -24,13 +24,12 @@
         .logo-container { margin: 20px auto; max-width: 600px; padding: 0 10px; }
         .main-logo { width: 100%; height: auto; display: block; filter: drop-shadow(0 0 12px rgba(0, 210, 255, 0.5)); }
 
-        /* 登入介面優化 */
+        /* 登入介面 */
         #auth-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; }
         #entry-pw { width: 180px; text-align: center; background: rgba(255, 255, 255, 0.1); border: 1px solid var(--accent-blue); color: white; padding: 10px; border-radius: 12px; font-family: var(--font-round); outline: none; }
-        .go-btn { font-family: var(--font-round); padding: 10px 40px; background: linear-gradient(135deg, #00d2ff, #3a7bd5); color: white; border: none; border-radius: 30px; cursor: pointer; font-weight: 800; font-size: 16px; box-shadow: 0 4px 15px rgba(58, 123, 213, 0.4); transition: transform 0.2s; }
-        .go-btn:active { transform: scale(0.95); }
+        .go-btn { font-family: var(--font-round); padding: 10px 40px; background: linear-gradient(135deg, #00d2ff, #3a7bd5); color: white; border: none; border-radius: 30px; cursor: pointer; font-weight: 800; font-size: 16px; box-shadow: 0 4px 15px rgba(58, 123, 213, 0.4); }
 
-        /* UI 控制項 */
+        /* 控制面板 */
         .section-header { max-width: 550px; margin: 0 auto 15px auto; text-align: left; }
         .section-title { font-size: 18px; font-weight: 800; color: var(--accent-gold); padding-left: 10px; border-left: 4px solid var(--accent-gold); line-height: 1; }
         .controls-wrapper { margin: 0 auto 30px auto; max-width: 550px; background: var(--panel-bg); padding: 25px; border-radius: 40px; border: 2px solid var(--track-yellow); box-shadow: 0 15px 30px rgba(0, 0, 0, 0.7), inset 0 0 20px rgba(11, 30, 59, 0.9); display: flex; flex-direction: column; gap: 20px; box-sizing: border-box; }
@@ -40,34 +39,41 @@
         .input-box.grow { flex-grow: 1; }
         .input-box.small { width: 90px; flex-shrink: 0; }
         input, select { font-family: var(--font-round); background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); padding: 10px; border-radius: 12px; color: #ffffff; outline: none; font-size: 14px; width: 100%; box-sizing: border-box; }
-        select option { color: #0b1e3b; background: #ffffff; }
         .submit-btn { font-family: var(--font-round); padding: 12px 100px; background: linear-gradient(135deg, #f9d423, #ff4e50); color: #000; border: none; border-radius: 30px; cursor: pointer; font-weight: 800; font-size: 16px; box-shadow: 0 4px 15px rgba(255, 78, 80, 0.4); }
 
-        /* 碎碎念牆 */
-        #comment-wall { margin: 30px auto; max-width: 550px; text-align: left; }
-        .comment-item { position: relative; background: var(--bubble-bg); border-radius: 15px; padding: 15px 20px; margin-bottom: 20px; font-size: 14px; border: 1.5px solid rgba(255,255,255,0.15); }
-        .comment-item::after { content: ''; position: absolute; left: 25px; bottom: -10px; border-width: 10px 10px 0; border-style: solid; border-color: rgba(255,255,255,0.1) transparent transparent; }
-        .comment-header { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 12px; }
-        .comment-name { color: var(--accent-gold); font-weight: 800; }
-        .comment-time { color: rgba(255,255,255,0.4); font-weight: 500; }
-
-        /* 跑道區域 */
+        /* 跑道區域與顏色流動優化 */
         #track-wrapper { width: 100%; max-width: 550px; margin: 40px auto; position: relative; }
         svg { width: 100%; height: auto; overflow: visible; }
-        .path-main { fill: none; stroke: url(#track-gradient); stroke-width: 5; stroke-linecap: round; filter: drop-shadow(0 0 5px rgba(0, 210, 255, 0.3)); }
+        
+        /* 核心優化：更動感的流動線條 */
+        .path-main { 
+            fill: none; 
+            stroke: url(#track-gradient); 
+            stroke-width: 6; 
+            stroke-linecap: round; 
+            filter: drop-shadow(0 0 8px rgba(0, 210, 255, 0.4));
+        }
+
         .milestone-dot { fill: #fff; }
         .milestone-text { font-family: var(--font-round); fill: #ffffff; font-size: 7px; font-weight: 800; paint-order: stroke; stroke: var(--bg-color); stroke-width: 1.5px; pointer-events: none;}
 
-        /* 角色頭像樣式 */
+        /* 角色 */
         .runner { position: absolute; width: 40px; height: 40px; z-index: 50; cursor: pointer; margin-left: -20px; margin-top: -20px; transition: all 1s ease; animation: runnerFloating 2s ease-in-out infinite; }
         @keyframes runnerFloating { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
         .user-photo { width: 100%; height: 100%; border-radius: 50%; border: 3px solid #ffffff; box-shadow: 0 0 15px rgba(255, 255, 255, 0.8), 0 4px 10px rgba(0,0,0,0.5); background: #fff; box-sizing: border-box; }
 
-        /* 自訂彈窗樣式 */
+        /* 碎碎念（底部） */
+        #comment-wall { margin: 50px auto; max-width: 550px; text-align: left; }
+        .comment-item { display: flex; gap: 12px; position: relative; background: var(--bubble-bg); border-radius: 15px; padding: 15px; margin-bottom: 20px; font-size: 14px; border: 1.5px solid rgba(255,255,255,0.15); align-items: flex-start; }
+        .comment-avatar { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--accent-gold); background: #fff; flex-shrink: 0; }
+        .comment-content { flex-grow: 1; }
+        .comment-header { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 12px; }
+        .comment-name { color: var(--accent-gold); font-weight: 800; }
+        .comment-time { color: rgba(255,255,255,0.4); }
+
+        /* 彈窗 */
         #info-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 4000; }
-        .info-card { background: rgba(26, 42, 68, 0.95); border: 2px solid var(--accent-blue); padding: 30px; border-radius: 25px; width: 85%; max-width: 320px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); text-align: center; animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        .info-card h2 { color: var(--accent-gold); margin: 0 0 10px 0; font-size: 22px; }
+        .info-card { background: rgba(26, 42, 68, 0.95); border: 2px solid var(--accent-blue); padding: 30px; border-radius: 25px; width: 85%; max-width: 320px; text-align: center; animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .score-num { display: block; font-size: 42px; font-weight: 900; color: #fff; text-shadow: 0 0 15px var(--accent-blue); margin: 10px 0; }
     </style>
 </head>
@@ -96,55 +102,50 @@
         <div class="controls-wrapper">
             <div class="control-row">
                 <div class="input-group">
-                    <div class="input-box grow">
-                        <label style="font-size:11px; color:var(--accent-blue); font-weight:800; margin-bottom:5px; align-self:flex-start;">是哪位運動家</label>
-                        <select id="user-select"><option value="">+ 新成員</option></select>
-                    </div>
-                    <div class="input-box grow" id="new-name-box">
-                        <label style="font-size:11px; color:var(--accent-blue); font-weight:800; margin-bottom:5px; align-self:flex-start;">輸入名字</label>
-                        <input type="text" id="new-name" placeholder="名字">
-                    </div>
+                    <div class="input-box grow"><label>是哪位運動家</label><select id="user-select"><option value="">+ 新成員</option></select></div>
+                    <div class="input-box grow" id="new-name-box"><label>輸入名字</label><input type="text" id="new-name" placeholder="名字"></div>
                     <button id="avatar-btn" style="background:#2c5282; color:white; border:none; padding:10px; border-radius:12px; cursor:pointer; font-size:12px; height:41px; min-width:80px;" onclick="toggleModal(true)">選擇頭像</button>
                 </div>
-                <div class="input-box small">
-                    <label style="font-size:11px; color:var(--accent-blue); font-weight:800; margin-bottom:5px; align-self:flex-start;">運動量</label>
-                    <input type="number" id="mins" placeholder="mins" min="0">
-                </div>
+                <div class="input-box small"><label>運動量</label><input type="number" id="mins" placeholder="mins"></div>
             </div>
-            <div class="control-row">
-                <div class="input-box grow">
-                    <label style="font-size:11px; color:var(--accent-blue); font-weight:800; margin-bottom:5px; align-self:flex-start;">今日碎碎念</label>
-                    <input type="text" id="thought-input" placeholder="只能碎念30字" maxlength="30">
-                </div>
-            </div>
+            <div class="control-row"><div class="input-box grow"><label>今日碎碎念</label><input type="text" id="thought-input" placeholder="只能碎念30字" maxlength="30"></div></div>
             <button class="submit-btn" onclick="handleUpdate()">GO!</button>
-        </div>
-
-        <div id="comment-wall">
-            <div class="section-header"><div class="section-title">動動碎碎念</div></div>
-            <div id="comment-list"></div>
         </div>
 
         <div id="track-wrapper">
             <div class="section-header"><div class="section-title">跑跑跑！向前跑！</div></div>
             <svg viewBox="0 0 200 520" id="main-svg">
                 <defs>
-                    <linearGradient id="track-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                        <stop offset="0%" style="stop-color:#00d2ff">
-                            <animate attributeName="offset" values="-1; 1" dur="10s" repeatCount="indefinite" calcMode="linear" />
-                        </stop>
-                        <stop offset="50%" style="stop-color:#f9d423">
-                            <animate attributeName="offset" values="0; 2" dur="10s" repeatCount="indefinite" calcMode="linear" />
-                        </stop>
-                        <stop offset="100%" style="stop-color:#ff4e50">
-                            <animate attributeName="offset" values="1; 3" dur="10s" repeatCount="indefinite" calcMode="linear" />
-                        </stop>
+                    <linearGradient id="track-gradient" x1="0%" y1="0%" x2="0%" y2="100%" gradientUnits="userSpaceOnUse">
+                        <stop offset="0%" stop-color="#00d2ff" />
+                        <stop offset="25%" stop-color="#f9d423" />
+                        <stop offset="50%" stop-color="#ff4e50" />
+                        <stop offset="75%" stop-color="#f9d423" />
+                        <stop offset="100%" stop-color="#00d2ff" />
                     </linearGradient>
+                    
+                    <style>
+                        /* 使用 CSS 直接對 SVG 漸層進行背景位移動畫，效能極佳 */
+                        .path-main {
+                            stroke-dasharray: 2000; /* 設定足夠長度確保漸層鋪滿 */
+                            stroke-dashoffset: 0;
+                            animation: flowEffect 15s linear infinite;
+                        }
+                        @keyframes flowEffect {
+                            from { stroke-dashoffset: 2000; }
+                            to { stroke-dashoffset: 0; }
+                        }
+                    </style>
                 </defs>
                 <path id="s-path" class="path-main" d="M 0 50 H 165 A 35 35 0 0 1 165 120 H 35 A 35 35 0 0 0 35 190 H 165 A 35 35 0 0 1 165 260 H 35 A 35 35 0 0 0 35 330 H 165 A 35 35 0 0 1 165 400 H 35 A 35 35 0 0 0 35 470" />
                 <text x="0" y="505" fill="#ff4e50" font-size="11" font-weight="900">FINISH 7500</text>
                 <g id="milestones-group"></g>
             </svg>
+        </div>
+
+        <div id="comment-wall">
+            <div class="section-header"><div class="section-title">動動碎碎念</div></div>
+            <div id="comment-list"></div>
         </div>
     </div>
 
@@ -161,16 +162,12 @@
 
         function checkEntry() { if (document.getElementById('entry-pw').value === "1234") { localStorage.setItem('last_login_time', new Date().getTime().toString()); location.reload(); } else { alert("通關密語錯誤！"); } }
         if (localStorage.getItem('last_login_time') && (new Date().getTime() - parseInt(localStorage.getItem('last_login_time'))) / 60000 < 30) {
-            document.getElementById('main-content').style.display = 'block';
-            document.getElementById('auth-overlay').style.display = 'none';
+            document.getElementById('main-content').style.display = 'block'; document.getElementById('auth-overlay').style.display = 'none';
         }
 
         function closeInfo() { document.getElementById('info-overlay').style.display = 'none'; }
-        function showInfo(name, score) {
-            document.getElementById('info-name').innerText = name;
-            document.getElementById('info-score').innerText = score;
-            document.getElementById('info-overlay').style.display = 'flex';
-        }
+        function showInfo(name, score) { document.getElementById('info-name').innerText = name; document.getElementById('info-score').innerText = score; document.getElementById('info-overlay').style.display = 'flex'; }
+        function toggleModal(show) { document.getElementById('avatar-modal').style.display = show ? 'block' : 'none'; document.getElementById('modal-overlay').style.display = show ? 'block' : 'none'; }
 
         function drawMilestones() {
             const path = document.getElementById('s-path');
@@ -182,33 +179,23 @@
                 const point = path.getPointAtLength(percent * pathLength);
                 const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
                 dot.setAttribute("cx", point.x); dot.setAttribute("cy", point.y); dot.setAttribute("r", "2.5");
-                dot.setAttribute("class", "milestone-dot");
-                group.appendChild(dot);
+                dot.setAttribute("class", "milestone-dot"); group.appendChild(dot);
                 const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                text.setAttribute("class", "milestone-text");
-                text.textContent = i;
+                text.setAttribute("class", "milestone-text"); text.textContent = i;
                 text.setAttribute("x", point.x); text.setAttribute("y", point.y + 12);
-                text.setAttribute("text-anchor", "middle");
-                group.appendChild(text);
+                text.setAttribute("text-anchor", "middle"); group.appendChild(text);
             }
         }
 
         const baseUrl = "https://raw.githubusercontent.com/adeerlulu/runrundondon/main/icons/";
         for (let i = 1; i <= 12; i++) {
             const fileName = i < 10 ? '0' + i : i;
-            const img = document.createElement('img');
-            img.src = `${baseUrl}${fileName}.png`;
+            const img = document.createElement('img'); img.src = `${baseUrl}${fileName}.png`;
             img.style = "width:50px; height:50px; cursor:pointer; border-radius:8px; border:2px solid transparent; background:#fff;";
-            img.onclick = function() { 
-                document.querySelectorAll('#avatar-picker img').forEach(el => el.style.borderColor = 'transparent');
-                this.style.borderColor = '#00d2ff';
-                window.selectedAvatarUrl = this.src;
-            };
+            img.onclick = function() { document.querySelectorAll('#avatar-picker img').forEach(el => el.style.borderColor = 'transparent'); this.style.borderColor = '#00d2ff'; window.selectedAvatarUrl = this.src; };
             document.getElementById('avatar-picker').appendChild(img);
         }
 
-        function toggleModal(show) { document.getElementById('avatar-modal').style.display = show ? 'block' : 'none'; document.getElementById('modal-overlay').style.display = show ? 'block' : 'none'; }
-        
         function handleUpdate() {
             const name = document.getElementById('user-select').value || document.getElementById('new-name').value.trim();
             const mins = parseInt(document.getElementById('mins').value);
@@ -233,14 +220,17 @@
             const thoughts = playersArr.filter(p => p.lastThought).sort((a,b) => b.lastUpdate - a.lastUpdate).slice(0,3);
             document.getElementById('comment-list').innerHTML = thoughts.map(p => {
                 const date = new Date(p.lastUpdate);
-                return `<div class="comment-item"><div class="comment-header"><span class="comment-name">${p.name}</span><span class="comment-time">${date.getMonth()+1}/${date.getDate()}</span></div><div>${p.lastThought}</div></div>`;
+                return `<div class="comment-item"><img src="${p.photo}" class="comment-avatar"><div class="comment-content"><div class="comment-header"><span class="comment-name">${p.name}</span><span class="comment-time">${date.getMonth()+1}/${date.getDate()}</span></div><div>${p.lastThought}</div></div></div>`;
             }).join('');
 
             document.querySelectorAll('.runner').forEach(r => r.remove());
             playersArr.forEach(p => {
                 const totalL = path.getTotalLength();
-                let ratio = (p.score <= 0) ? (35 / totalL) : (p.score / 7500);
-                const point = path.getPointAtLength(Math.min(ratio, 1) * totalL);
+                // 嚴格起跑線修正：物理座標 x=35 對應的比例
+                const startRatio = 35 / totalL;
+                let moveRatio = (p.score <= 0) ? startRatio : startRatio + (p.score / 7500) * (1 - startRatio);
+                const point = path.getPointAtLength(Math.min(moveRatio, 1) * totalL);
+                
                 const runner = document.createElement('div');
                 runner.className = 'runner';
                 runner.style.left = `${(point.x / 200) * 100}%`;
@@ -252,9 +242,7 @@
             drawMilestones();
         });
 
-        document.getElementById('user-select').addEventListener('change', function() {
-            document.getElementById('new-name-box').style.display = (this.value === "") ? "block" : "none";
-        });
+        document.getElementById('user-select').addEventListener('change', function() { document.getElementById('new-name-box').style.display = (this.value === "") ? "block" : "none"; });
     </script>
 </body>
 </html>
