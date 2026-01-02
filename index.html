@@ -30,21 +30,24 @@
             display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
 
-        .logo-container { margin: 15px auto; max-width: 300px; padding: 0 10px; }
-        .main-logo { width: 100%; height: auto; display: block; filter: drop-shadow(0 0 8px rgba(0, 210, 255, 0.4)); }
+        /* LOGO 放大 1 倍 */
+        .logo-container { margin: 20px auto; max-width: 600px; padding: 0 10px; }
+        .main-logo { width: 100%; height: auto; display: block; filter: drop-shadow(0 0 12px rgba(0, 210, 255, 0.5)); }
 
+        /* 整合後的控制面板 */
         .controls-wrapper {
-            display: flex; flex-direction: column; gap: 15px; align-items: center;
             margin: 10px auto; max-width: 650px;
-        }
-        .control-row {
-            display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-end; gap: 12px;
             background: var(--panel-bg); 
-            padding: 15px 25px; 
-            border-radius: 40px; 
-            border: 2px solid var(--track-yellow); 
-            width: 100%;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.6), inset 0 0 15px rgba(11, 30, 59, 0.8);
+            padding: 25px; 
+            border-radius: 50px; /* 最圓導圓角 */
+            border: 2px solid var(--track-yellow); /* 黃線 */
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.7), inset 0 0 20px rgba(11, 30, 59, 0.9);
+            display: flex; flex-direction: column; gap: 20px;
+        }
+
+        /* 每一排的排版 */
+        .control-row {
+            display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-end; gap: 15px;
         }
 
         .input-box { display: flex; flex-direction: column; align-items: flex-start; }
@@ -54,16 +57,28 @@
         }
         .label-icon { width: 14px; height: 14px; }
 
-        input, select { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); padding: 8px; border-radius: 12px; color: #ffffff; outline: none; }
-        #user-select { width: 115px; }
-        #new-name { width: 95px; }
-        #mins { width: 70px; }
-        #thought-input { width: 200px; }
+        input, select { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); padding: 10px; border-radius: 12px; color: #ffffff; outline: none; }
+        #user-select { width: 120px; }
+        #new-name { width: 100px; }
+        #mins { width: 80px; }
+        #thought-input { width: 300px; }
 
-        #comment-wall { margin: 25px auto; max-width: 450px; text-align: left; }
+        /* 送出按鈕獨立置中 */
+        .submit-container { width: 100%; display: flex; justify-content: center; margin-top: 5px; }
+        button.submit-btn { 
+            padding: 12px 60px; /* 加寬按鈕 */
+            background: linear-gradient(135deg, #f9d423, #ff4e50); 
+            color: #000; border: none; border-radius: 30px; cursor: pointer; font-weight: 900; 
+            font-size: 16px; box-shadow: 0 4px 15px rgba(255, 78, 80, 0.4);
+            transition: transform 0.2s;
+        }
+        button.submit-btn:active { transform: scale(0.95); }
+
+        /* 碎碎念氣泡 */
+        #comment-wall { margin: 30px auto; max-width: 450px; text-align: left; }
         .comment-item { 
             position: relative; background: var(--bubble-bg); border-radius: 15px; 
-            padding: 10px 18px; margin-bottom: 18px; font-size: 13px; 
+            padding: 12px 20px; margin-bottom: 20px; font-size: 13px; 
             border: 1px solid rgba(255,255,255,0.1);
         }
         .comment-item::after {
@@ -73,33 +88,21 @@
         .comment-time { font-size: 10px; color: rgba(255,255,255,0.4); margin-right: 8px; }
         .comment-name { color: var(--accent-gold); font-weight: bold; }
 
-        .runner {
-            position: absolute; width: 40px; height: 40px;
-            display: flex; flex-direction: column; align-items: center;
-            transition: all 1.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-            z-index: 100; pointer-events: none; margin-left: -20px; margin-top: -35px;
-            animation: runnerFloating 3s ease-in-out infinite;
-        }
-        @keyframes runnerFloating { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-5px); } }
-        .user-photo { width: 32px; height: 32px; border-radius: 50%; border: 2px solid #fff; object-fit: cover; }
-        .label { background: linear-gradient(135deg, #ff4e50, #f9d423); color: #000; font-size: 10px; font-weight: 900; padding: 1px 8px; border-radius: 10px; border: 1px solid #fff; }
-
+        /* 跑道與數字 */
         #track-wrapper { width: 100%; max-width: 450px; margin: 0 auto; position: relative; }
         svg { width: 100%; height: auto; overflow: visible; }
         .path-main { fill: none; stroke: url(#track-gradient); stroke-width: 26; stroke-linecap: round; }
         .path-shadow { fill: none; stroke: rgba(255,255,255,0.03); stroke-width: 32; stroke-linecap: round; }
+        .milestone-text { fill: rgba(255,255,255,0.4); font-size: 5px; font-weight: normal; }
 
-        /* 跑道數字縮小一半 (5px) 並移除粗體 */
-        .milestone-text { 
-            fill: rgba(255,255,255,0.4); 
-            font-size: 5px; 
-            font-weight: normal; 
-        }
+        /* 角色標籤 */
+        .runner { position: absolute; width: 40px; height: 40px; display: flex; flex-direction: column; align-items: center; transition: all 1.5s cubic-bezier(0.34, 1.56, 0.64, 1); z-index: 100; pointer-events: none; margin-left: -20px; margin-top: -35px; }
+        .user-photo { width: 32px; height: 32px; border-radius: 50%; border: 2px solid #fff; object-fit: cover; }
+        .label { background: linear-gradient(135deg, #ff4e50, #f9d423); color: #000; font-size: 10px; font-weight: 900; padding: 1px 8px; border-radius: 10px; border: 1px solid #fff; }
 
         #avatar-modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #1a2a44; padding: 20px; border-radius: 20px; border: 2px solid var(--accent-blue); z-index: 3000; width: 280px; }
         .avatar-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
         .avatar-option { width: 50px; height: 50px; border-radius: 8px; cursor: pointer; border: 2px solid transparent; background: #fff; }
-        button.submit-btn { padding: 10px 22px; background: linear-gradient(135deg, #00d2ff, #3a7bd5); color: white; border: none; border-radius: 30px; cursor: pointer; font-weight: bold; }
         #main-content { display: none; }
         #modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2500; }
     </style>
@@ -109,7 +112,7 @@
     <div id="auth-overlay">
         <div class="logo-container"><img src="https://raw.githubusercontent.com/adeerlulu/runrundondon/main/links/LOGO.png" class="main-logo"></div>
         <input type="password" id="entry-pw" placeholder="輸入密碼 1234" style="width: 180px; margin-bottom: 20px;">
-        <button class="submit-btn" onclick="checkEntry()">進入網頁</button>
+        <button class="submit-btn" style="color:white; background: #3a7bd5;" onclick="checkEntry()">進入網頁</button>
     </div>
 
     <div id="main-content">
@@ -127,18 +130,22 @@
                     <input type="text" id="new-name" placeholder="輸入名字">
                 </div>
                 <div class="input-box" id="avatar-box">
-                    <button id="avatar-btn" style="background:#2c5282; color:white; border:none; padding:8px 12px; border-radius:10px; cursor:pointer; font-size:12px;" onclick="toggleModal(true)">選擇頭像</button>
+                    <button id="avatar-btn" style="background:#2c5282; color:white; border:none; padding:10px 12px; border-radius:10px; cursor:pointer; font-size:12px;" onclick="toggleModal(true)">選擇頭像</button>
+                </div>
+                <div class="input-box">
+                    <label><img src="https://raw.githubusercontent.com/adeerlulu/runrundondon/main/links/flower_1.svg" class="label-icon"> 今日運動量</label>
+                    <input type="number" id="mins" placeholder="mins">
                 </div>
             </div>
+
             <div class="control-row">
                 <div class="input-box">
-                    <label><img src="https://raw.githubusercontent.com/adeerlulu/runrundondon/main/links/flower_1.svg" class="label-icon"> 運動幾分鐘</label>
-                    <input type="number" id="mins" placeholder="min">
-                </div>
-                <div class="input-box">
                     <label><img src="https://raw.githubusercontent.com/adeerlulu/runrundondon/main/links/flower_1.svg" class="label-icon"> 今日碎碎念</label>
-                    <input type="text" id="thought-input" placeholder="30字內(非必填)" maxlength="30">
+                    <input type="text" id="thought-input" placeholder="只能碎念30字" maxlength="30">
                 </div>
+            </div>
+
+            <div class="submit-container">
                 <button class="submit-btn" onclick="handleUpdate()">GO!</button>
             </div>
         </div>
@@ -146,7 +153,7 @@
         <div id="comment-wall"><div id="comment-list"></div></div>
 
         <div id="modal-overlay" onclick="toggleModal(false)"></div>
-        <div id="avatar-modal"><div class="avatar-grid" id="avatar-picker"></div><button class="submit-btn" style="margin-top:15px; width:100%;" onclick="toggleModal(false)">確定</button></div>
+        <div id="avatar-modal"><div class="avatar-grid" id="avatar-picker"></div><button class="submit-btn" style="margin-top:15px; width:100%; color: white;" onclick="toggleModal(false)">確定</button></div>
         
         <div id="track-wrapper">
             <svg viewBox="0 0 200 520" id="main-svg">
@@ -165,6 +172,7 @@
     </div>
 
     <script>
+        // --- 核心邏輯維持不變 ---
         function checkEntry() { if (document.getElementById('entry-pw').value === "1234") { localStorage.setItem('last_login_time', new Date().getTime().toString()); location.reload(); } else { alert("密碼錯誤"); } }
         if (localStorage.getItem('last_login_time') && (new Date().getTime() - parseInt(localStorage.getItem('last_login_time'))) / 60000 < 30) {
             document.getElementById('auth-overlay').style.display = 'none';
@@ -219,7 +227,7 @@
             const name = userSelect.value || document.getElementById('new-name').value.trim();
             const mins = parseInt(document.getElementById('mins').value);
             const thought = document.getElementById('thought-input').value.trim();
-            if (!name || isNaN(mins)) { alert("資訊未填寫完整"); return; }
+            if (!name || isNaN(mins)) { alert("請填寫名字與運動量"); return; }
             const userRef = db.ref('players/' + name);
             userRef.once('value').then(snapshot => {
                 const data = snapshot.val() || { score: 0, photo: "" };
