@@ -3,59 +3,157 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>運動馬拉松即時看板</title>
+    <title>🏃‍♂️ 運動累計馬拉松 🏃‍♀️</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     
     <style>
-        body { font-family: "Microsoft JhengHei", sans-serif; text-align: center; background: #eceff1; margin: 0; padding: 20px; }
-        h1 { color: #333; }
-        #track { 
-            width: 100%; max-width: 800px; background: #444; margin: 20px auto; 
-            padding: 10px 0; border-radius: 10px; border: 4px solid #222;
-            min-height: 200px; box-shadow: inset 0 0 10px #000;
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --track-gradient: linear-gradient(90deg, #333 0%, #444 50%, #333 100%);
+            --accent-color: #00f2fe;
         }
+
+        body { 
+            font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif; 
+            text-align: center; 
+            background: #f0f2f5; 
+            margin: 0; 
+            padding: 20px;
+            color: #333;
+        }
+
+        h1 { 
+            font-size: 2.5rem; 
+            margin-bottom: 10px; 
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+        }
+
+        /* 跑道容器 */
+        #track-container { 
+            width: 100%; 
+            max-width: 900px; 
+            background: var(--track-gradient); 
+            margin: 30px auto; 
+            padding: 20px 0; 
+            border-radius: 20px; 
+            border: 8px solid #222;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 跑道格線 */
         .lane { 
-            height: 60px; border-bottom: 1px dashed #777; 
-            position: relative; display: flex; align-items: center; 
+            height: 70px; 
+            border-bottom: 1px dashed rgba(255,255,255,0.2); 
+            position: relative; 
+            display: flex; 
+            align-items: center; 
         }
         .lane:last-child { border-bottom: none; }
+
+        /* 跑者設計 */
         .runner { 
-            position: absolute; transition: left 1s cubic-bezier(0.25, 0.1, 0.25, 1); 
-            display: flex; align-items: center; z-index: 10;
+            position: absolute; 
+            transition: left 1.5s cubic-bezier(0.34, 1.56, 0.64, 1); 
+            display: flex; 
+            flex-direction: column;
+            align-items: center; 
+            z-index: 10;
         }
-        .avatar { font-size: 30px; filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.5)); }
+
+        .avatar { 
+            font-size: 35px; 
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
+            animation: bounce 0.5s infinite alternate;
+        }
+
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-5px); }
+        }
+
         .label { 
-            color: white; font-size: 12px; background: rgba(0,0,0,0.7); 
-            border-radius: 4px; padding: 4px 8px; white-space: nowrap; margin-left: 5px;
-            border: 1px solid #555;
+            color: white; 
+            font-size: 12px; 
+            font-weight: bold;
+            background: rgba(0,0,0,0.8); 
+            border-radius: 20px; 
+            padding: 4px 12px; 
+            white-space: nowrap; 
+            margin-top: 2px;
+            border: 1px solid var(--accent-color);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
+
+        /* 控制面板 */
         .controls { 
-            margin-top: 30px; padding: 20px; background: white; 
-            display: inline-block; border-radius: 12px; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+            margin-top: 20px; 
+            padding: 30px; 
+            background: white; 
+            display: inline-flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            border-radius: 24px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05); 
+            max-width: 90%;
         }
-        input { padding: 10px; border: 1px solid #ccc; border-radius: 4px; width: 120px; margin: 5px; }
+
+        input { 
+            padding: 12px 20px; 
+            border: 2px solid #eee; 
+            border-radius: 12px; 
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        input:focus { border-color: #667eea; }
+
         button { 
-            padding: 10px 20px; background: #28a745; color: white; 
-            border: none; border-radius: 4px; cursor: pointer; font-weight: bold;
+            padding: 12px 30px; 
+            background: var(--primary-gradient); 
+            color: white; 
+            border: none; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            font-weight: bold;
+            font-size: 16px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
         }
-        button:hover { background: #218838; }
+
+        button:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        button:active { transform: translateY(0); }
+
+        .hint { color: #888; font-size: 14px; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-    <h1>🏃‍♂️ 每日運動馬拉松 🏃‍♀️</h1>
-    <p>輸入姓名與分鐘數，一起累積運動量！</p>
+    <h1>🏃‍♂️ 運動累計馬拉松</h1>
+    <p style="color: #666;">越運動，小人跑得越遠！(目標: 1000 min)</p>
     
-    <div id="track">載入中...</div>
+    <div id="track-container">
+        </div>
 
     <div class="controls">
         <input type="text" id="name" placeholder="你的姓名">
-        <input type="number" id="mins" placeholder="分鐘" min="1">
-        <button type="button" onclick="addMins()">增加進度</button>
+        <input type="number" id="mins" placeholder="增加分鐘" min="1">
+        <input type="password" id="pw" placeholder="通關密碼">
+        <button type="button" onclick="addMins()">回報運動</button>
     </div>
+    <p class="hint">請輸入密碼以驗證身份</p>
 
     <script>
         // --- 1. 初始化 Firebase ---
@@ -69,25 +167,27 @@
             appId: "1:466713105396:web:c0651103b028978cd9dfa1"
         };
 
-        // 初始化
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // --- 2. 增加時間的邏輯 (確保定義在全域) ---
+        // --- 2. 增加時間邏輯 (含密碼驗證) ---
         window.addMins = function() {
-            const nameEl = document.getElementById('name');
-            const minsEl = document.getElementById('mins');
-            const name = nameEl.value.trim();
-            const mins = parseInt(minsEl.value);
+            const name = document.getElementById('name').value.trim();
+            const mins = parseInt(document.getElementById('mins').value);
+            const pw = document.getElementById('pw').value;
 
-            if (!name || isNaN(mins)) {
-                alert("請填寫姓名與分鐘數");
+            // 1. 驗證密碼
+            if (pw !== "hello") {
+                alert("密碼錯誤！只有指定成員可以登記。");
                 return;
             }
 
-            console.log("嘗試更新用戶:", name);
+            if (!name || isNaN(mins)) {
+                alert("請填寫姓名與運動分鐘數");
+                return;
+            }
+
             const userRef = db.ref('players/' + name);
-            
             userRef.once('value').then(snapshot => {
                 const currentScore = (snapshot.val() && snapshot.val().score) ? snapshot.val().score : 0;
                 return userRef.update({
@@ -96,43 +196,20 @@
                     lastUpdate: firebase.database.ServerValue.TIMESTAMP
                 });
             }).then(() => {
-                minsEl.value = ''; 
-                console.log("更新完成");
+                document.getElementById('mins').value = ''; 
+                document.getElementById('pw').value = '';
+                alert("太棒了！紀錄已更新。");
             }).catch(err => {
-                console.error("Firebase 錯誤:", err);
-                alert("寫入失敗，請確認資料庫規則已開啟為 true");
+                alert("連線錯誤: " + err.message);
             });
         };
 
         // --- 3. 監聽資料庫 ---
         db.ref('players').on('value', (snapshot) => {
             const players = snapshot.val();
-            const track = document.getElementById('track');
+            const track = document.getElementById('track-container');
             track.innerHTML = ''; 
 
             if (!players) {
-                track.innerHTML = '<p style="color:#aaa; padding:20px;">目前還沒有跑者，快來當第一個！</p>';
+                track.innerHTML = '<div style="color:rgba(255,255,255,0.3); padding:50px;">目前尚無跑者紀錄</div>';
                 return;
-            }
-
-            const GOAL = 300; // 累積 300 分鐘到達終點
-
-            for (let id in players) {
-                const p = players[id];
-                // 計算進度百分比 (0% ~ 85%)
-                const progress = Math.min((p.score / GOAL) * 85, 90); 
-                
-                const lane = document.createElement('div');
-                lane.className = 'lane';
-                lane.innerHTML = `
-                    <div class="runner" style="left: ${progress}%">
-                        <span class="avatar">🏃</span>
-                        <span class="label">${p.name}: ${p.score} min</span>
-                    </div>
-                `;
-                track.appendChild(lane);
-            }
-        });
-    </script>
-</body>
-</html>
