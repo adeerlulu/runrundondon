@@ -24,8 +24,11 @@
         .logo-container { margin: 20px auto; max-width: 700px; text-align: center; }
         .main-logo { width: 100%; height: auto; filter: drop-shadow(0 0 15px rgba(0, 210, 255, 0.5)); }
 
-        /* 間距再縮小 */
-        .section-header { width: 100%; margin: 0 auto 5px auto; padding-top: 10px; }
+        /* 標題與間距修正 */
+        .section-header-work { width: 100%; margin: 0 auto 80px auto; padding-top: 10px; } /* 今日工事標題與下方隔 80px */
+        .section-header-run { width: 100%; margin: 250px auto 5px auto; padding-top: 10px; } /* 跑跑跑標題與上方隔 250px */
+        .section-header-talk { width: 100%; margin: 20px auto 5px auto; padding-top: 10px; }
+        
         .section-title { font-size: 19px; font-weight: 900; color: var(--accent-gold); padding-left: 12px; border-left: 5px solid var(--accent-gold); line-height: 1.2; }
 
         .controls-wrapper { 
@@ -37,16 +40,14 @@
         .input-box { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; flex: 1; min-width: 140px; }
         .input-box label { font-size: 13px; color: var(--accent-blue); font-weight: 700; }
         
-        /* 修正選單看不到字的問題 */
         input, select { 
             font-family: var(--font-taipei); background: #1a2a44 !important; 
             border: 1px solid rgba(255, 255, 255, 0.3); padding: 12px; 
             border-radius: 12px; color: #ffffff !important; outline: none; width: 100%; box-sizing: border-box;
-            height: 48px; /* 固定高度 */
+            height: 48px;
         }
         select option { background-color: #1a2a44; color: white; }
 
-        /* GO按鈕與輸入框同高 */
         .submit-btn { 
             font-family: var(--font-taipei); height: 48px; padding: 0 60px; 
             background: linear-gradient(135deg, #f9d423, #ff4e50); 
@@ -54,9 +55,16 @@
             transition: 0.3s;
         }
 
+        /* 跑道區域：恢復動畫 */
         #track-wrapper { width: 100%; margin: 5px auto; position: relative; }
         .svg-container { position: relative; width: 100%; height: 300px; }
-        .path-main { fill: none; stroke: url(#track-gradient); stroke-width: 14; stroke-linecap: round; }
+        .path-main { 
+            fill: none; stroke: url(#track-gradient); stroke-width: 14; stroke-linecap: round; 
+            stroke-dasharray: 2500; stroke-dashoffset: 0;
+            animation: flowEffect 15s linear infinite;
+        }
+        @keyframes flowEffect { from { stroke-dashoffset: 2500; } to { stroke-dashoffset: 0; } }
+
         .milestone-dot { fill: #ffffff; }
         .milestone-text { font-size: 12px; fill: #ffffff; font-weight: 700; paint-order: stroke; stroke: var(--bg-color); stroke-width: 3px; }
 
@@ -87,9 +95,6 @@
 
         .nav-btn { background: rgba(255,255,255,0.1); border: 1px solid var(--accent-gold); color: var(--accent-gold); width: 36px; height: 36px; border-radius: 50%; cursor: pointer; }
         
-        #avatar-modal img { width: 100%; cursor: pointer; transition: 0.2s; }
-        #avatar-modal img:hover { transform: scale(1.1); }
-        
         footer { margin: 40px auto 20px auto; text-align: center; color: #fff; font-size: 11px; opacity: 0.5; }
     </style>
 </head>
@@ -98,7 +103,7 @@
 <div class="main-container">
     <div class="logo-container"><img src="https://raw.githubusercontent.com/adeerlulu/runrundondon/main/links/LOGO.png" class="main-logo"></div>
 
-    <div class="section-header"><div class="section-title">今日工事</div></div>
+    <div class="section-header-work"><div class="section-title">今日工事</div></div>
     <div class="controls-wrapper">
         <div class="control-row">
             <div class="input-box"><label>是哪位運動家</label><select id="user-select"><option value="">+ 新成員</option></select></div>
@@ -112,18 +117,18 @@
         </div>
     </div>
 
-    <div class="section-header"><div class="section-title">跑跑跑！向前跑！</div></div>
+    <div class="section-header-run"><div class="section-title">跑跑跑！向前跑！</div></div>
     <div id="track-wrapper">
         <div class="svg-container" id="runner-layer">
             <svg viewBox="0 0 1000 300" id="main-svg" style="width:100%; height:100%;">
                 <defs><linearGradient id="track-gradient" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#00d2ff" /><stop offset="50%" stop-color="#f9d423" /><stop offset="100%" stop-color="#ff4e50" /></linearGradient></defs>
-                <path id="double-path" class="path-main" d="M 50,110 L 920,110 A 55,55 0 0 1 920,210 L 50,210" />
+                <path id="double-path" class="path-main" d="M 50,110 L 920,110 A 55,55 0 0 1 920,220 L 50,220" />
                 <g id="milestones-group"></g>
             </svg>
         </div>
     </div>
 
-    <div class="section-header"><div class="section-title">動動碎碎念</div></div>
+    <div class="section-header-talk"><div class="section-title">動動碎碎念</div></div>
     <div class="comment-carousel-container">
         <button class="nav-btn" onclick="moveCarousel(-1)">❮</button>
         <div class="comment-window"><div id="comment-list"></div></div>
@@ -167,7 +172,7 @@
         const num = i < 10 ? '0' + i : i;
         const img = document.createElement('img');
         img.src = `https://raw.githubusercontent.com/adeerlulu/runrundondon/main/icons/${num}.png`;
-        img.style = "width:100%; cursor:pointer; border:2px solid transparent; border-radius:8px;"; // 移除白底
+        img.style = "width:100%; cursor:pointer; border:2px solid transparent; border-radius:8px;";
         img.onclick = function() {
             document.querySelectorAll('#avatar-picker img').forEach(i => i.style.borderColor='transparent');
             this.style.borderColor = '#00d2ff';
