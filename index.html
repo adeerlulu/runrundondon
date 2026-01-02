@@ -22,18 +22,14 @@
             font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif; 
             background-color: var(--bg-color); 
             margin: 0; padding: 10px; text-align: center; color: var(--text-main);
+            overflow-x: hidden;
         }
 
-        #auth-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg-color); z-index: 2000;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-        }
-
+        /* LOGO 區 */
         .logo-container { margin: 20px auto; max-width: 600px; padding: 0 10px; }
         .main-logo { width: 100%; height: auto; display: block; filter: drop-shadow(0 0 12px rgba(0, 210, 255, 0.5)); }
 
-        /* 控制面板與輸入框 */
+        /* 控制面板 */
         .controls-wrapper {
             margin: 10px auto; max-width: 550px;
             background: var(--panel-bg); 
@@ -41,7 +37,6 @@
             box-shadow: 0 15px 30px rgba(0, 0, 0, 0.7), inset 0 0 20px rgba(11, 30, 59, 0.9);
             display: flex; flex-direction: column; gap: 20px;
         }
-
         .control-row { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-end; gap: 15px; }
         .input-box { display: flex; flex-direction: column; align-items: flex-start; }
         label { font-size: 11px; margin-bottom: 5px; color: var(--accent-blue); font-weight: bold; display: flex; align-items: center; gap: 4px; }
@@ -49,18 +44,9 @@
 
         input, select { 
             background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); 
-            padding: 10px; border-radius: 12px; color: #ffffff; outline: none; 
-            font-size: 14px;
+            padding: 10px; border-radius: 12px; color: #ffffff; outline: none; font-size: 14px;
         }
-        /* 修正下拉選單字體顏色 */
         select option { background-color: #1a2a44; color: #ffffff; }
-        
-        #user-select { width: 140px; }
-        #new-name { width: 100px; }
-        #mins { width: 80px; }
-        #thought-input { width: 100%; box-sizing: border-box; } /* 碎碎念跟面板同寬 */
-
-        /* 移除數字上下鍵 */
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
         .submit-container { width: 100%; display: flex; justify-content: center; }
@@ -70,7 +56,7 @@
             font-size: 16px; box-shadow: 0 4px 15px rgba(255, 78, 80, 0.4);
         }
 
-        /* 碎碎念資訊區 - 同寬 */
+        /* 碎碎念資訊區 */
         #comment-wall { margin: 30px auto; max-width: 550px; text-align: left; }
         .comment-item { 
             position: relative; background: var(--bubble-bg); border-radius: 15px; 
@@ -80,38 +66,54 @@
             content: ''; position: absolute; left: 25px; bottom: -10px;
             border-width: 10px 10px 0; border-style: solid; border-color: var(--bubble-bg) transparent transparent;
         }
-        .comment-time { font-size: 10px; color: rgba(255,255,255,0.4); margin-right: 8px; }
         .comment-name { color: var(--accent-gold); font-weight: bold; }
 
-        /* 角色小動態恢復 */
+        /* 跑道細線設計 */
+        #track-wrapper { width: 100%; max-width: 450px; margin: 0 auto; position: relative; }
+        svg { width: 100%; height: auto; overflow: visible; }
+        
+        .path-main { 
+            fill: none; 
+            stroke: url(#track-gradient); 
+            stroke-width: 2; /* 纖細線條 */
+            stroke-linecap: round;
+            filter: drop-shadow(0 0 3px rgba(0, 210, 255, 0.5));
+        }
+        .path-shadow { fill: none; stroke: rgba(255,255,255,0.05); stroke-width: 1; stroke-dasharray: 4, 4; }
+
+        /* 跑道數字細化 */
+        .milestone-text { 
+            fill: rgba(255,255,255,0.5); 
+            font-size: 5px; 
+            font-weight: 300; 
+            pointer-events: none;
+        }
+
+        /* 角色動畫 */
         .runner { 
             position: absolute; width: 40px; height: 40px; 
             display: flex; flex-direction: column; align-items: center; 
             transition: all 1.5s cubic-bezier(0.34, 1.56, 0.64, 1); 
             z-index: 50; pointer-events: none; margin-left: -20px; margin-top: -35px;
-            animation: runnerFloating 2s ease-in-out infinite !important; /* 強制執行 */
+            animation: runnerFloating 2s ease-in-out infinite !important;
         }
         @keyframes runnerFloating { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-        
-        .user-photo { width: 32px; height: 32px; border-radius: 50%; border: 2px solid #fff; object-fit: cover; }
-        .label { background: linear-gradient(135deg, #ff4e50, #f9d423); color: #000; font-size: 10px; font-weight: 900; padding: 1px 8px; border-radius: 10px; border: 1px solid #fff; }
-
-        /* 跑道數字層級調整 */
-        #track-wrapper { width: 100%; max-width: 450px; margin: 0 auto; position: relative; }
-        svg { width: 100%; height: auto; overflow: visible; }
-        #milestones-group { pointer-events: none; z-index: 100; position: relative; }
-        .milestone-text { fill: rgba(255,255,255,0.6); font-size: 5px; font-weight: normal; }
+        .user-photo { width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid #fff; object-fit: cover; }
+        .label { background: linear-gradient(135deg, #ff4e50, #f9d423); color: #000; font-size: 9px; font-weight: 900; padding: 1px 6px; border-radius: 8px; border: 1px solid #fff; }
 
         #avatar-modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #1a2a44; padding: 20px; border-radius: 20px; border: 2px solid var(--accent-blue); z-index: 3000; width: 280px; }
         .avatar-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
         .avatar-option { width: 50px; height: 50px; border-radius: 8px; cursor: pointer; border: 2px solid transparent; background: #fff; }
+        
+        /* 認證頁面隱藏內容 */
+        #auth-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
     </style>
 </head>
 <body>
 
     <div id="auth-overlay">
         <div class="logo-container"><img src="https://raw.githubusercontent.com/adeerlulu/runrundondon/main/links/LOGO.png" class="main-logo"></div>
-        <input type="password" id="entry-pw" placeholder="輸入密碼 1234" style="width: 180px; margin-bottom: 20px;">
+        <input type="password" id="entry-pw" placeholder="密碼 1234" style="width: 180px; margin-bottom: 20px;">
         <button class="submit-btn" style="color:white; background: #3a7bd5; padding: 10px 40px;" onclick="checkEntry()">進入網頁</button>
     </div>
 
@@ -137,17 +139,13 @@
                     <input type="number" id="mins" placeholder="mins" min="0">
                 </div>
             </div>
-
             <div class="control-row">
                 <div class="input-box" style="width: 100%;">
                     <label><img src="https://raw.githubusercontent.com/adeerlulu/runrundondon/main/links/flower_1.svg" class="label-icon"> 今日碎碎念</label>
                     <input type="text" id="thought-input" placeholder="只能碎念30字" maxlength="30">
                 </div>
             </div>
-
-            <div class="submit-container">
-                <button class="submit-btn" onclick="handleUpdate()">GO!</button>
-            </div>
+            <div class="submit-container"><button class="submit-btn" onclick="handleUpdate()">GO!</button></div>
         </div>
 
         <div id="comment-wall"><div id="comment-list"></div></div>
@@ -164,6 +162,7 @@
                 </defs>
                 <path class="path-shadow" d="M 45 50 H 155 A 35 35 0 0 1 155 120 H 45 A 35 35 0 0 0 45 190 H 155 A 35 35 0 0 1 155 260 H 45 A 35 35 0 0 0 45 330 H 155 A 35 35 0 0 1 155 400 H 45 A 35 35 0 0 0 45 470" />
                 <path id="s-path" class="path-main" d="M 45 50 H 155 A 35 35 0 0 1 155 120 H 45 A 35 35 0 0 0 45 190 H 155 A 35 35 0 0 1 155 260 H 45 A 35 35 0 0 0 45 330 H 155 A 35 35 0 0 1 155 400 H 45 A 35 35 0 0 0 45 470" />
+                
                 <text x="15" y="25" fill="#fff" font-size="10" font-weight="bold">START</text>
                 <text x="15" y="505" fill="#ff4e50" font-size="14" font-weight="900">FINISH 7800</text>
                 <g id="milestones-group"></g>
@@ -172,23 +171,65 @@
     </div>
 
     <script>
-        // --- 認證邏輯 ---
+        // --- 基本設定與認證 ---
+        const firebaseConfig = { apiKey: "AIzaSyDqX_tZqqfw0txXpd-b4AWuolhgQgU6lLU", authDomain: "runrundondon-31b12.firebaseapp.com", databaseURL: "https://runrundondon-31b12-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "runrundondon-31b12" };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
         function checkEntry() { if (document.getElementById('entry-pw').value === "1234") { localStorage.setItem('last_login_time', new Date().getTime().toString()); location.reload(); } else { alert("密碼錯誤"); } }
         if (localStorage.getItem('last_login_time') && (new Date().getTime() - parseInt(localStorage.getItem('last_login_time'))) / 60000 < 30) {
             document.getElementById('main-content').style.display = 'block';
             document.getElementById('auth-overlay').style.display = 'none';
         }
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyDqX_tZqqfw0txXpd-b4AWuolhgQgU6lLU",
-            authDomain: "runrundondon-31b12.firebaseapp.com",
-            databaseURL: "https://runrundondon-31b12-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "runrundondon-31b12",
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+        // --- 里程碑數字分布邏輯 ---
+        function drawMilestones() {
+            const path = document.getElementById('s-path');
+            const group = document.getElementById('milestones-group');
+            const pathLength = path.getTotalLength();
+            group.innerHTML = "";
 
-        // 頭像生成
+            // 邏輯：500, 1000 為排，1500 為轉彎圓環，以此類推
+            for (let i = 500; i < 7800; i += 500) {
+                const point = path.getPointAtLength((i / 7800) * pathLength);
+                const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                text.setAttribute("class", "milestone-text");
+                text.textContent = i;
+
+                // 判斷位置排版：圓環處中置，直線處偏左或偏右
+                if (point.x > 170 || point.x < 30) { // 圓環頂點處
+                    text.setAttribute("x", point.x);
+                    text.setAttribute("y", point.y + (point.y < 250 ? -10 : 15));
+                    text.setAttribute("text-anchor", "middle");
+                } else if (point.x > 100) { // 右側直線
+                    text.setAttribute("x", point.x + 10);
+                    text.setAttribute("y", point.y + 2);
+                    text.setAttribute("text-anchor", "start");
+                } else { // 左側直線
+                    text.setAttribute("x", point.x - 10);
+                    text.setAttribute("y", point.y + 2);
+                    text.setAttribute("text-anchor", "end");
+                }
+                group.appendChild(text);
+            }
+        }
+
+        // --- 核心更新功能 ---
+        function handleUpdate() {
+            const name = document.getElementById('user-select').value || document.getElementById('new-name').value.trim();
+            const mins = parseInt(document.getElementById('mins').value);
+            const thought = document.getElementById('thought-input').value.trim();
+            if (!name || isNaN(mins)) { alert("資訊未填寫完整"); return; }
+            const userRef = db.ref('players/' + name);
+            userRef.once('value').then(snapshot => {
+                const data = snapshot.val() || { score: 0, photo: "" };
+                const updates = { name: name, score: data.score + mins, photo: window.selectedAvatarUrl || data.photo, lastUpdate: Date.now() };
+                if (thought) updates.lastThought = thought;
+                return userRef.update(updates);
+            }).then(() => location.reload());
+        }
+
+        // --- 頭像與監聽器 ---
         const baseUrl = "https://raw.githubusercontent.com/adeerlulu/runrundondon/main/icons/";
         for (let i = 1; i <= 12; i++) {
             const fileName = i < 10 ? '0' + i : i;
@@ -205,63 +246,16 @@
         }
         function toggleModal(show) { document.getElementById('avatar-modal').style.display = show ? 'block' : 'none'; document.getElementById('modal-overlay').style.display = show ? 'block' : 'none'; }
 
-        function formatROCDate(timestamp) {
-            const date = new Date(timestamp);
-            const rocYear = date.getFullYear() - 1911;
-            const mm = String(date.getMonth() + 1).padStart(2, '0');
-            const dd = String(date.getDate()).padStart(2, '0');
-            const hh = String(date.getHours()).padStart(2, '0');
-            const min = String(date.getMinutes()).padStart(2, '0');
-            return `${rocYear}/${mm}/${dd} ${hh}:${min}`;
-        }
-
-        function handleUpdate() {
-            const name = document.getElementById('user-select').value || document.getElementById('new-name').value.trim();
-            const mins = parseInt(document.getElementById('mins').value);
-            const thought = document.getElementById('thought-input').value.trim();
-            if (!name || isNaN(mins)) { alert("請填寫名字與運動量"); return; }
-            if (mins < 0) { alert("運動量不能為負數"); return; }
-            const userRef = db.ref('players/' + name);
-            userRef.once('value').then(snapshot => {
-                const data = snapshot.val() || { score: 0, photo: "" };
-                const updates = { name: name, score: data.score + mins, photo: window.selectedAvatarUrl || data.photo, lastUpdate: Date.now() };
-                if (thought) updates.lastThought = thought;
-                return userRef.update(updates);
-            }).then(() => location.reload());
-        }
-
-        function drawMilestones() {
-            const path = document.getElementById('s-path');
-            const group = document.getElementById('milestones-group');
-            const pathLength = path.getTotalLength();
-            group.innerHTML = "";
-            for (let i = 250; i < 7800; i += 250) {
-                const point = path.getPointAtLength((i / 7800) * pathLength);
-                const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                text.setAttribute("class", "milestone-text");
-                text.textContent = i;
-                if (point.x < 70) { text.setAttribute("x", point.x - 30); text.setAttribute("y", point.y + 2); text.setAttribute("text-anchor", "end"); }
-                else if (point.x > 130) { text.setAttribute("x", point.x + 30); text.setAttribute("y", point.y + 2); text.setAttribute("text-anchor", "start"); }
-                else { 
-                    const yOff = (point.y < 100 || (point.y > 150 && point.y < 230) || (point.y > 300 && point.y < 360)) ? -15 : 20;
-                    text.setAttribute("x", point.x); text.setAttribute("y", point.y + yOff); text.setAttribute("text-anchor", "middle");
-                }
-                group.appendChild(text);
-            }
-        }
-
         db.ref('players').on('value', (snapshot) => {
             const players = snapshot.val();
             const path = document.getElementById('s-path');
             if(!players || !path) return;
             const playersArr = Object.values(players);
             
-            const userSelect = document.getElementById('user-select');
-            userSelect.innerHTML = '<option value="">+ 新運動家</option>';
-            playersArr.forEach(p => { const opt = document.createElement('option'); opt.value = p.name; opt.innerText = p.name; userSelect.appendChild(opt); });
+            document.getElementById('user-select').innerHTML = '<option value="">+ 新運動家</option>' + playersArr.map(p => `<option value="${p.name}">${p.name}</option>`).join('');
 
             const thoughts = playersArr.filter(p => p.lastThought).sort((a,b) => b.lastUpdate - a.lastUpdate).slice(0,3);
-            document.getElementById('comment-list').innerHTML = thoughts.map(p => `<div class="comment-item"><span class="comment-time">${formatROCDate(p.lastUpdate)}</span><span class="comment-name">${p.name}</span> 說：${p.lastThought}</div>`).join('');
+            document.getElementById('comment-list').innerHTML = thoughts.map(p => `<div class="comment-item"><span class="comment-name">${p.name}</span> 說：${p.lastThought}</div>`).join('');
 
             document.querySelectorAll('.runner').forEach(r => r.remove());
             playersArr.forEach(p => {
