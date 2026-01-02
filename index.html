@@ -25,7 +25,7 @@
         .main-logo { width: 100%; height: auto; filter: drop-shadow(0 0 15px rgba(0, 210, 255, 0.5)); }
 
         .section-header-work { width: 100%; margin: 0 auto 20px auto; } 
-        .section-header-run { width: 100%; margin: 80px auto 5px auto; } /* 標題與上方隔 80px */
+        .section-header-run { width: 100%; margin: 80px auto 5px auto; }
         
         .section-title { font-size: 19px; font-weight: 900; color: var(--accent-gold); padding-left: 12px; border-left: 5px solid var(--accent-gold); line-height: 1.2; }
 
@@ -50,11 +50,9 @@
             color: #000; border: none; border-radius: 12px; cursor: pointer; font-weight: 900; font-size: 18px;
         }
 
-        /* 統計數字間距修正 */
         .total-counter-box { text-align: center; margin: 20px auto 20px auto; color: #fff; font-weight: bold; }
         .total-num { color: var(--accent-gold); font-size: 28px; font-weight: 900; margin: 0 8px; }
 
-        /* 跑道區域：三行 S 型 */
         #track-wrapper { width: 100%; margin: 0 auto; position: relative; }
         .svg-container { position: relative; width: 100%; height: 500px; }
         .path-main { 
@@ -73,21 +71,15 @@
             transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         .runner:hover { transform: translate(-50%, -50%) scale(1.3); z-index: 100; filter: drop-shadow(0 0 10px var(--accent-blue)); }
-        .user-photo { width: 100%; height: 100%; border-radius: 50%; border: 2px solid #fff; background: rgba(255,255,255,0.2); }
+        .user-photo { width: 100%; height: 100%; border-radius: 50%; border: 2px solid #fff; background: rgba(255,255,255,0.2); pointer-events: none; }
 
-        .nav-btn { 
-            background: transparent; border: 2px solid var(--accent-gold); color: var(--accent-gold); 
-            width: 40px; height: 40px; border-radius: 50%; cursor: pointer; 
-            display: flex; align-items: center; justify-content: center; font-size: 18px; transition: 0.3s;
-        }
+        /* 模態框修復：確保 z-index 足夠高，且不會被霧化遮擋 */
+        .ui-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 99999; }
+        .ui-card { background: #1a2a44; border: 2px solid var(--accent-gold); padding: 40px; border-radius: 25px; text-align: center; color: white; min-width: 300px; max-width: 500px; }
 
-        /* 挑選頭像修正 */
         #avatar-picker img { width: 100%; cursor: pointer; border: 3px solid transparent; border-radius: 12px; transition: 0.2s; box-sizing: border-box; }
         #avatar-picker img:hover { transform: scale(1.1); }
-        #avatar-picker img.selected { border-color: var(--accent-blue); background: rgba(0, 210, 255, 0.2); }
-
-        .ui-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 20000; }
-        .ui-card { background: #1a2a44; border: 2px solid var(--accent-gold); padding: 40px; border-radius: 25px; text-align: center; color: white; min-width: 300px; }
+        #avatar-picker img.selected { border-color: var(--accent-gold); background: rgba(249, 212, 35, 0.2); }
 
         footer { margin: 40px auto 20px auto; text-align: center; color: #fff; font-size: 11px; opacity: 0.5; }
     </style>
@@ -102,7 +94,7 @@
         <div class="control-row">
             <div class="input-box"><label>是哪位運動家</label><select id="user-select"><option value="">+ 新成員</option></select></div>
             <div id="new-name-box" class="input-box"><label>新成員姓名</label><input type="text" id="new-name"></div>
-            <div class="input-box"><div style="height:19px"></div><button id="avatar-btn" style="background:#2c5282; color:white; border:none; padding:12px; border-radius:12px; cursor:pointer; width:100%; font-weight:bold; height:48px;" onclick="toggleModal(true)">挑選頭像</button></div>
+            <div id="avatar-btn-box" class="input-box"><div style="height:19px"></div><button id="avatar-btn" style="background:#2c5282; color:white; border:none; padding:12px; border-radius:12px; cursor:pointer; width:100%; font-weight:bold; height:48px;" onclick="toggleAvatarModal(true)">挑選頭像</button></div>
             <div class="input-box" style="flex:0.6"><label>今日運動時數</label><input type="number" id="mins" placeholder="分鐘"></div>
         </div>
         <div class="control-row">
@@ -133,11 +125,12 @@
     <div class="ui-card" id="ui-card-content" onclick="event.stopPropagation()"></div>
 </div>
 
-<div id="modal-overlay" class="ui-modal" onclick="toggleModal(false)"></div>
-<div id="avatar-modal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:#1a2a44; padding:30px; border-radius:30px; z-index:12000; width: 90%; max-width: 550px; border: 2px solid var(--accent-blue);">
-    <h3 style="margin-top:0; color:var(--accent-blue);">請選擇頭像</h3>
-    <div id="avatar-picker" style="display:grid; grid-template-columns: repeat(6, 1fr); gap:12px; max-height:400px; overflow-y:auto; padding:10px;"></div>
-    <button class="submit-btn" style="height:40px; margin-top:20px; width:100%;" onclick="toggleModal(false)">確定</button>
+<div id="avatar-modal-overlay" class="ui-modal" style="display:none; z-index:100000;" onclick="toggleAvatarModal(false)">
+    <div class="ui-card" onclick="event.stopPropagation()" style="max-width:600px;">
+        <h3 style="margin-top:0; color:var(--accent-gold);">挑選你的專屬頭像</h3>
+        <div id="avatar-picker" style="display:grid; grid-template-columns: repeat(6, 1fr); gap:12px; max-height:400px; overflow-y:auto; padding:10px;"></div>
+        <button class="submit-btn" style="height:40px; margin-top:20px; width:100%;" onclick="toggleAvatarModal(false)">確定</button>
+    </div>
 </div>
 
 <script>
@@ -147,24 +140,18 @@
 
     function showUI(title, content, sub, isError=false) {
         const card = document.getElementById('ui-card-content');
-        card.innerHTML = `<h2 style="color:${isError?'#ff4e50':'var(--accent-blue)'}">${title}</h2><div style="font-size:48px; font-weight:900; color:var(--accent-gold); margin:20px 0;">${content}</div><p style="opacity:0.7">${sub}</p><button class="submit-btn" style="height:40px; margin-top:30px;" onclick="document.getElementById('ui-overlay').style.display='none'">關閉</button>`;
+        card.innerHTML = `
+            <h2 style="color:${isError?'#ff4e50':'var(--accent-blue)'}; margin-top:0;">${title}</h2>
+            <div style="font-size:32px; font-weight:900; color:var(--accent-gold); margin:20px 0; line-height:1.4;">${content}</div>
+            <p style="opacity:0.8; font-size:14px; line-height:1.6;">${sub}</p>
+            <button class="submit-btn" style="height:40px; margin-top:30px; padding:0 30px; font-size:14px;" onclick="document.getElementById('ui-overlay').style.display='none'">關閉</button>
+        `;
         document.getElementById('ui-overlay').style.display = 'flex';
     }
 
-    function animateValue(obj, start, end, duration) {
-        let startTimestamp = null;
-        const step = (timestamp) => {
-            if (!startTimestamp) startTimestamp = timestamp;
-            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-            obj.innerHTML = Math.floor(progress * (end - start) + start).toLocaleString();
-            if (progress < 1) window.requestAnimationFrame(step);
-        };
-        window.requestAnimationFrame(step);
-    }
-
-    function toggleModal(show) { document.getElementById('avatar-modal').style.display = show ? 'block' : 'none'; document.getElementById('modal-overlay').style.display = show ? 'block' : 'none'; }
+    function toggleAvatarModal(show) { document.getElementById('avatar-modal-overlay').style.display = show ? 'flex' : 'none'; }
     
-    // 初始化頭像選取功能
+    // 初始化頭像
     const picker = document.getElementById('avatar-picker');
     for (let i = 1; i <= 24; i++) {
         const num = i < 10 ? '0' + i : i;
@@ -178,13 +165,22 @@
         picker.appendChild(img);
     }
 
+    // 當選擇既有成員時，隱藏新成員姓名與頭像按鈕
+    document.getElementById('user-select').addEventListener('change', function() {
+        const isNew = this.value === "";
+        document.getElementById('new-name-box').style.display = isNew ? "flex" : "none";
+        document.getElementById('avatar-btn-box').style.display = isNew ? "flex" : "none";
+    });
+
     db.ref('players').on('value', (snapshot) => {
         const players = snapshot.val() || {};
         const playersArr = Object.values(players);
+        
         const total = playersArr.reduce((acc, p) => acc + (p.score || 0), 0);
-        animateValue(document.getElementById('total-minutes'), 0, total, 1500);
+        document.getElementById('total-minutes').innerText = total.toLocaleString();
 
-        document.getElementById('user-select').innerHTML = '<option value="">+ 新成員</option>' + playersArr.map(p => `<option value="${p.name}">${p.name}</option>`).join('');
+        document.getElementById('user-select').innerHTML = '<option value="">+ 新成員</option>' + 
+            playersArr.map(p => `<option value="${p.name}">${p.name}</option>`).join('');
 
         const path = document.getElementById('double-path');
         const pathLength = path.getTotalLength();
@@ -194,9 +190,7 @@
         for (let score = 0; score <= 7500; score += 300) {
             const ratio = score / 7500;
             const pt = path.getPointAtLength(ratio * pathLength);
-            // 轉彎處判斷 (S型路徑的轉彎點約在總長 30%~40% 與 65%~75% 之間)
             if ((ratio > 0.28 && ratio < 0.42) || (ratio > 0.62 && ratio < 0.74)) continue;
-
             mGroup.innerHTML += `<circle cx="${pt.x}" cy="${pt.y}" r="3" class="milestone-dot"/><text x="${pt.x}" y="${pt.y - 20}" class="milestone-text" text-anchor="middle">${score}</text>`;
         }
 
@@ -210,22 +204,30 @@
             r.innerHTML = `<img src="${p.photo}" class="user-photo">`;
             r.onclick = () => {
                 const d = new Date(p.lastUpdate);
-                const ts = p.lastUpdate ? `最後登記：${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()} ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}:${d.getSeconds().toString().padStart(2,'0')}` : "尚無紀錄";
-                showUI(p.name, p.score, ts);
+                const timeStr = p.lastUpdate ? `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()} ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}:${d.getSeconds().toString().padStart(2,'0')}` : "尚未紀錄";
+                // 點擊成員顯示完整訊息
+                showUI("運動家進度", `${p.name} 今年已動了 ${p.score} 分鐘`, `最後登記時間：<br>${timeStr}`);
             };
             document.getElementById('runner-layer').appendChild(r);
         });
     });
 
     function handleUpdate() {
-        const name = document.getElementById('user-select').value || document.getElementById('new-name').value.trim();
+        const selectedValue = document.getElementById('user-select').value;
+        const name = selectedValue || document.getElementById('new-name').value.trim();
         const mins = parseInt(document.getElementById('mins').value);
-        if (!name || isNaN(mins) || mins <= 0) { showUI("哦哦！出錯了", "請填入數字", "運動分鐘數不能為空喔！", true); return; }
+        
+        if (!name || isNaN(mins) || mins <= 0) { 
+            showUI("哦哦！出錯了", "請確認姓名與運動分鐘數", "如果是新成員，別忘了填寫姓名與挑選頭像喔！", true); 
+            return; 
+        }
+
         db.ref('players/' + name).once('value').then(s => {
             const d = s.val() || {score:0, photo: window.selectedAvatarUrl || ""};
             db.ref('players/' + name).update({
-                name: name, score: d.score + mins, 
-                photo: window.selectedAvatarUrl || d.photo,
+                name: name, 
+                score: d.score + mins, 
+                photo: selectedValue ? d.photo : (window.selectedAvatarUrl || d.photo),
                 lastThought: document.getElementById('thought-input').value,
                 lastUpdate: Date.now()
             }).then(() => location.reload());
