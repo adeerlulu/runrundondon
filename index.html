@@ -69,4 +69,178 @@
         .runner { 
             position: absolute; 
             transition: left 1.5s cubic-bezier(0.34, 1.56, 0.64, 1); 
-            display: flex;
+            display: flex; 
+            flex-direction: column;
+            align-items: center; 
+            z-index: 10;
+        }
+
+        .avatar { 
+            font-size: 40px; 
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4));
+            animation: moveSlowly 0.8s infinite alternate ease-in-out;
+        }
+
+        @keyframes moveSlowly {
+            from { transform: rotate(-5deg) translateY(0); }
+            to { transform: rotate(5deg) translateY(-5px); }
+        }
+
+        .label { 
+            color: white; 
+            font-size: 13px; 
+            font-weight: bold;
+            background: rgba(0,0,0,0.75); 
+            border-radius: 15px; 
+            padding: 4px 14px; 
+            white-space: nowrap; 
+            margin-top: 5px;
+            border: 1px solid var(--accent-color);
+        }
+
+        .controls { 
+            margin-top: 20px; 
+            padding: 35px; 
+            background: white; 
+            display: inline-flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            border-radius: 25px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
+            max-width: 95%;
+        }
+
+        input { 
+            padding: 14px 18px; 
+            border: 2px solid #edf2f7; 
+            border-radius: 15px; 
+            font-size: 16px;
+            background: #f7fafc;
+            transition: all 0.3s;
+        }
+
+        input:focus { 
+            border-color: #667eea; 
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        button { 
+            padding: 14px 35px; 
+            background: var(--header-gradient); 
+            color: white; 
+            border: none; 
+            border-radius: 15px; 
+            cursor: pointer; 
+            font-weight: 800;
+            font-size: 16px;
+            transition: all 0.3s;
+            box-shadow: 0 6px 20px rgba(118, 75, 162, 0.3);
+        }
+
+        button:hover { 
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(118, 75, 162, 0.4);
+        }
+
+        .hint { color: #a0aec0; font-size: 14px; margin-top: 15px; font-style: italic; }
+    </style>
+</head>
+<body>
+
+    <div class="title-container">
+        <h1>跑跑動動</h1>
+        <div class="subtitle">RunRun! DonDon!</div>
+    </div>
+    
+    <div id="track-container">
+        </div>
+
+    <div class="controls">
+        <input type="text" id="name" placeholder="輸入大名">
+        <input type="number" id="mins" placeholder="運動(min)">
+        <input type="password" id="pw" placeholder="密碼">
+        <button type="button" onclick="addMins()">回報進度</button>
+    </div>
+    <p class="hint">目標累積：1000 分鐘 | 專屬密碼驗證</p>
+
+    <script>
+        // --- 1. 初始化 Firebase ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyDqX_tZqqfw0txXpd-b4AWuolhgQgU6lLU",
+            authDomain: "runrundondon-31b12.firebaseapp.com",
+            databaseURL: "https://runrundondon-31b12-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "runrundondon-31b12",
+            storageBucket: "runrundondon-31b12.firebasestorage.app",
+            messagingSenderId: "466713105396",
+            appId: "1:466713105396:web:c0651103b028978cd9dfa1"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // --- 2. 增加時間邏輯 ---
+        window.addMins = function() {
+            const name = document.getElementById('name').value.trim();
+            const mins = parseInt(document.getElementById('mins').value);
+            const pw = document.getElementById('pw').value;
+
+            if (pw !== "hello") {
+                alert("🔒 密碼不正確喔！");
+                return;
+            }
+
+            if (!name || isNaN(mins)) {
+                alert("請填寫姓名與正確的分鐘數");
+                return;
+            }
+
+            const userRef = db.ref('players/' + name);
+            userRef.once('value').then(snapshot => {
+                const currentScore = (snapshot.val() && snapshot.val().score) ? snapshot.val().score : 0;
+                return userRef.update({
+                    name: name,
+                    score: currentScore + mins,
+                    lastUpdate: firebase.database.ServerValue.TIMESTAMP
+                });
+            }).then(() => {
+                document.getElementById('mins').value = ''; 
+                document.getElementById('pw').value = '';
+                alert("💪 紀錄成功！繼續加油！");
+            }).catch(err => {
+                alert("連線發生問題: " + err.message);
+            });
+        };
+
+        // --- 3. 監聽資料庫 ---
+        db.ref('players').on('value', (snapshot) => {
+            const players = snapshot.val();
+            const track = document.getElementById('track-container');
+            track.innerHTML = ''; 
+
+            if (!players) {
+                track.innerHTML = '<div style="color:rgba(255,255,255,0.4); padding:60px; font-weight:bold;">🏃 虛位以待，快來加入！</div>';
+                return;
+            }
+
+            const GOAL = 1000; 
+
+            for (let id in players) {
+                const p = players[id];
+                const progress = Math.min((p.score / GOAL) * 85, 92); 
+                
+                const lane = document.createElement('div');
+                lane.className = 'lane';
+                lane.innerHTML = `
+                    <div class="runner" style="left: ${progress}%">
+                        <span class="avatar">🏃</span>
+                        <span class="label">${p.name}: ${p.score} min</span>
+                    </div>
+                `;
+                track.appendChild(lane);
+            }
+        });
+    </script>
+</body>
+</html>
