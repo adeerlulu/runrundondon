@@ -43,7 +43,6 @@
         
         label { font-size: 11px; margin-bottom: 5px; color: var(--accent-blue); font-weight: 800; }
         
-        /* 霧感選單與輸入框 */
         input, select { 
             font-family: var(--font-round); background: rgba(255, 255, 255, 0.15); 
             backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
@@ -58,7 +57,7 @@
             font-size: 16px; box-shadow: 0 4px 15px rgba(255, 78, 80, 0.4);
         }
 
-        /* 修復碎碎念版型 */
+        /* 碎碎念牆 */
         #comment-wall { margin: 30px auto; max-width: 550px; text-align: left; }
         .comment-item { 
             position: relative; background: var(--bubble-bg); border-radius: 15px; padding: 15px 20px; margin-bottom: 20px; 
@@ -76,19 +75,28 @@
         /* 跑道區域 */
         #track-wrapper { width: 100%; max-width: 550px; margin: 40px auto; position: relative; }
         svg { width: 100%; height: auto; overflow: visible; }
-        .path-main { fill: none; stroke: url(#track-gradient); stroke-width: 4; stroke-linecap: round; }
+        
+        /* 動態流動跑道設定 */
+        .path-main { 
+            fill: none; 
+            stroke: url(#track-gradient); 
+            stroke-width: 5; 
+            stroke-linecap: round; 
+            filter: drop-shadow(0 0 5px rgba(0, 210, 255, 0.3));
+        }
+
         .milestone-dot { fill: #fff; }
         .milestone-text { font-family: var(--font-round); fill: #ffffff; font-size: 7px; font-weight: 800; paint-order: stroke; stroke: var(--bg-color); stroke-width: 1.5px; pointer-events: none;}
 
         .runner { 
             position: absolute; width: 44px; height: 44px; display: flex; flex-direction: column; align-items: center; 
-            z-index: 50; pointer-events: none; margin-left: -22px; margin-top: -55px;
+            z-index: 50; cursor: pointer; margin-left: -22px; margin-top: -55px;
             transition: all 1s ease;
-            animation: runnerFloating 2s ease-in-out infinite !important;
+            animation: runnerFloating 2s ease-in-out infinite;
         }
         @keyframes runnerFloating { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-        .user-photo { width: 34px; height: 34px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 4px 8px rgba(0,0,0,0.5); }
-        .label { background: linear-gradient(135deg, #ff4e50, #f9d423); color: #000; font-size: 10px; font-weight: 800; padding: 1px 8px; border-radius: 10px; border: 1px solid #fff; margin-top: 2px; }
+        .user-photo { width: 34px; height: 34px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 4px 8px rgba(0,0,0,0.5); pointer-events: none; }
+        .label { background: linear-gradient(135deg, #ff4e50, #f9d423); color: #000; font-size: 10px; font-weight: 800; padding: 1px 8px; border-radius: 10px; border: 1px solid #fff; margin-top: 2px; pointer-events: none; }
 
         #auth-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
     </style>
@@ -144,7 +152,15 @@
             <svg viewBox="0 0 200 520" id="main-svg">
                 <defs>
                     <linearGradient id="track-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                        <stop offset="0%" style="stop-color:#00d2ff" /><stop offset="50%" style="stop-color:#f9d423" /><stop offset="100%" style="stop-color:#ff4e50" />
+                        <stop offset="0%" style="stop-color:#00d2ff">
+                            <animate attributeName="offset" values="-1; 1" dur="3s" repeatCount="indefinite" />
+                        </stop>
+                        <stop offset="50%" style="stop-color:#f9d423">
+                            <animate attributeName="offset" values="0; 2" dur="3s" repeatCount="indefinite" />
+                        </stop>
+                        <stop offset="100%" style="stop-color:#ff4e50">
+                            <animate attributeName="offset" values="1; 3" dur="3s" repeatCount="indefinite" />
+                        </stop>
                     </linearGradient>
                 </defs>
                 <path id="s-path" class="path-main" d="M 0 50 H 165 A 35 35 0 0 1 165 120 H 35 A 35 35 0 0 0 35 190 H 165 A 35 35 0 0 1 165 260 H 35 A 35 35 0 0 0 35 330 H 165 A 35 35 0 0 1 165 400 H 35 A 35 35 0 0 0 35 470" />
@@ -177,20 +193,16 @@
             const pathLength = path.getTotalLength();
             group.innerHTML = "";
             for (let i = 0; i <= 7500; i += 500) {
-                // 起點 0 位移至 x=35
                 let percent = (i === 0) ? (35 / pathLength) : (i / 7500);
                 const point = path.getPointAtLength(percent * pathLength);
-                
                 const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
                 dot.setAttribute("cx", point.x); dot.setAttribute("cy", point.y); dot.setAttribute("r", "2.5");
                 dot.setAttribute("class", "milestone-dot");
                 group.appendChild(dot);
-
                 const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
                 text.setAttribute("class", "milestone-text");
                 text.textContent = i;
-                text.setAttribute("x", point.x);
-                text.setAttribute("y", point.y + 12);
+                text.setAttribute("x", point.x); text.setAttribute("y", point.y + 12);
                 text.setAttribute("text-anchor", "middle");
                 group.appendChild(text);
             }
@@ -233,17 +245,10 @@
             const playersArr = Object.values(players);
             document.getElementById('user-select').innerHTML = '<option value="">+ 新成員</option>' + playersArr.map(p => `<option value="${p.name}">${p.name}</option>`).join('');
             
-            // 碎碎念列表更新
             const thoughts = playersArr.filter(p => p.lastThought).sort((a,b) => b.lastUpdate - a.lastUpdate).slice(0,3);
             document.getElementById('comment-list').innerHTML = thoughts.map(p => {
                 const date = new Date(p.lastUpdate);
-                return `<div class="comment-item">
-                    <div class="comment-header">
-                        <span class="comment-name">${p.name}</span>
-                        <span class="comment-time">${date.getMonth()+1}/${date.getDate()}</span>
-                    </div>
-                    <div>${p.lastThought}</div>
-                </div>`;
+                return `<div class="comment-item"><div class="comment-header"><span class="comment-name">${p.name}</span><span class="comment-time">${date.getMonth()+1}/${date.getDate()}</span></div><div>${p.lastThought}</div></div>`;
             }).join('');
 
             document.querySelectorAll('.runner').forEach(r => r.remove());
@@ -256,6 +261,12 @@
                 runner.style.left = `${(point.x / 200) * 100}%`;
                 runner.style.top = `${(point.y / 520) * 100}%`;
                 runner.innerHTML = `<img src="${p.photo}" class="user-photo"><span class="label">${p.name}</span>`;
+                
+                // 點擊互動功能
+                runner.onclick = () => {
+                    alert(`🏃‍♂️ ${p.name} 在 2026 年\n已累計運動了： ${p.score} 分鐘！`);
+                };
+
                 document.getElementById('track-wrapper').appendChild(runner);
             });
             drawMilestones();
