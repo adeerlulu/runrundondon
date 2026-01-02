@@ -1,149 +1,138 @@
 <!DOCTYPE html>
-
 <html lang="zh-TW">
-
 <head>
-
     <meta charset="UTF-8">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>運動馬拉松即時看板</title>
-
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-
     
-
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
     <style>
-
-        /* 簡單的跑道樣式 */
-
-        body { font-family: "Microsoft JhengHei", sans-serif; text-align: center; background: #eceff1; }
-
-        #track { width: 90%; max-width: 800px; background: #333; margin: 20px auto; padding: 10px; border-radius: 8px; position: relative; }
-
-        .lane { height: 50px; border-bottom: 1px dashed #777; position: relative; display: flex; align-items: center; overflow: hidden; }
-
-        .runner { position: absolute; transition: left 1s; display: flex; align-items: center; }
-
-        .avatar { font-size: 24px; margin-right: 5px; }
-
-        .label { color: white; font-size: 12px; background: rgba(0,0,0,0.6); border-radius: 4px; padding: 2px 6px; white-space: nowrap; }
-
-        .controls { margin: 20px; padding: 20px; background: white; display: inline-block; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-
+        body { font-family: "Microsoft JhengHei", sans-serif; text-align: center; background: #eceff1; margin: 0; padding: 20px; }
+        h1 { color: #333; }
+        #track { 
+            width: 100%; max-width: 800px; background: #444; margin: 20px auto; 
+            padding: 10px 0; border-radius: 10px; border: 4px solid #222;
+            min-height: 200px; box-shadow: inset 0 0 10px #000;
+        }
+        .lane { 
+            height: 60px; border-bottom: 1px dashed #777; 
+            position: relative; display: flex; align-items: center; 
+        }
+        .lane:last-child { border-bottom: none; }
+        .runner { 
+            position: absolute; transition: left 1s cubic-bezier(0.25, 0.1, 0.25, 1); 
+            display: flex; align-items: center; z-index: 10;
+        }
+        .avatar { font-size: 30px; filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.5)); }
+        .label { 
+            color: white; font-size: 12px; background: rgba(0,0,0,0.7); 
+            border-radius: 4px; padding: 4px 8px; white-space: nowrap; margin-left: 5px;
+            border: 1px solid #555;
+        }
+        .controls { 
+            margin-top: 30px; padding: 20px; background: white; 
+            display: inline-block; border-radius: 12px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+        }
+        input { padding: 10px; border: 1px solid #ccc; border-radius: 4px; width: 120px; margin: 5px; }
+        button { 
+            padding: 10px 20px; background: #28a745; color: white; 
+            border: none; border-radius: 4px; cursor: pointer; font-weight: bold;
+        }
+        button:hover { background: #218838; }
     </style>
-
 </head>
-
 <body>
 
-
-
-    <h1>🏃‍♂️ 即時運動馬拉松 🏃‍♀️</h1>
-
+    <h1>🏃‍♂️ 每日運動馬拉松 🏃‍♀️</h1>
+    <p>輸入姓名與分鐘數，一起累積運動量！</p>
     
-
-    <div id="track">
-
-        </div>
-
-
+    <div id="track">載入中...</div>
 
     <div class="controls">
-
         <input type="text" id="name" placeholder="你的姓名">
-
-        <input type="number" id="mins" placeholder="運動分鐘數" style="width: 80px;">
-
-        <button onclick="addMins()">增加進度</button>
-
+        <input type="number" id="mins" placeholder="分鐘" min="1">
+        <button type="button" onclick="addMins()">增加進度</button>
     </div>
 
-
-
     <script>
+        // --- 1. 初始化 Firebase ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyDqX_tZqqfw0txXpd-b4AWuolhgQgU6lLU",
+            authDomain: "runrundondon-31b12.firebaseapp.com",
+            databaseURL: "https://runrundondon-31b12-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "runrundondon-31b12",
+            storageBucket: "runrundondon-31b12.firebasestorage.app",
+            messagingSenderId: "466713105396",
+            appId: "1:466713105396:web:c0651103b028978cd9dfa1"
+        };
 
-// --- 1. 初始化 Firebase ---
-const firebaseConfig = {
-    apiKey: "AIzaSyDqX_tZqqfw0txXpd-b4AWuolhgQgU6lLU",
-    authDomain: "runrundondon-31b12.firebaseapp.com",
-    databaseURL: "https://runrundondon-31b12-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "runrundondon-31b12",
-    storageBucket: "runrundondon-31b12.firebasestorage.app",
-    messagingSenderId: "466713105396",
-    appId: "1:466713105396:web:c0651103b028978cd9dfa1"
-};
+        // 初始化
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
-// 確保 SDK 已載入後執行
-firebase.initializeApp(firebaseConfig);
+        // --- 2. 增加時間的邏輯 (確保定義在全域) ---
+        window.addMins = function() {
+            const nameEl = document.getElementById('name');
+            const minsEl = document.getElementById('mins');
+            const name = nameEl.value.trim();
+            const mins = parseInt(minsEl.value);
 
-// 重點：手動指定資料庫網址，避免 Region 偵測出錯
-const db = firebase.database(); 
+            if (!name || isNaN(mins)) {
+                alert("請填寫姓名與分鐘數");
+                return;
+            }
 
-// --- 2. 增加時間的邏輯 ---
-function addMins() {
-    const nameInput = document.getElementById('name');
-    const minsInput = document.getElementById('mins');
-    const name = nameInput.value.trim();
-    const mins = parseInt(minsInput.value);
+            console.log("嘗試更新用戶:", name);
+            const userRef = db.ref('players/' + name);
+            
+            userRef.once('value').then(snapshot => {
+                const currentScore = (snapshot.val() && snapshot.val().score) ? snapshot.val().score : 0;
+                return userRef.update({
+                    name: name,
+                    score: currentScore + mins,
+                    lastUpdate: firebase.database.ServerValue.TIMESTAMP
+                });
+            }).then(() => {
+                minsEl.value = ''; 
+                console.log("更新完成");
+            }).catch(err => {
+                console.error("Firebase 錯誤:", err);
+                alert("寫入失敗，請確認資料庫規則已開啟為 true");
+            });
+        };
 
-    if (!name || isNaN(mins)) {
-        alert("請輸入姓名與分鐘數");
-        return;
-    }
+        // --- 3. 監聽資料庫 ---
+        db.ref('players').on('value', (snapshot) => {
+            const players = snapshot.val();
+            const track = document.getElementById('track');
+            track.innerHTML = ''; 
 
-    const userRef = db.ref('players/' + name);
-    
-    // 讀取並更新
-    userRef.once('value').then(snapshot => {
-        const currentScore = (snapshot.val() && snapshot.val().score) ? snapshot.val().score : 0;
-        return userRef.set({
-            name: name,
-            score: currentScore + mins,
-            lastUpdate: Date.now()
+            if (!players) {
+                track.innerHTML = '<p style="color:#aaa; padding:20px;">目前還沒有跑者，快來當第一個！</p>';
+                return;
+            }
+
+            const GOAL = 300; // 累積 300 分鐘到達終點
+
+            for (let id in players) {
+                const p = players[id];
+                // 計算進度百分比 (0% ~ 85%)
+                const progress = Math.min((p.score / GOAL) * 85, 90); 
+                
+                const lane = document.createElement('div');
+                lane.className = 'lane';
+                lane.innerHTML = `
+                    <div class="runner" style="left: ${progress}%">
+                        <span class="avatar">🏃</span>
+                        <span class="label">${p.name}: ${p.score} min</span>
+                    </div>
+                `;
+                track.appendChild(lane);
+            }
         });
-    }).then(() => {
-        alert("更新成功！");
-        minsInput.value = ''; // 只清空分鐘
-    }).catch(error => {
-        console.error("Firebase Error:", error);
-        alert("寫入失敗！原因：" + error.message);
-    });
-}
-
-// --- 3. 監聽資料 ---
-db.ref('players').on('value', (snapshot) => {
-    const players = snapshot.val();
-    const track = document.getElementById('track');
-    track.innerHTML = ''; 
-
-    if (!players) {
-        track.innerHTML = '<p style="color:gray">目前還沒有資料</p>';
-        return;
-    }
-
-    const GOAL = 500; // 你可以調整終點線
-
-    for (let id in players) {
-        const p = players[id];
-        const progress = Math.min((p.score / GOAL) * 85, 92); 
-        
-        const lane = document.createElement('div');
-        lane.className = 'lane';
-        lane.innerHTML = `
-            <div class="runner" style="left: ${progress}%">
-                <span class="avatar">🏃</span>
-                <span class="label">${p.name}: ${p.score} min</span>
-            </div>
-        `;
-        track.appendChild(lane);
-    }
-});
-
     </script>
-
 </body>
-
-
 </html>
