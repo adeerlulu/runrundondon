@@ -26,9 +26,7 @@
         .main-logo { width: 100%; height: auto; filter: drop-shadow(0 0 15px rgba(0, 210, 255, 0.5)); }
 
         .section-header { width: 100%; margin: 0 auto 20px auto; } 
-        .section-header-run { width: 100%; margin: 80px auto 5px auto; }
-        
-        /* 嚴格控制碎碎念間距 */
+        .section-header-run { width: 100%; margin: 60px auto 5px auto; }
         .section-header-talk { width: 100%; margin: 100px auto 5px auto; }
         
         .section-title { font-size: 19px; font-weight: 900; color: var(--accent-gold); padding-left: 12px; border-left: 5px solid var(--accent-gold); line-height: 1.2; }
@@ -52,14 +50,16 @@
             font-family: var(--font-taipei); height: 48px; padding: 0 60px; 
             background: var(--btn-confirm); color: #fff; border: none; border-radius: 12px; cursor: pointer; font-weight: 900; font-size: 18px; transition: 0.3s;
         }
-        .submit-btn:hover { background: #5599ee; transform: scale(1.02); }
 
         .confirm-btn { background-color: var(--btn-confirm) !important; color: white !important; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; transition: 0.3s; }
 
         .total-counter-box { text-align: center; margin: 20px auto 20px auto; color: #fff; font-weight: bold; }
         .total-num { color: var(--accent-gold); font-size: 28px; font-weight: 900; margin: 0 8px; }
 
-        .svg-container { position: relative; width: 100%; height: 500px; }
+        /* 跑道區域修正：高度改為自動避免空白，SVG 維持固定寬高比 */
+        .svg-container { position: relative; width: 100%; height: auto; aspect-ratio: 1000 / 450; overflow: visible; }
+        #main-svg { overflow: visible; width: 100%; height: auto; }
+
         .path-main { fill: none; stroke: url(#track-gradient); stroke-width: 14; stroke-linecap: round; stroke-dasharray: 3000; stroke-dashoffset: 3000; animation: flowSlow 3s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
         @keyframes flowSlow { from { stroke-dashoffset: 3000; } to { stroke-dashoffset: 0; } }
 
@@ -71,11 +71,20 @@
             100% { transform: translate(-50%, -50%); }
         }
 
+        /* 預設桌面版 Runner 大小 */
         .runner { position: absolute; width: 42px; height: 42px; z-index: 50; transform: translate(-50%, -50%); cursor: pointer; animation: float 3s ease-in-out infinite; }
         .runner:hover { animation-play-state: paused; transform: translate(-50%, -50%) scale(1.3); z-index: 100; filter: drop-shadow(0 0 10px var(--accent-blue)); }
         .user-photo { width: 100%; height: 100%; border-radius: 50%; border: 2px solid #fff; background: rgba(255,255,255,0.2); pointer-events: none; }
 
-        /* 碎碎念間距優化 */
+        /* --- 手機版專屬修正 (APP介面) --- */
+        @media screen and (max-width: 600px) {
+            .runner { width: 30px; height: 30px; } /* 手機版 icon 縮小 */
+            .milestone-text { font-size: 14px; } /* 手機版里程文字放大確保可讀 */
+            .total-num { font-size: 24px; }
+            .svg-container { aspect-ratio: 1000 / 550; } /* 稍微拉高手機版比例防止重疊 */
+            .section-header-talk { margin: 60px auto 5px auto; } /* 手機版間距自動調整 */
+        }
+
         .comment-carousel-container { position: relative; width: 100%; margin: 5px auto 40px auto; display: flex; align-items: center; }
         .comment-window { overflow: hidden; width: 100%; padding: 10px 0; }
         #comment-list { display: flex; transition: transform 0.6s ease; }
@@ -117,7 +126,7 @@
     
     <div id="track-wrapper">
         <div class="svg-container" id="runner-layer">
-            <svg viewBox="0 0 1000 500" id="main-svg" style="width:100%; height:100%;">
+            <svg viewBox="0 0 1000 450" id="main-svg">
                 <defs><linearGradient id="track-gradient" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#00d2ff" /><stop offset="50%" stop-color="#f9d423" /><stop offset="100%" stop-color="#ff4e50" /></linearGradient></defs>
                 <path id="double-path" class="path-main" d="M 50,80 L 900,80 A 60,60 0 0 1 900,200 L 100,200 A 60,60 0 0 0 100,320 L 950,320" />
                 <g id="milestones-group"></g>
@@ -147,6 +156,7 @@
 </div>
 
 <script>
+    // ... 此處保持之前的 Firebase 與 Script 邏輯不變 ...
     const firebaseConfig = { apiKey: "AIzaSyDqX_tZqqfw0txXpd-b4AWuolhgQgU6lLU", authDomain: "runrundondon-31b12.firebaseapp.com", databaseURL: "https://runrundondon-31b12-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "runrundondon-31b12" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
@@ -196,12 +206,12 @@
     let currentIndex = 0;
     let allComments = [];
     let hasAnimated = false;
-    let existingNames = []; // 儲存現有成員名單
+    let existingNames = [];
 
     db.ref('players').on('value', (snapshot) => {
         const players = snapshot.val() || {};
         const playersArr = Object.values(players);
-        existingNames = Object.keys(players); // 更新名單
+        existingNames = Object.keys(players);
         const total = playersArr.reduce((acc, p) => acc + (p.score || 0), 0);
         
         if (!hasAnimated) { animateValue(document.getElementById('total-minutes'), 0, total, 1500); hasAnimated = true; } 
@@ -226,7 +236,7 @@
             const r = document.createElement('div');
             r.className = 'runner';
             r.style.left = `${(pt.x / 1000) * 100}%`;
-            r.style.top = `${(pt.y / 500) * 100}%`;
+            r.style.top = `${(pt.y / 450) * 100}%`; // 同步修正 SVG 高度比例
             r.innerHTML = `<img src="${p.photo}" class="user-photo">`;
             r.onclick = () => {
                 const d = new Date(p.lastUpdate);
@@ -256,16 +266,11 @@
         const inputName = document.getElementById('new-name').value.trim();
         const name = selectedValue || inputName;
         const mins = parseInt(document.getElementById('mins').value);
-
-        // 1. 基礎檢查
         if (!name || isNaN(mins) || mins <= 0) { showUI("哦哦！出錯了", "姓名與分鐘數都要填寫喔！", "", "", true); return; }
-        
-        // 2. 新成員唯一性檢查
         if (!selectedValue && existingNames.includes(name)) {
             showUI("成員已存在", `「${name}」已經在名單中囉！`, "請直接從下拉選單選擇該成員，不必重複新增。", "", true);
             return;
         }
-
         db.ref('players/' + name).once('value').then(s => {
             const d = s.val() || {score:0, photo: ""};
             db.ref('players/' + name).update({
