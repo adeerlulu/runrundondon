@@ -46,13 +46,17 @@
         .logo-container { margin: 20px auto; max-width: 700px; text-align: center; }
         .main-logo { width: 100%; height: auto; filter: drop-shadow(0 0 15px rgba(0, 210, 255, 0.5)); }
         
+        /* 欄位標題與間距控制 */
         .section-header { width: 100%; margin: 0 auto 20px auto; } 
-        .section-header-talk { width: 100%; margin: 60px auto 5px auto; }
         
-        /* 關鍵修正：確保跑跑跑標題與上方區塊間距為 100px */
+        /* 碎碎念標題：與下方內文間隔 20px */
+        .section-header-talk { width: 100%; margin: 60px auto 20px auto; }
+        
+        /* 跑跑跑標題：與上方碎碎念欄位間隔 100px */
         .section-header-run { width: 100%; margin: 100px auto 5px auto; }
         
         .section-title { font-size: 19px; font-weight: 900; color: var(--accent-gold); padding-left: 12px; border-left: 5px solid var(--accent-gold); line-height: 1.2; }
+        
         .controls-wrapper { margin: 0 auto 20px auto; width: 100%; box-sizing: border-box; background: var(--panel-bg); padding: 25px; border-radius: 35px; border: 2px solid var(--accent-gold); display: flex; flex-direction: column; gap: 15px; }
         .control-row { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; width: 100%; }
         .input-box { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; flex: 1; min-width: 140px; }
@@ -62,6 +66,8 @@
         .confirm-btn { background-color: var(--btn-confirm) !important; color: white !important; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; transition: 0.3s; }
         .total-counter-box { text-align: center; margin: 20px auto 0 auto; color: #fff; font-weight: bold; }
         .total-num { color: var(--accent-gold); font-size: 28px; font-weight: 900; margin: 0 8px; }
+        
+        /* 跑道區域 */
         .svg-container { position: relative; width: 100%; height: auto; aspect-ratio: 1000 / 400; overflow: visible; margin-bottom: 0; }
         #main-svg { width: 100%; height: auto; overflow: visible; display: block; }
         .path-main { fill: none; stroke: url(#track-gradient); stroke-width: 14; stroke-linecap: round; stroke-dasharray: 3000; stroke-dashoffset: 3000; animation: flowSlow 3s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
@@ -71,7 +77,9 @@
         .runner { position: absolute; width: 42px; height: 42px; z-index: 50; transform: translate(-50%, -50%); cursor: pointer; animation: float 3s ease-in-out infinite; }
         .runner:hover { animation-play-state: paused; transform: translate(-50%, -50%) scale(1.3); z-index: 100; filter: drop-shadow(0 0 10px var(--accent-blue)); }
         .user-photo { width: 100%; height: 100%; border-radius: 50%; border: 2px solid #fff; background: rgba(255,255,255,0.2); pointer-events: none; }
-        .comment-carousel-container { position: relative; width: 100%; margin: 5px auto 0 auto; display: flex; align-items: center; }
+        
+        /* 碎碎念內文（輪播區） */
+        .comment-carousel-container { position: relative; width: 100%; margin: 0 auto; display: flex; align-items: center; }
         .comment-window { overflow: hidden; width: 100%; padding: 10px 0; }
         #comment-list { display: flex; transition: transform 0.6s ease; }
         .comment-item { min-width: 300px; margin: 0 15px; background: var(--bubble-bg); padding: 20px; border-radius: 20px; opacity: 0.3; transform: scale(0.9); transition: 0.5s; border: 1px solid rgba(255,255,255,0.1); text-align: left; display: flex; gap: 12px; }
@@ -83,7 +91,7 @@
             .runner { width: 30px; height: 30px; }
             .milestone-text { font-size: 14px; }
             .total-num { font-size: 24px; }
-            .section-header-run { margin: 100px auto 5px auto; }
+            .section-header-run { margin: 80px auto 5px auto; } /* 手機端稍微縮減以利閱讀 */
         }
 
         .ui-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 99999; }
