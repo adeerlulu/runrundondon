@@ -17,88 +17,90 @@
             --accent-gold: #f9d423;
             --bubble-bg: rgba(255, 255, 255, 0.1);
             --track-yellow: #f9d423;
-            /* 設定台北黑體風格優先 */
             --font-taipei: 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
         }
 
         body { font-family: var(--font-taipei); background-color: var(--bg-color); margin: 0; padding: 20px; text-align: center; color: var(--text-main); overflow-x: hidden; }
-        .main-container { max-width: 1200px; margin: 0 auto; text-align: left; }
+        .main-container { max-width: 1000px; margin: 0 auto; text-align: left; } /* 縮小主容器以對齊線圖 */
         
-        .logo-container { margin: 40px auto; max-width: 800px; text-align: center; }
-        .main-logo { width: 100%; height: auto; filter: drop-shadow(0 0 20px rgba(0, 210, 255, 0.6)); }
+        .logo-container { margin: 30px auto; max-width: 700px; text-align: center; }
+        .main-logo { width: 100%; height: auto; filter: drop-shadow(0 0 15px rgba(0, 210, 255, 0.5)); }
 
-        .section-header { width: 100%; max-width: 900px; margin: 0 auto 15px auto; padding-top: 40px; }
-        .section-title { font-size: 22px; font-weight: 900; color: var(--accent-gold); padding-left: 15px; border-left: 5px solid var(--accent-gold); line-height: 1.2; }
+        /* 標題與間距優化 */
+        .section-header { width: 100%; margin: 0 auto 10px auto; padding-top: 20px; }
+        .section-title { font-size: 20px; font-weight: 900; color: var(--accent-gold); padding-left: 12px; border-left: 5px solid var(--accent-gold); line-height: 1.2; }
 
+        /* 控制面板：寬度對齊線圖頭尾 */
         .controls-wrapper { 
-            margin: 0 auto 50px auto; max-width: 900px; 
-            background: var(--panel-bg); padding: 35px; border-radius: 40px; 
+            margin: 0 auto 30px auto; width: 100%; box-sizing: border-box;
+            background: var(--panel-bg); padding: 30px; border-radius: 35px; 
             border: 2px solid var(--track-yellow); 
-            display: flex; flex-direction: column; gap: 25px;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+            display: flex; flex-direction: column; gap: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
-        .control-row { display: flex; flex-wrap: wrap; justify-content: flex-start; align-items: flex-end; gap: 20px; width: 100%; }
-        .input-box { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; flex: 1; min-width: 150px; }
-        .input-box label { font-size: 14px; color: var(--accent-blue); font-weight: 700; }
+        .control-row { display: flex; flex-wrap: wrap; justify-content: flex-start; align-items: flex-end; gap: 15px; width: 100%; }
+        .input-box { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; flex: 1; min-width: 140px; }
+        .input-box label { font-size: 13px; color: var(--accent-blue); font-weight: 700; }
         
         input, select { 
-            font-family: var(--font-taipei); background: rgba(255, 255, 255, 0.2) !important; 
-            border: 1px solid rgba(255, 255, 255, 0.3); padding: 12px; 
-            border-radius: 12px; color: #ffffff !important; outline: none; width: 100%; box-sizing: border-box;
+            font-family: var(--font-taipei); background: rgba(255, 255, 255, 0.15) !important; 
+            border: 1px solid rgba(255, 255, 255, 0.2); padding: 10px; 
+            border-radius: 10px; color: #ffffff !important; outline: none; width: 100%; box-sizing: border-box;
         }
 
         .submit-btn { 
-            font-family: var(--font-taipei); padding: 15px 80px; 
+            font-family: var(--font-taipei); padding: 12px 60px; 
             background: linear-gradient(135deg, #f9d423, #ff4e50); 
-            color: #000; border: none; border-radius: 35px; cursor: pointer; font-weight: 900; font-size: 18px;
+            color: #000; border: none; border-radius: 30px; cursor: pointer; font-weight: 900; font-size: 16px;
         }
 
-        #track-wrapper { width: 100%; max-width: 1000px; margin: 40px auto; position: relative; }
-        .svg-container { position: relative; width: 100%; z-index: 5; }
-        /* 跑道顏色固定，移除動畫效果 */
-        .path-main { 
-            fill: none; stroke: url(#track-gradient); stroke-width: 14; stroke-linecap: round;
-        }
+        /* 跑道區域間距縮短 */
+        #track-wrapper { width: 100%; margin: 15px auto; position: relative; }
+        .svg-container { position: relative; width: 100%; z-index: 10; height: 320px; }
+        .path-main { fill: none; stroke: url(#track-gradient); stroke-width: 14; stroke-linecap: round; }
 
         .milestone-dot { fill: #ffffff; }
-        /* 數字改在上方 */
-        .milestone-text { font-size: 13px; fill: #ffffff; font-weight: 700; paint-order: stroke; stroke: var(--bg-color); stroke-width: 3px; }
+        .milestone-text { font-size: 12px; fill: #ffffff; font-weight: 700; paint-order: stroke; stroke: var(--bg-color); stroke-width: 3px; }
 
+        /* 跑道角色：尺寸再縮小 90% (48px -> 43px) */
         .runner { 
-            position: absolute; width: 48px; height: 48px; z-index: 100; 
-            transform: translate(-50%, -50%); cursor: pointer;
+            position: absolute; width: 43px; height: 43px; z-index: 50; 
+            transform: translate(-50%, -50%); cursor: pointer; pointer-events: auto;
             animation: runnerFloating 2.5s ease-in-out infinite;
         }
         @keyframes runnerFloating {
-            0%, 100% { transform: translate(-50%, -60%); }
-            50% { transform: translate(-50%, -40%); }
+            0%, 100% { margin-top: -12px; }
+            50% { margin-top: -3px; }
         }
-        .user-photo { width: 100%; height: 100%; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 5px 15px rgba(0,0,0,0.5); background: #fff; }
+        .user-photo { width: 100%; height: 100%; border-radius: 50%; border: 2.5px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.5); background: #fff; }
 
-        .comment-carousel-container { position: relative; max-width: 1000px; margin: 40px auto 100px auto; display: flex; align-items: center; }
-        .comment-window { overflow: hidden; width: 100%; padding: 40px 0; }
+        /* 彈窗樣式 */
+        #info-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 10000; }
+        .info-card { background: #1a2a44; border: 2px solid var(--accent-blue); padding: 35px; border-radius: 30px; text-align: center; color: white; min-width: 280px; }
+        .score-num { font-size: 56px; font-weight: 900; color: var(--accent-gold); display: block; margin: 15px 0; }
+
+        /* 碎碎念間距縮短 */
+        .comment-carousel-container { position: relative; width: 100%; margin: 10px auto 60px auto; display: flex; align-items: center; }
+        .comment-window { overflow: hidden; width: 100%; padding: 25px 0; }
         #comment-list { display: flex; transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1); }
         .comment-item { 
-            min-width: 320px; margin: 0 20px; background: var(--bubble-bg); 
-            padding: 25px; border-radius: 25px; opacity: 0.3; transform: scale(0.85);
+            min-width: 300px; margin: 0 15px; background: var(--bubble-bg); 
+            padding: 20px; border-radius: 20px; opacity: 0.3; transform: scale(0.9);
             transition: 0.5s; border: 1px solid rgba(255,255,255,0.1); text-align: left;
-            display: flex; gap: 15px; 
+            display: flex; gap: 12px; 
         }
-        .comment-item.active { opacity: 1; transform: scale(1.1); border-color: var(--accent-gold); }
-        .comment-avatar { width: 50px; height: 50px; border-radius: 50%; border: 2px solid var(--accent-gold); background: #fff; }
-        .comment-time { font-size: 11px; color: #aaa; margin-top: 5px; display: block; }
+        .comment-item.active { opacity: 1; transform: scale(1.05); border-color: var(--accent-gold); }
+        .comment-avatar { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--accent-gold); background: #fff; }
+        .comment-time { font-size: 10px; color: #888; margin-top: 4px; display: block; }
 
-        .nav-btn { background: rgba(255,255,255,0.1); border: 2px solid var(--accent-gold); color: var(--accent-gold); width: 40px; height: 40px; border-radius: 50%; cursor: pointer; }
+        .nav-btn { background: rgba(255,255,255,0.1); border: 2px solid var(--accent-gold); color: var(--accent-gold); width: 36px; height: 36px; border-radius: 50%; cursor: pointer; z-index: 100; }
         
-        #avatar-picker { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
-        
-        /* 頁尾小小文字 */
-        footer { margin: 80px auto 40px auto; text-align: center; color: #ffffff; font-size: 12px; opacity: 0.8; letter-spacing: 1px; }
+        footer { margin: 60px auto 30px auto; text-align: center; color: #ffffff; font-size: 11px; opacity: 0.6; letter-spacing: 1px; }
     </style>
 </head>
 <body>
 
-<div class="main-container" id="main-content">
+<div class="main-container">
     <div class="logo-container"><img src="https://raw.githubusercontent.com/adeerlulu/runrundondon/main/links/LOGO.png" class="main-logo"></div>
 
     <div class="section-header"><div class="section-title">今日工事</div></div>
@@ -106,7 +108,7 @@
         <div class="control-row">
             <div class="input-box"><label>是哪位運動家</label><select id="user-select"><option value="">+ 新成員</option></select></div>
             <div id="new-name-box" class="input-box"><label>新同學姓名</label><input type="text" id="new-name"></div>
-            <div class="input-box"><div style="height:22px"></div><button id="avatar-btn" style="background:#2c5282; color:white; border:none; padding:12px; border-radius:12px; cursor:pointer; width:100%; font-weight:bold;" onclick="toggleModal(true)">挑選頭像</button></div>
+            <div class="input-box"><div style="height:20px"></div><button id="avatar-btn" style="background:#2c5282; color:white; border:none; padding:10px; border-radius:10px; cursor:pointer; width:100%; font-weight:bold; font-size: 14px;" onclick="toggleModal(true)">挑選頭像</button></div>
             <div class="input-box" style="flex:0.6"><label>今日運動時數</label><input type="number" id="mins" placeholder="分鐘"></div>
         </div>
         <div class="control-row">
@@ -117,8 +119,8 @@
 
     <div class="section-header"><div class="section-title">跑跑跑！向前跑！</div></div>
     <div id="track-wrapper">
-        <div class="svg-container">
-            <svg viewBox="0 0 1000 300" id="main-svg">
+        <div class="svg-container" id="runner-layer">
+            <svg viewBox="0 0 1000 300" id="main-svg" style="width:100%; height:100%;">
                 <defs>
                     <linearGradient id="track-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
                         <stop offset="0%" stop-color="#00d2ff" /><stop offset="50%" stop-color="#f9d423" /><stop offset="100%" stop-color="#ff4e50" />
@@ -142,13 +144,17 @@
 
 <div id="info-overlay" onclick="this.style.display='none'">
     <div class="info-card" onclick="event.stopPropagation()">
-        <h2 id="info-name"></h2><p>2026 年已累積運動</p><span class="score-num" id="info-score">0</span><p>分鐘</p>
+        <h2 id="info-name" style="margin:0; color:var(--accent-blue)"></h2>
+        <p style="margin:10px 0 0 0; opacity:0.8">2026 年已累積運動</p>
+        <span class="score-num" id="info-score">0</span>
+        <p style="margin:0">分鐘</p>
+        <button class="submit-btn" style="padding:8px 25px; font-size:14px; margin-top:20px;" onclick="document.getElementById('info-overlay').style.display='none'">了解！</button>
     </div>
 </div>
 
-<div id="modal-overlay" onclick="toggleModal(false)" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:2500;"></div>
-<div id="avatar-modal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:#1a2a44; padding:30px; border-radius:30px; z-index:3000; width: 90%; max-width: 550px; border: 2px solid var(--accent-blue);">
-    <div id="avatar-picker"></div>
+<div id="modal-overlay" onclick="toggleModal(false)" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:11000;"></div>
+<div id="avatar-modal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:#1a2a44; padding:30px; border-radius:30px; z-index:12000; width: 90%; max-width: 500px; border: 2px solid var(--accent-blue);">
+    <div id="avatar-picker" style="display:grid; grid-template-columns: repeat(6, 1fr); gap:10px;"></div>
 </div>
 
 <script>
@@ -163,7 +169,7 @@
         const num = i < 10 ? '0' + i : i;
         const img = document.createElement('img');
         img.src = `https://raw.githubusercontent.com/adeerlulu/runrundondon/main/icons/${num}.png`;
-        img.style = "width:100%; cursor:pointer; background:#fff; border-radius:10px; border:3px solid transparent;";
+        img.style = "width:100%; cursor:pointer; background:#fff; border-radius:8px; border:2px solid transparent;";
         img.onclick = function() {
             document.querySelectorAll('#avatar-picker img').forEach(i => i.style.borderColor='transparent');
             this.style.borderColor = '#00d2ff';
@@ -179,8 +185,7 @@
         const players = snapshot.val() || {};
         const playersArr = Object.values(players);
         
-        const select = document.getElementById('user-select');
-        select.innerHTML = '<option value="">+ 新成員</option>' + 
+        document.getElementById('user-select').innerHTML = '<option value="">+ 新成員</option>' + 
             playersArr.map(p => `<option value="${p.name}">${p.name}</option>`).join('');
 
         const path = document.getElementById('double-path');
@@ -189,13 +194,13 @@
         mGroup.innerHTML = "";
         [0, 1000, 2000, 3000, 4500, 5500, 6500, 7500].forEach(score => {
             const pt = path.getPointAtLength((score/7500) * pathLength);
-            // 數字 dy 改成 -25 讓它出現在上方
             mGroup.innerHTML += `
-                <circle cx="${pt.x}" cy="${pt.y}" r="4.5" class="milestone-dot"/>
+                <circle cx="${pt.x}" cy="${pt.y}" r="4" class="milestone-dot"/>
                 <text x="${pt.x}" y="${pt.y - 25}" class="milestone-text" text-anchor="middle">${score}</text>
             `;
         });
 
+        // 重新繪製角色
         document.querySelectorAll('.runner').forEach(r => r.remove());
         playersArr.forEach(p => {
             const pt = path.getPointAtLength(Math.min(p.score/7500, 1) * pathLength);
@@ -204,12 +209,15 @@
             r.style.left = `${(pt.x / 1000) * 100}%`;
             r.style.top = `${(pt.y / 300) * 100}%`;
             r.innerHTML = `<img src="${p.photo}" class="user-photo">`;
-            r.onclick = () => {
+            
+            // 綁定點擊事件
+            r.addEventListener('click', (e) => {
+                e.stopPropagation();
                 document.getElementById('info-name').innerText = p.name;
                 document.getElementById('info-score').innerText = p.score;
                 document.getElementById('info-overlay').style.display = 'flex';
-            };
-            document.querySelector('.svg-container').appendChild(r);
+            });
+            document.getElementById('runner-layer').appendChild(r);
         });
 
         allComments = playersArr.filter(p => p.lastThought).sort((a,b) => b.lastUpdate - a.lastUpdate);
@@ -218,28 +226,22 @@
 
     document.getElementById('user-select').addEventListener('change', function() {
         const btn = document.getElementById('avatar-btn');
-        const newNameBox = document.getElementById('new-name-box');
-        if (this.value === "") { btn.innerText = "挑選頭像"; newNameBox.style.display = "flex"; } 
-        else { btn.innerText = "更改頭像"; newNameBox.style.display = "none"; }
+        const box = document.getElementById('new-name-box');
+        btn.innerText = (this.value === "") ? "挑選頭像" : "更改頭像";
+        box.style.display = (this.value === "") ? "flex" : "none";
     });
 
     function renderCarousel() {
         const list = document.getElementById('comment-list');
         list.innerHTML = allComments.map((p, i) => {
-            const dateObj = new Date(p.lastUpdate);
-            const timeStr = `${dateObj.getFullYear()}/${dateObj.getMonth()+1}/${dateObj.getDate()} ${dateObj.getHours().toString().padStart(2,'0')}:${dateObj.getMinutes().toString().padStart(2,'0')}`;
-            return `
-            <div class="comment-item ${i === currentIndex ? 'active' : ''}">
+            const d = new Date(p.lastUpdate);
+            const ts = `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${d.getMinutes().toString().padStart(2,'0')}`;
+            return `<div class="comment-item ${i === currentIndex ? 'active' : ''}">
                 <img src="${p.photo}" class="comment-avatar">
-                <div>
-                    <b style="color:var(--accent-gold)">${p.name}</b>
-                    <p style="margin:8px 0 0 0; color:#fff">${p.lastThought}</p>
-                    <span class="comment-time">${timeStr}</span>
-                </div>
+                <div><b style="color:var(--accent-gold)">${p.name}</b><p style="margin:5px 0 0 0; color:#fff; font-size:14px;">${p.lastThought}</p><span class="comment-time">${ts}</span></div>
             </div>`;
         }).join('');
-        const offset = -currentIndex * 360;
-        list.style.transform = `translateX(${offset}px)`;
+        list.style.transform = `translateX(${-currentIndex * 330}px)`;
     }
 
     function moveCarousel(dir) {
