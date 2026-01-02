@@ -17,7 +17,6 @@
             --accent-gold: #f9d423;
             --bubble-bg: rgba(255, 255, 255, 0.1);
             --track-yellow: #f9d423;
-            /* 套用圓體字型 */
             --font-round: 'M PLUS Rounded 1c', 'Quicksand', 'Microsoft JhengHei', sans-serif;
         }
 
@@ -30,7 +29,6 @@
         .logo-container { margin: 20px auto; max-width: 600px; padding: 0 10px; }
         .main-logo { width: 100%; height: auto; display: block; filter: drop-shadow(0 0 12px rgba(0, 210, 255, 0.5)); }
 
-        /* 欄位設定 */
         .controls-wrapper {
             margin: 10px auto; max-width: 550px;
             background: var(--panel-bg); 
@@ -50,14 +48,11 @@
             padding: 10px; border-radius: 12px; color: #ffffff; outline: none; font-size: 14px; width: 100%; box-sizing: border-box;
         }
 
-        /* 手機模式適應：第一排改為兩層 */
         @media (max-width: 480px) {
             .control-row:first-child { flex-direction: column; align-items: stretch; gap: 20px; }
             .input-group { width: 100%; }
-            .submit-btn { width: 100%; padding: 12px 0 !important; }
         }
 
-        .submit-container { width: 100%; display: flex; justify-content: center; }
         .submit-btn { 
             font-family: var(--font-round);
             padding: 12px 100px; background: linear-gradient(135deg, #f9d423, #ff4e50); 
@@ -65,8 +60,9 @@
             font-size: 16px; box-shadow: 0 4px 15px rgba(255, 78, 80, 0.4);
         }
 
-        /* 氣泡對話框 */
+        /* 碎碎念區域 */
         #comment-wall { margin: 30px auto; max-width: 550px; text-align: left; }
+        .section-title { font-size: 18px; font-weight: 800; color: var(--accent-gold); margin-bottom: 15px; padding-left: 5px; border-left: 4px solid var(--accent-gold); line-height: 1; }
         .comment-item { 
             position: relative; background: var(--bubble-bg); border-radius: 15px; 
             padding: 15px 20px; margin-bottom: 20px; font-size: 14px; border: 1.5px solid rgba(255,255,255,0.15);
@@ -75,16 +71,18 @@
             content: ''; position: absolute; left: 25px; bottom: -10px;
             border-width: 10px 10px 0; border-style: solid; border-color: rgba(255,255,255,0.1) transparent transparent;
         }
-        .comment-name { color: var(--accent-gold); font-weight: 800; margin-right: 5px; }
+        .comment-header { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 12px; }
+        .comment-name { color: var(--accent-gold); font-weight: 800; }
+        .comment-time { color: rgba(255,255,255,0.4); font-weight: 500; }
 
-        /* 跑道與文字 */
+        /* 跑道優化 */
         #track-wrapper { width: 100%; max-width: 550px; margin: 0 auto; position: relative; }
         svg { width: 100%; height: auto; overflow: visible; }
         .path-main { fill: none; stroke: url(#track-gradient); stroke-width: 3; stroke-linecap: round; }
-        .milestone-dot { fill: #fff; box-shadow: 0 0 5px #fff; }
+        .milestone-dot { fill: #fff; }
         .milestone-text { 
-            font-family: var(--font-round); fill: #ffffff; font-size: 8px; font-weight: 800; 
-            paint-order: stroke; stroke: var(--bg-color); stroke-width: 2px;
+            font-family: var(--font-round); fill: #ffffff; font-size: 7px; font-weight: 800; 
+            paint-order: stroke; stroke: var(--bg-color); stroke-width: 1.5px;
         }
 
         .runner { 
@@ -93,7 +91,7 @@
             animation: runnerFloating 2s ease-in-out infinite !important;
         }
         @keyframes runnerFloating { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-        .user-photo { width: 34px; height: 34px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 10px rgba(0,210,255,0.5); }
+        .user-photo { width: 34px; height: 34px; border-radius: 50%; border: 2px solid #fff; }
         .label { background: linear-gradient(135deg, #ff4e50, #f9d423); color: #000; font-size: 10px; font-weight: 800; padding: 1px 8px; border-radius: 10px; border: 1px solid #fff; }
 
         #auth-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
@@ -138,7 +136,10 @@
             </div>
         </div>
 
-        <div id="comment-wall"><div id="comment-list"></div></div>
+        <div id="comment-wall">
+            <div class="section-title">動動碎碎念</div>
+            <div id="comment-list"></div>
+        </div>
 
         <div id="modal-overlay" onclick="toggleModal(false)" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:2500;"></div>
         <div id="avatar-modal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:#1a2a44; padding:20px; border-radius:20px; border:2px solid var(--accent-blue); z-index:3000; width: 280px;">
@@ -153,8 +154,8 @@
                         <stop offset="0%" style="stop-color:#00d2ff" /><stop offset="50%" style="stop-color:#f9d423" /><stop offset="100%" style="stop-color:#ff4e50" />
                     </linearGradient>
                 </defs>
-                <path id="s-path" class="path-main" d="M 35 50 H 165 A 35 35 0 0 1 165 120 H 35 A 35 35 0 0 0 35 190 H 165 A 35 35 0 0 1 165 260 H 35 A 35 35 0 0 0 35 330 H 165 A 35 35 0 0 1 165 400 H 35 A 35 35 0 0 0 35 470" />
-                <text x="15" y="505" fill="#ff4e50" font-size="12" font-weight="900">FINISH 7500</text>
+                <path id="s-path" class="path-main" d="M 10 50 H 165 A 35 35 0 0 1 165 120 H 35 A 35 35 0 0 0 35 190 H 165 A 35 35 0 0 1 165 260 H 35 A 35 35 0 0 0 35 330 H 165 A 35 35 0 0 1 165 400 H 35 A 35 35 0 0 0 35 470" />
+                <text x="10" y="505" fill="#ff4e50" font-size="12" font-weight="900">FINISH 7500</text>
                 <g id="milestones-group"></g>
             </svg>
         </div>
@@ -193,7 +194,6 @@
             }
         }
 
-        // 頭像生成
         const baseUrl = "https://raw.githubusercontent.com/adeerlulu/runrundondon/main/icons/";
         for (let i = 1; i <= 12; i++) {
             const fileName = i < 10 ? '0' + i : i;
@@ -231,11 +231,20 @@
             const playersArr = Object.values(players);
             document.getElementById('user-select').innerHTML = '<option value="">+ 新成員</option>' + playersArr.map(p => `<option value="${p.name}">${p.name}</option>`).join('');
             
-            // 碎碎念氣泡列表
             const thoughts = playersArr.filter(p => p.lastThought).sort((a,b) => b.lastUpdate - a.lastUpdate).slice(0,3);
-            document.getElementById('comment-list').innerHTML = thoughts.map(p => `<div class="comment-item"><span class="comment-name">${p.name}</span> 說：${p.lastThought}</div>`).join('');
+            document.getElementById('comment-list').innerHTML = thoughts.map(p => {
+                const date = new Date(p.lastUpdate);
+                const timeStr = `${date.getMonth()+1}/${date.getDate()} ${date.getHours().toString().padStart(2,'0')}:${date.getMinutes().toString().padStart(2,'0')}`;
+                return `
+                <div class="comment-item">
+                    <div class="comment-header">
+                        <span class="comment-name">${p.name}</span>
+                        <span class="comment-time">${timeStr}</span>
+                    </div>
+                    <div>${p.lastThought}</div>
+                </div>`;
+            }).join('');
             
-            // 渲染運動家
             document.querySelectorAll('.runner').forEach(r => r.remove());
             playersArr.forEach(p => {
                 const point = path.getPointAtLength((Math.min(p.score/7500, 1)) * path.getTotalLength());
@@ -249,11 +258,9 @@
             drawMilestones();
         });
 
-        // 監聽下拉選單：動態切換按鈕文字與新成員欄位
         document.getElementById('user-select').addEventListener('change', function() {
             const isNew = this.value === "";
             document.getElementById('new-name-box').style.display = isNew ? "block" : "none";
-            // 變更按鈕文字
             document.getElementById('avatar-btn').innerText = isNew ? "選擇頭像" : "更改頭像";
         });
     </script>
