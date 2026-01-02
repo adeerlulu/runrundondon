@@ -48,34 +48,35 @@
         }
         select option { color: #333333; background-color: #ffffff; }
 
+        /* 動態角色效果 - 縮小漂浮幅度確保在跑道內 */
         @keyframes runnerFloating {
             0% { transform: translateY(0px); }
-            50% { transform: translateY(-8px); }
+            50% { transform: translateY(-5px); }
             100% { transform: translateY(0px); }
         }
 
         .runner {
-            position: absolute; width: 50px; height: 50px;
+            position: absolute; width: 44px; height: 44px;
             display: flex; flex-direction: column; align-items: center;
             transition: all 1.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-            z-index: 100; pointer-events: none; margin-left: -25px; margin-top: -55px;
+            z-index: 100; pointer-events: none; margin-left: -22px; margin-top: -30px; /* 調整中心點位置 */
             animation: runnerFloating 3s ease-in-out infinite;
         }
 
         .user-photo { 
-            width: 40px; height: 40px; border-radius: 50%; 
-            border: 3px solid #fff; 
-            box-shadow: 0 0 15px var(--accent-blue);
+            width: 34px; height: 34px; border-radius: 50%; 
+            border: 2px solid #fff; 
+            box-shadow: 0 0 10px var(--accent-blue);
             object-fit: cover; background: #fff;
         }
 
         .label { 
             background: linear-gradient(135deg, #ff4e50, #f9d423);
-            color: #000; font-size: 11px; font-weight: 900; 
-            padding: 2px 10px; border-radius: 20px; 
+            color: #000; font-size: 10px; font-weight: 900; 
+            padding: 1px 8px; border-radius: 20px; 
             white-space: nowrap; 
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            margin-top: 5px; border: 1px solid #fff;
+            margin-top: 2px; border: 1px solid #fff;
         }
 
         #avatar-modal {
@@ -89,13 +90,12 @@
 
         button.submit-btn { padding: 10px 25px; background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%); color: white; border: none; border-radius: 30px; cursor: pointer; font-weight: bold; }
 
-        #track-wrapper { width: 100%; max-width: 450px; margin: 0 auto; position: relative; }
+        #track-wrapper { width: 100%; max-width: 450px; margin: 40px auto; position: relative; }
         svg { width: 100%; height: auto; display: block; overflow: visible; }
-        .path-main { fill: none; stroke: url(#track-gradient); stroke-width: 26; stroke-linecap: round; stroke-linejoin: round; }
-        .path-shadow { fill: none; stroke: rgba(255,255,255,0.05); stroke-width: 32; stroke-linecap: round; }
+        .path-main { fill: none; stroke: url(#track-gradient); stroke-width: 32; stroke-linecap: round; stroke-linejoin: round; }
+        .path-shadow { fill: none; stroke: rgba(255,255,255,0.05); stroke-width: 40; stroke-linecap: round; }
         
-        .milestone-flag { fill: var(--accent-gold); opacity: 0.9; }
-        .milestone-text { fill: rgba(255,255,255,0.6); font-size: 7px; font-weight: bold; font-family: 'Arial'; }
+        .milestone-text { fill: rgba(255,255,255,0.5); font-size: 8px; font-weight: 900; font-family: 'Arial'; }
 
         #main-content { display: none; }
         #modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2500; }
@@ -145,7 +145,7 @@
                 </defs>
                 <path class="path-shadow" d="M 35 50 H 165 A 35 35 0 0 1 165 120 H 35 A 35 35 0 0 0 35 190 H 165 A 35 35 0 0 1 165 260 H 35 A 35 35 0 0 0 35 330 H 165 A 35 35 0 0 1 165 400 H 35 A 35 35 0 0 0 35 470" />
                 <path id="s-path" class="path-main" d="M 35 50 H 165 A 35 35 0 0 1 165 120 H 35 A 35 35 0 0 0 35 190 H 165 A 35 35 0 0 1 165 260 H 35 A 35 35 0 0 0 35 330 H 165 A 35 35 0 0 1 165 400 H 35 A 35 35 0 0 0 35 470" />
-                <text x="10" y="30" fill="#fff" font-size="10" font-weight="bold">START</text>
+                <text x="10" y="25" fill="#fff" font-size="10" font-weight="bold">START</text>
                 <text x="10" y="505" fill="#ff4e50" font-size="14" font-weight="900">FINISH 7800</text>
                 <g id="milestones-group"></g>
             </svg>
@@ -153,7 +153,6 @@
     </div>
 
     <script>
-        // 登入檢查邏輯
         function checkAuth() {
             const lastLogin = localStorage.getItem('last_login_time');
             if (lastLogin) {
@@ -175,7 +174,6 @@
         }
         window.onload = checkAuth;
 
-        // Firebase 設定
         const firebaseConfig = {
             apiKey: "AIzaSyDqX_tZqqfw0txXpd-b4AWuolhgQgU6lLU",
             authDomain: "runrundondon-31b12.firebaseapp.com",
@@ -185,13 +183,12 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // 頭像讀取邏輯：修正補零檔名
         const baseUrl = "https://raw.githubusercontent.com/adeerlulu/runrundondon/main/icons/";
         const avatarPicker = document.getElementById('avatar-picker');
         for (let i = 1; i <= 12; i++) {
-            const fileName = i < 10 ? '0' + i : i; // 1-9 變 01-09
+            const fileName = i < 10 ? '0' + i : i;
             const img = document.createElement('img');
-            img.src = `${baseUrl}${fileName}.png?v=4`;
+            img.src = `${baseUrl}${fileName}.png?v=5`;
             img.className = 'avatar-option';
             img.onclick = function() { selectAvatar(this); };
             avatarPicker.appendChild(img);
@@ -212,22 +209,30 @@
 
         function drawMilestones() {
             const path = document.getElementById('s-path');
-            if(!path) return;
             const pathLength = path.getTotalLength();
             const group = document.getElementById('milestones-group');
             group.innerHTML = "";
             for (let i = 250; i < 7800; i += 250) {
                 const point = path.getPointAtLength((i / 7800) * pathLength);
-                const flag = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                flag.setAttribute("d", `M ${point.x} ${point.y} L ${point.x} ${point.y-8} L ${point.x+6} ${point.y-6} L ${point.x} ${point.y-4}`);
-                flag.setAttribute("class", "milestone-flag");
-                group.appendChild(flag);
                 const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
                 text.setAttribute("class", "milestone-text");
                 text.textContent = i;
-                if (point.x < 50) { text.setAttribute("x", point.x - 18); text.setAttribute("y", point.y + 3); text.setAttribute("text-anchor", "end"); }
-                else if (point.x > 150) { text.setAttribute("x", point.x + 8); text.setAttribute("y", point.y + 3); text.setAttribute("text-anchor", "start"); }
-                else { text.setAttribute("x", point.x); text.setAttribute("y", point.y + 12); text.setAttribute("text-anchor", "middle"); }
+                
+                // 數字強制排列在跑道外側 (外圈)
+                if (point.x < 40) { // 左彎外側
+                    text.setAttribute("x", point.x - 30);
+                    text.setAttribute("y", point.y + 3);
+                    text.setAttribute("text-anchor", "end");
+                } else if (point.x > 160) { // 右彎外側
+                    text.setAttribute("x", point.x + 30);
+                    text.setAttribute("y", point.y + 3);
+                    text.setAttribute("text-anchor", "start");
+                } else { // 直道部分根據上下層級決定擺放
+                    const yPos = point.y < 250 ? point.y - 30 : point.y + 35;
+                    text.setAttribute("x", point.x);
+                    text.setAttribute("y", yPos);
+                    text.setAttribute("text-anchor", "middle");
+                }
                 group.appendChild(text);
             }
         }
@@ -257,7 +262,6 @@
         db.ref('players').on('value', (snapshot) => {
             const players = snapshot.val();
             const path = document.getElementById('s-path');
-            if(!path) return;
             const pathLength = path.getTotalLength();
             const wrapper = document.getElementById('track-wrapper');
             document.querySelectorAll('.runner').forEach(r => r.remove());
@@ -270,7 +274,7 @@
                 runner.className = 'runner';
                 runner.style.animationDelay = `${index * 0.4}s`;
                 runner.style.left = `${(point.x / 200) * 100}%`;
-                runner.style.top = `${((point.y+20) / 520) * 100}%`;
+                runner.style.top = `${((point.y + 15) / 520) * 100}%`; // 微調 y 軸使其落在寬跑道中心
                 runner.innerHTML = `<img src="${p.photo}" class="user-photo"><span class="label">${p.name}</span>`;
                 wrapper.appendChild(runner);
             });
