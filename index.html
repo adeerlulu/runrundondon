@@ -74,7 +74,7 @@
         .runner { 
             position: absolute; width: 44px; height: 44px; display: flex; flex-direction: column; align-items: center; 
             z-index: 50; pointer-events: none; margin-left: -22px; 
-            margin-top: -55px; /* 高於跑道線 */
+            margin-top: -55px;
             transition: all 1s ease;
             animation: runnerFloating 2s ease-in-out infinite !important;
         }
@@ -151,7 +151,6 @@
     </div>
 
     <script>
-        // Firebase Config ...
         const firebaseConfig = { apiKey: "AIzaSyDqX_tZqqfw0txXpd-b4AWuolhgQgU6lLU", authDomain: "runrundondon-31b12.firebaseapp.com", databaseURL: "https://runrundondon-31b12-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "runrundondon-31b12" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
@@ -167,32 +166,41 @@
             const group = document.getElementById('milestones-group');
             const pathLength = path.getTotalLength();
             group.innerHTML = "";
+            
+            // 重新定義里程碑點位，確保 0 的 x 座標與 2000 對齊 (x=35)
             for (let i = 0; i <= 7500; i += 500) {
-                const percent = i / 7500;
+                let percent;
+                
+                if (i === 0) {
+                    // 強制讓 0 的點位出現在 x=35 的位置 (這在 pathLength 中約佔 35 單位)
+                    percent = 35 / pathLength;
+                } else {
+                    // 其他點位根據比例均分
+                    percent = i / 7500;
+                }
+
                 const point = path.getPointAtLength(percent * pathLength);
                 
-                // 1. 繪製所有圓點
+                // 點點
                 const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
                 dot.setAttribute("cx", point.x); dot.setAttribute("cy", point.y); dot.setAttribute("r", "2.5");
                 dot.setAttribute("class", "milestone-dot");
                 group.appendChild(dot);
 
-                // 2. 顯示數字：每個點都要有數字
+                // 數字
                 const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
                 text.setAttribute("class", "milestone-text");
                 text.textContent = i;
                 
-                let offsetY = 12; // 統一在下方
+                let offsetY = 12;
                 let anchor = "middle";
 
-                // 針對圓弧頂點進行微調，防止數字壓在跑道線上
+                // 圓弧頂點微調
                 if (i > 0 && i % 1500 === 0) {
-                    if (point.x > 100) { anchor = "end"; } // 右側圓弧稍微向內靠
-                    else { anchor = "start"; } // 左側圓弧稍微向內靠
+                    if (point.x > 100) { anchor = "end"; } 
+                    else { anchor = "start"; } 
                 } else if (i === 0) {
-                    anchor = "start";
-                } else if (i === 7500) {
-                    anchor = "end";
+                    anchor = "middle"; // 0 現在是對齊中心，用 middle 最準
                 }
 
                 text.setAttribute("x", point.x);
@@ -202,7 +210,7 @@
             }
         }
 
-        // Firebase & UI 同步邏輯 ...
+        // Firebase & UI 同步 ...
         const baseUrl = "https://raw.githubusercontent.com/adeerlulu/runrundondon/main/icons/";
         for (let i = 1; i <= 12; i++) {
             const fileName = i < 10 ? '0' + i : i;
@@ -244,7 +252,15 @@
             }).join('');
             document.querySelectorAll('.runner').forEach(r => r.remove());
             playersArr.forEach(p => {
-                const point = path.getPointAtLength((Math.min(p.score/7500, 1)) * path.getTotalLength());
+                const totalPath = path.getTotalLength();
+                let pScore = p.score;
+                let runnerPercent;
+                if (pScore === 0) {
+                    runnerPercent = 35 / totalPath; // 0 的特化位置
+                } else {
+                    runnerPercent = (pScore / 7500);
+                }
+                const point = path.getPointAtLength((Math.min(runnerPercent, 1)) * totalPath);
                 const runner = document.createElement('div');
                 runner.className = 'runner';
                 runner.style.left = `${(point.x / 200) * 100}%`;
