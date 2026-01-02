@@ -27,6 +27,7 @@
         .section-header { max-width: 550px; margin: 0 auto 15px auto; text-align: left; }
         .section-title { font-size: 18px; font-weight: 800; color: var(--accent-gold); padding-left: 10px; border-left: 4px solid var(--accent-gold); line-height: 1; }
 
+        /* 霧感 UI 控制項 */
         .controls-wrapper {
             margin: 0 auto 30px auto; max-width: 550px; background: var(--panel-bg); 
             padding: 25px; border-radius: 40px; border: 2px solid var(--track-yellow); 
@@ -35,35 +36,25 @@
         }
 
         .control-row { display: flex; justify-content: space-between; align-items: flex-end; width: 100%; gap: 15px; }
-        .input-group { display: flex; gap: 10px; align-items: flex-end; flex-grow: 2; }
-        .input-box { display: flex; flex-direction: column; align-items: flex-start; flex-grow: 1; }
+        .input-group { display: flex; gap: 10px; align-items: flex-end; flex-grow: 3; } /* 增加左側比例 */
+        .input-box { display: flex; flex-direction: column; align-items: flex-start; }
+        .input-box.grow { flex-grow: 1; }
+        .input-box.small { width: 80px; flex-shrink: 0; } /* 縮小運動量欄位 */
         
         label { font-size: 11px; margin-bottom: 5px; color: var(--accent-blue); font-weight: 800; }
         input, select { 
-            font-family: var(--font-round); background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); 
+            font-family: var(--font-round); background: rgba(255, 255, 255, 0.15); 
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3); 
             padding: 10px; border-radius: 12px; color: #ffffff; outline: none; font-size: 14px; width: 100%; box-sizing: border-box;
         }
-
-        @media (max-width: 480px) {
-            .control-row:first-child { flex-direction: column; align-items: stretch; gap: 20px; }
-            .submit-btn { width: 100%; padding: 12px 0 !important; }
-        }
+        select option { color: #333; background: #fff; } /* 修正選單文字色 */
 
         .submit-btn { 
             font-family: var(--font-round); padding: 12px 100px; background: linear-gradient(135deg, #f9d423, #ff4e50); 
             color: #000; border: none; border-radius: 30px; cursor: pointer; font-weight: 800; 
             font-size: 16px; box-shadow: 0 4px 15px rgba(255, 78, 80, 0.4);
         }
-
-        #comment-wall { margin: 30px auto; max-width: 550px; text-align: left; }
-        .comment-item { 
-            position: relative; background: var(--bubble-bg); border-radius: 15px; padding: 15px 20px; margin-bottom: 20px; 
-            font-size: 14px; border: 1.5px solid rgba(255,255,255,0.15);
-        }
-        .comment-item::after { content: ''; position: absolute; left: 25px; bottom: -10px; border-width: 10px 10px 0; border-style: solid; border-color: rgba(255,255,255,0.1) transparent transparent; }
-        .comment-header { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 12px; }
-        .comment-name { color: var(--accent-gold); font-weight: 800; }
-        .comment-time { color: rgba(255,255,255,0.4); font-weight: 500; }
 
         #track-wrapper { width: 100%; max-width: 550px; margin: 0 auto; position: relative; }
         svg { width: 100%; height: auto; overflow: visible; }
@@ -73,8 +64,7 @@
 
         .runner { 
             position: absolute; width: 44px; height: 44px; display: flex; flex-direction: column; align-items: center; 
-            z-index: 50; pointer-events: none; margin-left: -22px; 
-            margin-top: -55px;
+            z-index: 50; pointer-events: none; margin-left: -22px; margin-top: -55px;
             transition: all 1s ease;
             animation: runnerFloating 2s ease-in-out infinite !important;
         }
@@ -100,22 +90,23 @@
         <div class="controls-wrapper">
             <div class="control-row">
                 <div class="input-group">
-                    <div class="input-box">
+                    <div class="input-box grow">
                         <label>是哪位運動家</label>
                         <select id="user-select"><option value="">+ 新成員</option></select>
                     </div>
-                    <div class="input-box" id="new-name-box">
-                        <input type="text" id="new-name" placeholder="輸入名字">
+                    <div class="input-box grow" id="new-name-box">
+                        <label>輸入名字</label>
+                        <input type="text" id="new-name" placeholder="名字">
                     </div>
                     <button id="avatar-btn" style="font-family: var(--font-round); background:#2c5282; color:white; border:none; padding:10px; border-radius:12px; cursor:pointer; font-size:12px; height:41px; min-width:80px;" onclick="toggleModal(true)">選擇頭像</button>
                 </div>
-                <div class="input-box">
+                <div class="input-box small">
                     <label>今日運動量</label>
                     <input type="number" id="mins" placeholder="mins" min="0">
                 </div>
             </div>
             <div class="control-row">
-                <div class="input-box">
+                <div class="input-box grow">
                     <label>今日碎碎念</label>
                     <input type="text" id="thought-input" placeholder="只能碎念30字" maxlength="30">
                 </div>
@@ -130,13 +121,8 @@
             <div id="comment-list"></div>
         </div>
 
-        <div id="modal-overlay" onclick="toggleModal(false)" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:2500;"></div>
-        <div id="avatar-modal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:#1a2a44; padding:20px; border-radius:20px; border:2px solid var(--accent-blue); z-index:3000; width: 280px;">
-            <div class="avatar-grid" id="avatar-picker" style="display:grid; grid-template-columns:repeat(4,1fr); gap:10px;"></div>
-            <button class="submit-btn" style="margin-top:15px; width:100%; color: white; font-size:14px; padding:10px;" onclick="toggleModal(false)">確定</button>
-        </div>
-        
         <div id="track-wrapper">
+            <div class="section-header"><div class="section-title">跑跑跑！向前跑！</div></div>
             <svg viewBox="0 0 200 520" id="main-svg">
                 <defs>
                     <linearGradient id="track-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -148,6 +134,12 @@
                 <g id="milestones-group"></g>
             </svg>
         </div>
+    </div>
+
+    <div id="modal-overlay" onclick="toggleModal(false)" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:2500;"></div>
+    <div id="avatar-modal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:#1a2a44; padding:20px; border-radius:20px; border:2px solid var(--accent-blue); z-index:3000; width: 280px;">
+        <div class="avatar-grid" id="avatar-picker" style="display:grid; grid-template-columns:repeat(4,1fr); gap:10px;"></div>
+        <button class="submit-btn" style="margin-top:15px; width:100%; color: white; font-size:14px; padding:10px;" onclick="toggleModal(false)">確定</button>
     </div>
 
     <script>
@@ -166,51 +158,27 @@
             const group = document.getElementById('milestones-group');
             const pathLength = path.getTotalLength();
             group.innerHTML = "";
-            
-            // 重新定義里程碑點位，確保 0 的 x 座標與 2000 對齊 (x=35)
             for (let i = 0; i <= 7500; i += 500) {
-                let percent;
-                
-                if (i === 0) {
-                    // 強制讓 0 的點位出現在 x=35 的位置 (這在 pathLength 中約佔 35 單位)
-                    percent = 35 / pathLength;
-                } else {
-                    // 其他點位根據比例均分
-                    percent = i / 7500;
-                }
-
+                // 調整起點 0 到 x=35 的位置 (約佔路徑的 35 單位)
+                let percent = (i === 0) ? (35 / pathLength) : (i / 7500);
                 const point = path.getPointAtLength(percent * pathLength);
                 
-                // 點點
                 const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
                 dot.setAttribute("cx", point.x); dot.setAttribute("cy", point.y); dot.setAttribute("r", "2.5");
                 dot.setAttribute("class", "milestone-dot");
                 group.appendChild(dot);
 
-                // 數字
                 const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
                 text.setAttribute("class", "milestone-text");
                 text.textContent = i;
-                
                 let offsetY = 12;
-                let anchor = "middle";
-
-                // 圓弧頂點微調
-                if (i > 0 && i % 1500 === 0) {
-                    if (point.x > 100) { anchor = "end"; } 
-                    else { anchor = "start"; } 
-                } else if (i === 0) {
-                    anchor = "middle"; // 0 現在是對齊中心，用 middle 最準
-                }
-
                 text.setAttribute("x", point.x);
                 text.setAttribute("y", point.y + offsetY);
-                text.setAttribute("text-anchor", anchor);
+                text.setAttribute("text-anchor", "middle");
                 group.appendChild(text);
             }
         }
 
-        // Firebase & UI 同步 ...
         const baseUrl = "https://raw.githubusercontent.com/adeerlulu/runrundondon/main/icons/";
         for (let i = 1; i <= 12; i++) {
             const fileName = i < 10 ? '0' + i : i;
@@ -224,7 +192,9 @@
             };
             document.getElementById('avatar-picker').appendChild(img);
         }
+
         function toggleModal(show) { document.getElementById('avatar-modal').style.display = show ? 'block' : 'none'; document.getElementById('modal-overlay').style.display = show ? 'block' : 'none'; }
+        
         function handleUpdate() {
             const name = document.getElementById('user-select').value || document.getElementById('new-name').value.trim();
             const mins = parseInt(document.getElementById('mins').value);
@@ -238,29 +208,26 @@
                 return userRef.update(updates);
             }).then(() => location.reload());
         }
+
         db.ref('players').on('value', (snapshot) => {
             const players = snapshot.val();
             const path = document.getElementById('s-path');
             if(!players || !path) return;
             const playersArr = Object.values(players);
             document.getElementById('user-select').innerHTML = '<option value="">+ 新成員</option>' + playersArr.map(p => `<option value="${p.name}">${p.name}</option>`).join('');
+            
             const thoughts = playersArr.filter(p => p.lastThought).sort((a,b) => b.lastUpdate - a.lastUpdate).slice(0,3);
             document.getElementById('comment-list').innerHTML = thoughts.map(p => {
                 const date = new Date(p.lastUpdate);
-                const timeStr = `${date.getMonth()+1}/${date.getDate()} ${date.getHours().toString().padStart(2,'0')}:${date.getMinutes().toString().padStart(2,'0')}`;
-                return `<div class="comment-item"><div class="comment-header"><span class="comment-name">${p.name}</span><span class="comment-time">${timeStr}</span></div><div>${p.lastThought}</div></div>`;
+                return `<div class="comment-item"><div class="comment-header"><span class="comment-name">${p.name}</span><span class="comment-time">${date.getMonth()+1}/${date.getDate()}</span></div><div>${p.lastThought}</div></div>`;
             }).join('');
+
             document.querySelectorAll('.runner').forEach(r => r.remove());
             playersArr.forEach(p => {
-                const totalPath = path.getTotalLength();
-                let pScore = p.score;
-                let runnerPercent;
-                if (pScore === 0) {
-                    runnerPercent = 35 / totalPath; // 0 的特化位置
-                } else {
-                    runnerPercent = (pScore / 7500);
-                }
-                const point = path.getPointAtLength((Math.min(runnerPercent, 1)) * totalPath);
+                const totalL = path.getTotalLength();
+                // 分數 0 的跑者定位在 35 單位處
+                let ratio = (p.score === 0) ? (35 / totalL) : (p.score / 7500);
+                const point = path.getPointAtLength(Math.min(ratio, 1) * totalL);
                 const runner = document.createElement('div');
                 runner.className = 'runner';
                 runner.style.left = `${(point.x / 200) * 100}%`;
@@ -270,10 +237,10 @@
             });
             drawMilestones();
         });
+
         document.getElementById('user-select').addEventListener('change', function() {
             const isNew = this.value === "";
             document.getElementById('new-name-box').style.display = isNew ? "block" : "none";
-            document.getElementById('avatar-btn').innerText = isNew ? "選擇頭像" : "更改頭像";
         });
     </script>
 </body>
