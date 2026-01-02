@@ -72,69 +72,78 @@ const firebaseConfig = {
     projectId: "runrundondon-31b12",
     storageBucket: "runrundondon-31b12.firebasestorage.app",
     messagingSenderId: "466713105396",
-    appId: "1:466713105396:web:c0651103b028978cd9dfa1",
-    measurementId: "G-D5D9SP15X4"
+    appId: "1:466713105396:web:c0651103b028978cd9dfa1"
 };
 
-// 正確的相容版初始化方式
+// 確保 SDK 已載入後執行
 firebase.initializeApp(firebaseConfig);
-const db = firebase.database(); // 取得資料庫實例
+
+// 重點：手動指定資料庫網址，避免 Region 偵測出錯
+const db = firebase.database(); 
 
 // --- 2. 增加時間的邏輯 ---
 function addMins() {
-    const name = document.getElementById('name').value.trim();
-    const mins = parseInt(document.getElementById('mins').value);
+    const nameInput = document.getElementById('name');
+    const minsInput = document.getElementById('mins');
+    const name = nameInput.value.trim();
+    const mins = parseInt(minsInput.value);
 
-    if (!name || isNaN(mins)) return alert("請填寫姓名與正確的分鐘數");
+    if (!name || isNaN(mins)) {
+        alert("請輸入姓名與分鐘數");
+        return;
+    }
 
     const userRef = db.ref('players/' + name);
+    
+    // 讀取並更新
     userRef.once('value').then(snapshot => {
-        const current = snapshot.val() ? snapshot.val().score : 0;
-        userRef.set({
+        const currentScore = (snapshot.val() && snapshot.val().score) ? snapshot.val().score : 0;
+        return userRef.set({
             name: name,
-            score: current + mins
-        }).then(() => {
-            console.log("更新成功！");
-        }).catch((error) => {
-            console.error("更新失敗：", error);
-            alert("更新失敗，請檢查資料庫權限設定");
+            score: currentScore + mins,
+            lastUpdate: Date.now()
         });
+    }).then(() => {
+        alert("更新成功！");
+        minsInput.value = ''; // 只清空分鐘
+    }).catch(error => {
+        console.error("Firebase Error:", error);
+        alert("寫入失敗！原因：" + error.message);
     });
-    document.getElementById('mins').value = ''; // 清空輸入框
 }
 
-// --- 3. 監聽資料庫，即時繪製畫面 ---
+// --- 3. 監聽資料 ---
 db.ref('players').on('value', (snapshot) => {
     const players = snapshot.val();
     const track = document.getElementById('track');
-    track.innerHTML = ''; // 重新整理跑道
+    track.innerHTML = ''; 
 
-    const GOAL = 200; // 假設 200 分鐘跑完一圈
+    if (!players) {
+        track.innerHTML = '<p style="color:gray">目前還沒有資料</p>';
+        return;
+    }
 
-    if (players) {
-        for (let id in players) {
-            const p = players[id];
-            const progress = Math.min((p.score / GOAL) * 90, 95); 
-            
-            const lane = document.createElement('div');
-            lane.className = 'lane';
-            lane.innerHTML = `
-                <div class="runner" style="left: ${progress}%">
-                    <span class="avatar">🏃</span>
-                    <span class="label">${p.name}: ${p.score} min</span>
-                </div>
-            `;
-            track.appendChild(lane);
-        }
+    const GOAL = 500; // 你可以調整終點線
+
+    for (let id in players) {
+        const p = players[id];
+        const progress = Math.min((p.score / GOAL) * 85, 92); 
+        
+        const lane = document.createElement('div');
+        lane.className = 'lane';
+        lane.innerHTML = `
+            <div class="runner" style="left: ${progress}%">
+                <span class="avatar">🏃</span>
+                <span class="label">${p.name}: ${p.score} min</span>
+            </div>
+        `;
+        track.appendChild(lane);
     }
 });
-
-            }
-
-        });
 
     </script>
 
 </body>
+
 
 </html>
