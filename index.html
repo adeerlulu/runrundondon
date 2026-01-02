@@ -19,24 +19,22 @@
             font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif; 
             background-color: var(--bg-color); 
             margin: 0; padding: 20px; text-align: center; color: var(--text-main);
-            min-height: 100vh;
-            overflow-x: hidden;
+            min-height: 100vh; overflow-x: hidden;
         }
 
-        /* 鎖定層樣式 */
+        /* 鎖定層 */
         #auth-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg-color); z-index: 2000;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
 
-        /* 標題與副標 */
         h1 { font-size: 3rem; margin: 0; background: linear-gradient(to right, #ff4e50, #f9d423, #00d2ff, #9d50bb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; }
         .subtitle { font-size: 1.2rem; opacity: 0.8; margin-bottom: 20px; }
 
-        /* 控制面板（放在標題下） */
+        /* 控制面板 */
         .controls-container {
-            margin: 20px auto 40px auto; padding: 20px;
+            margin: 10px auto 30px auto; padding: 20px;
             background: var(--panel-bg); backdrop-filter: blur(15px);
             border: 1px solid rgba(255,255,255,0.1); border-radius: 20px;
             display: inline-flex; flex-wrap: wrap; justify-content: center; align-items: flex-end; gap: 15px;
@@ -45,27 +43,31 @@
 
         .input-box { display: flex; flex-direction: column; align-items: flex-start; }
         label { font-size: 11px; margin-bottom: 5px; color: var(--accent-blue); font-weight: bold; }
-
         input, select { 
             background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
             padding: 10px 12px; border-radius: 10px; color: white; outline: none; width: 130px;
-            font-size: 14px;
-        }
-        select option { background: #1a2a44; color: white; }
-
-        #file-btn { background: #2c5282; color: white; padding: 10px; border-radius: 10px; font-size: 12px; cursor: pointer; }
-
-        button { 
-            padding: 12px 30px; background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
-            color: white; border: none; border-radius: 30px; cursor: pointer;
-            font-weight: bold; font-size: 16px; box-shadow: 0 4px 15px rgba(0, 210, 255, 0.4);
         }
 
-        /* S 型跑道 */
+        /* 頭像選擇器 */
+        .avatar-picker { 
+            display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; 
+            background: rgba(0,0,0,0.2); padding: 10px; border-radius: 12px;
+        }
+        .avatar-option { 
+            width: 30px; height: 30px; border-radius: 6px; cursor: pointer; 
+            border: 2px solid transparent; transition: 0.2s; object-fit: cover;
+        }
+        .avatar-option.selected { border-color: var(--accent-blue); background: var(--accent-blue); }
+
+        button { padding: 12px 30px; background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%); color: white; border: none; border-radius: 30px; cursor: pointer; font-weight: bold; }
+
+        /* 跑道區域 */
         #track-wrapper { width: 100%; max-width: 500px; margin: 0 auto; position: relative; }
         svg { width: 100%; height: auto; display: block; overflow: visible; }
-        .path-main { fill: none; stroke: url(#track-gradient); stroke-width: 28; stroke-linecap: round; stroke-linejoin: round; }
-        .path-shadow { fill: none; stroke: rgba(255,255,255,0.05); stroke-width: 32; stroke-linecap: round; }
+        .path-main { fill: none; stroke: url(#track-gradient); stroke-width: 26; stroke-linecap: round; stroke-linejoin: round; }
+        .path-shadow { fill: none; stroke: rgba(255,255,255,0.05); stroke-width: 30; stroke-linecap: round; }
+        .milestone-dot { fill: rgba(255,255,255,0.8); }
+        .milestone-text { fill: rgba(255,255,255,0.5); font-size: 8px; font-weight: bold; }
 
         /* 跑者標籤 */
         .runner {
@@ -77,7 +79,7 @@
         .user-photo { width: 35px; height: 35px; border-radius: 8px; border: 2px solid white; box-shadow: 0 0 12px rgba(0, 210, 255, 0.6); object-fit: cover; background: #222; }
         .label { background: rgba(0, 0, 0, 0.85); color: white; font-size: 10px; font-weight: bold; padding: 2px 8px; border-radius: 10px; white-space: nowrap; border: 1px solid var(--accent-blue); margin-top: 4px; }
         
-        #main-content { display: none; } /* 初始隱藏內容 */
+        #main-content { display: none; }
     </style>
 </head>
 <body>
@@ -98,29 +100,25 @@
         <div class="controls-container">
             <div class="input-box">
                 <label>運動家角色</label>
-                <select id="user-select">
-                    <option value="">+ 新運動家</option>
-                </select>
+                <select id="user-select"><option value="">+ 新運動家</option></select>
                 <input type="text" id="new-name" placeholder="輸入大名" style="margin-top:8px;">
             </div>
             
-            <div class="input-box" id="photo-box">
-                <label>個人頭像 (30x30)</label>
-                <label id="file-btn" for="photo-file">選擇圖片</label>
-                <input type="file" id="photo-file" accept="image/*" style="display:none;">
-                <span id="file-status" style="font-size:10px; margin-top:5px; color:#888;">尚未選取</span>
+            <div class="input-box" id="avatar-box">
+                <label>選擇頭像</label>
+                <div class="avatar-picker" id="avatar-picker">
+                    </div>
             </div>
 
             <div class="input-box">
-                <label>今日運動時數</label>
+                <label>今日時數</label>
                 <input type="number" id="mins" placeholder="分鐘數">
             </div>
-
             <button onclick="handleUpdate()">新增進度</button>
         </div>
         
         <div id="track-wrapper">
-            <svg viewBox="0 0 200 450" id="main-svg">
+            <svg viewBox="0 0 200 500" id="main-svg">
                 <defs>
                     <linearGradient id="track-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
                         <stop offset="0%" style="stop-color:#9d50bb" />
@@ -130,16 +128,16 @@
                         <stop offset="100%" style="stop-color:#00d2ff" />
                     </linearGradient>
                 </defs>
-                <path class="path-shadow" d="M 35 50 H 165 A 35 35 0 0 1 165 120 H 35 A 35 35 0 0 0 35 190 H 165 A 35 35 0 0 1 165 260 H 35 A 35 35 0 0 0 35 330 H 165 A 35 35 0 0 1 165 400 H 35" />
-                <path id="s-path" class="path-main" d="M 35 50 H 165 A 35 35 0 0 1 165 120 H 35 A 35 35 0 0 0 35 190 H 165 A 35 35 0 0 1 165 260 H 35 A 35 35 0 0 0 35 330 H 165 A 35 35 0 0 1 165 400 H 35" />
-                <text x="25" y="32" fill="#fff" font-size="10">START</text>
-                <text x="25" y="435" fill="#ff4e50" font-size="12" font-weight="900">GOAL 7800</text>
+                <path class="path-shadow" d="M 35 50 H 165 A 35 35 0 0 1 165 120 H 35 A 35 35 0 0 0 35 190 H 165 A 35 35 0 0 1 165 260 H 35 A 35 35 0 0 0 35 330 H 165 A 35 35 0 0 1 165 400 H 35 A 35 35 0 0 0 35 470" />
+                <path id="s-path" class="path-main" d="M 35 50 H 165 A 35 35 0 0 1 165 120 H 35 A 35 35 0 0 0 35 190 H 165 A 35 35 0 0 1 165 260 H 35 A 35 35 0 0 0 35 330 H 165 A 35 35 0 0 1 165 400 H 35 A 35 35 0 0 0 35 470" />
+                <text x="25" y="30" fill="#fff" font-size="10" font-weight="bold">START</text>
+                <text x="15" y="495" fill="#ff4e50" font-size="12" font-weight="900">GOAL 7800</text>
+                <g id="milestones-group"></g>
             </svg>
         </div>
     </div>
 
     <script>
-        // --- Firebase 配置 ---
         const firebaseConfig = {
             apiKey: "AIzaSyDqX_tZqqfw0txXpd-b4AWuolhgQgU6lLU",
             authDomain: "runrundondon-31b12.firebaseapp.com",
@@ -152,49 +150,63 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // 1. 驗證密語進入網頁
+        // 1. 自動產生 GitHub 頭像選項
+        const avatarPicker = document.getElementById('avatar-picker');
+        for (let i = 1; i <= 12; i++) {
+            const img = document.createElement('img');
+            img.src = `https://raw.githubusercontent.com/adeerlulu/runrundondon/main/icons/${i}.png`;
+            img.className = 'avatar-option';
+            img.onclick = function() { selectAvatar(this); };
+            avatarPicker.appendChild(img);
+        }
+
+        let selectedAvatarUrl = "";
+        function selectAvatar(el) {
+            document.querySelectorAll('.avatar-option').forEach(img => img.classList.remove('selected'));
+            el.classList.add('selected');
+            selectedAvatarUrl = el.src;
+        }
+
+        // 2. 登入邏輯
         function checkEntry() {
-            const pw = document.getElementById('entry-pw').value;
-            if (pw === "hello") {
+            if (document.getElementById('entry-pw').value === "hello") {
                 document.getElementById('auth-overlay').style.display = 'none';
                 document.getElementById('main-content').style.display = 'block';
-            } else {
-                alert("密語錯誤，無法進入！");
+                drawMilestones();
+            } else { alert("密語錯誤！"); }
+        }
+
+        // 3. 里程碑繪製
+        function drawMilestones() {
+            const path = document.getElementById('s-path');
+            const pathLength = path.getTotalLength();
+            const group = document.getElementById('milestones-group');
+            for (let i = 500; i < 7800; i += 500) {
+                const point = path.getPointAtLength((i / 7800) * pathLength);
+                const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                circle.setAttribute("cx", point.x); circle.setAttribute("cy", point.y); circle.setAttribute("r", "2"); circle.setAttribute("class", "milestone-dot");
+                group.appendChild(circle);
+                const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                text.setAttribute("x", point.x + 6); text.setAttribute("y", point.y + 3); text.setAttribute("class", "milestone-text"); text.textContent = i;
+                group.appendChild(text);
             }
         }
 
-        let base64Photo = "";
         const userSelect = document.getElementById('user-select');
         const newNameInput = document.getElementById('new-name');
-        const photoBox = document.getElementById('photo-box');
+        const avatarBox = document.getElementById('avatar-box');
 
-        // 2. 圖片處理
-        document.getElementById('photo-file').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    base64Photo = event.target.result;
-                    document.getElementById('file-status').innerText = "✅ 已選取";
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        // 3. 切換使用者模式（隱藏/顯示欄位）
         userSelect.addEventListener('change', function() {
             const isNew = this.value === "";
             newNameInput.style.display = isNew ? "block" : "none";
-            photoBox.style.display = isNew ? "flex" : "none";
+            avatarBox.style.display = isNew ? "grid" : "none";
         });
 
-        // 4. 更新進度
         function handleUpdate() {
-            const selectedUser = userSelect.value;
-            const name = selectedUser || newNameInput.value.trim();
+            const name = userSelect.value || newNameInput.value.trim();
             const mins = parseInt(document.getElementById('mins').value);
-
-            if (!name || isNaN(mins)) { alert("請填寫姓名與運動時數"); return; }
+            if (!name || isNaN(mins)) { alert("請檢查姓名或時數"); return; }
+            if (userSelect.value === "" && !selectedAvatarUrl) { alert("請選擇頭像"); return; }
 
             const userRef = db.ref('players/' + name);
             userRef.once('value').then(snapshot => {
@@ -202,46 +214,27 @@
                 return userRef.update({
                     name: name,
                     score: data.score + mins,
-                    photo: base64Photo || data.photo || ""
+                    photo: selectedAvatarUrl || data.photo
                 });
-            }).then(() => {
-                alert("💪 更新完成！");
-                location.reload();
-            });
+            }).then(() => { location.reload(); });
         }
 
-        // 5. 監聽 Firebase 更新選單與跑道
         db.ref('players').on('value', (snapshot) => {
             const players = snapshot.val();
             const path = document.getElementById('s-path');
             const pathLength = path.getTotalLength();
             const wrapper = document.getElementById('track-wrapper');
-            
             document.querySelectorAll('.runner').forEach(r => r.remove());
             userSelect.innerHTML = '<option value="">+ 新運動家</option>';
-
             if (!players) return;
-
             Object.values(players).forEach(p => {
-                // 更新選單
-                const opt = document.createElement('option');
-                opt.value = p.name; opt.innerText = p.name;
-                userSelect.appendChild(opt);
-
-                // 計算座標
-                const progress = Math.min(p.score / 7800, 1);
-                const point = path.getPointAtLength(progress * pathLength);
-                
+                const opt = document.createElement('option'); opt.value = p.name; opt.innerText = p.name; userSelect.appendChild(opt);
+                const point = path.getPointAtLength((Math.min(p.score/7800, 1)) * pathLength);
                 const runner = document.createElement('div');
                 runner.className = 'runner';
                 runner.style.left = `${(point.x / 200) * 100}%`;
-                runner.style.top = `${(point.y / 450) * 100}%`;
-                
-                const photoSrc = p.photo || 'https://via.placeholder.com/30?text=👤';
-                runner.innerHTML = `
-                    <img src="${photoSrc}" class="user-photo">
-                    <span class="label">${p.name}: ${p.score}</span>
-                `;
+                runner.style.top = `${(point.y / 500) * 100}%`;
+                runner.innerHTML = `<img src="${p.photo}" class="user-photo"><span class="label">${p.name}: ${p.score}</span>`;
                 wrapper.appendChild(runner);
             });
         });
