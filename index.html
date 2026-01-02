@@ -23,15 +23,12 @@
         body { font-family: var(--font-round); background-color: var(--bg-color); margin: 0; padding: 20px; text-align: center; color: var(--text-main); overflow-x: hidden; }
         .main-container { max-width: 1200px; margin: 0 auto; text-align: left; }
         
-        /* LOGO 放大一倍 */
         .logo-container { margin: 40px auto; max-width: 800px; text-align: center; }
         .main-logo { width: 100%; height: auto; filter: drop-shadow(0 0 20px rgba(0, 210, 255, 0.6)); }
 
-        /* 統一標題樣式：置左 */
         .section-header { width: 100%; max-width: 900px; margin: 0 auto 15px auto; padding-top: 40px; }
         .section-title { font-size: 22px; font-weight: 800; color: var(--accent-gold); padding-left: 15px; border-left: 5px solid var(--accent-gold); line-height: 1.2; }
 
-        /* 控制面板 */
         .controls-wrapper { 
             margin: 0 auto 50px auto; max-width: 900px; 
             background: var(--panel-bg); padding: 35px; border-radius: 40px; 
@@ -43,7 +40,6 @@
         .input-box { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; flex: 1; min-width: 150px; }
         .input-box label { font-size: 14px; color: var(--accent-blue); font-weight: 800; }
         
-        /* 修正選單看不到字的問題：強制深色背景下的文字為白色 */
         input, select { 
             font-family: var(--font-round); background: rgba(255, 255, 255, 0.2) !important; 
             border: 1px solid rgba(255, 255, 255, 0.3); padding: 12px; 
@@ -57,9 +53,8 @@
             color: #000; border: none; border-radius: 35px; cursor: pointer; font-weight: 800; font-size: 18px;
         }
 
-        /* 跑道區域 */
         #track-wrapper { width: 100%; max-width: 1000px; margin: 40px auto; position: relative; }
-        .svg-container { position: relative; width: 100%; }
+        .svg-container { position: relative; width: 100%; z-index: 5; }
         .path-main { 
             fill: none; stroke: url(#track-gradient); stroke-width: 14; stroke-linecap: round;
             stroke-dasharray: 2500; stroke-dashoffset: 0;
@@ -70,24 +65,22 @@
         .milestone-dot { fill: #ffffff; }
         .milestone-text { font-size: 13px; fill: #ffffff; font-weight: 800; paint-order: stroke; stroke: var(--bg-color); stroke-width: 3px; }
 
-        /* 角色浮動動畫與定位修正 */
+        /* 角色定位：縮小 80% (由 60px 變為 48px) */
         .runner { 
-            position: absolute; width: 60px; height: 60px; z-index: 100; 
+            position: absolute; width: 48px; height: 48px; z-index: 100; 
             transform: translate(-50%, -50%); cursor: pointer;
             animation: runnerFloating 2.5s ease-in-out infinite;
         }
         @keyframes runnerFloating {
-            0%, 100% { transform: translate(-50%, -55%); }
-            50% { transform: translate(-50%, -45%); }
+            0%, 100% { transform: translate(-50%, -60%); }
+            50% { transform: translate(-50%, -40%); }
         }
         .user-photo { width: 100%; height: 100%; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 5px 15px rgba(0,0,0,0.5); background: #fff; }
 
-        /* 資訊彈窗 */
         #info-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 4000; }
         .info-card { background: #1a2a44; border: 2px solid var(--accent-blue); padding: 30px; border-radius: 25px; text-align: center; color: white; min-width: 250px; }
         .score-num { font-size: 48px; font-weight: 900; color: var(--accent-gold); display: block; margin: 10px 0; }
 
-        /* 碎碎念輪播區 */
         .comment-carousel-container { position: relative; max-width: 1000px; margin: 40px auto 100px auto; display: flex; align-items: center; }
         .comment-window { overflow: hidden; width: 100%; padding: 40px 0; }
         #comment-list { display: flex; transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1); }
@@ -114,11 +107,14 @@
         <div class="control-row">
             <div class="input-box"><label>是哪位運動家</label><select id="user-select"><option value="">+ 新成員</option></select></div>
             <div class="input-box" id="new-name-box"><label>新同學姓名</label><input type="text" id="new-name"></div>
-            <div class="input-box"><label>選個頭像</label><button id="avatar-btn" style="background:#2c5282; color:white; border:none; padding:12px; border-radius:12px; cursor:pointer; width:100%; font-weight:bold;" onclick="toggleModal(true)">挑選頭像 (24款)</button></div>
-            <div class="input-box" style="flex:0.6"><label>運動量(min)</label><input type="number" id="mins"></div>
+            <div class="input-box">
+                <div style="height:22px"></div> 
+                <button id="avatar-btn" style="background:#2c5282; color:white; border:none; padding:12px; border-radius:12px; cursor:pointer; width:100%; font-weight:bold;" onclick="toggleModal(true)">挑選頭像</button>
+            </div>
+            <div class="input-box" style="flex:0.6"><label>今日運動時數</label><input type="number" id="mins" placeholder="分鐘"></div>
         </div>
         <div class="control-row">
-            <div class="input-box" style="flex:3"><label>今日碎碎念</label><input type="text" id="thought-input" maxlength="30"></div>
+            <div class="input-box" style="flex:3"><label>今日碎碎念</label><input type="text" id="thought-input" placeholder="只能碎念30字" maxlength="30"></div>
             <button class="submit-btn" onclick="handleUpdate()">GO!</button>
         </div>
     </div>
@@ -135,7 +131,7 @@
                 <path id="double-path" class="path-main" d="M 50,100 L 920,100 A 60,60 0 0 1 920,220 L 50,220" />
                 <g id="milestones-group"></g>
             </svg>
-            </div>
+        </div>
     </div>
 
     <div class="section-header"><div class="section-title">動動碎碎念</div></div>
@@ -148,10 +144,7 @@
 
 <div id="info-overlay" onclick="this.style.display='none'">
     <div class="info-card" onclick="event.stopPropagation()">
-        <h2 id="info-name"></h2>
-        <p>2026 年已累積運動</p>
-        <span class="score-num" id="info-score">0</span>
-        <p>分鐘</p>
+        <h2 id="info-name"></h2><p>2026 年已累積運動</p><span class="score-num" id="info-score">0</span><p>分鐘</p>
         <button class="submit-btn" style="padding:10px 30px; font-size:14px" onclick="document.getElementById('info-overlay').style.display='none'">關閉</button>
     </div>
 </div>
@@ -190,12 +183,10 @@
         const players = snapshot.val() || {};
         const playersArr = Object.values(players);
         
-        // 1. 修復選單：確保文字顯示為白色
         const select = document.getElementById('user-select');
         select.innerHTML = '<option value="" style="color:white">+ 新成員</option>' + 
             playersArr.map(p => `<option value="${p.name}" style="color:white">${p.name}</option>`).join('');
 
-        // 2. 繪製刻度
         const path = document.getElementById('double-path');
         const pathLength = path.getTotalLength();
         const mGroup = document.getElementById('milestones-group');
@@ -208,13 +199,11 @@
             `;
         });
 
-        // 3. 修正角色定位：在 .svg-container 內生成
         document.querySelectorAll('.runner').forEach(r => r.remove());
         playersArr.forEach(p => {
             const pt = path.getPointAtLength(Math.min(p.score/7500, 1) * pathLength);
             const r = document.createElement('div');
             r.className = 'runner';
-            // 使用百分比定位於容器內
             r.style.left = `${(pt.x / 1000) * 100}%`;
             r.style.top = `${(pt.y / 300) * 100}%`;
             r.innerHTML = `<img src="${p.photo}" class="user-photo">`;
@@ -226,9 +215,21 @@
             document.querySelector('.svg-container').appendChild(r);
         });
 
-        // 4. 碎碎念
         allComments = playersArr.filter(p => p.lastThought).sort((a,b) => b.lastUpdate - a.lastUpdate);
         renderCarousel();
+    });
+
+    // 監聽選單切換，改變按鈕文字
+    document.getElementById('user-select').addEventListener('change', function() {
+        const btn = document.getElementById('avatar-btn');
+        const newNameBox = document.getElementById('new-name-box');
+        if (this.value === "") {
+            btn.innerText = "挑選頭像";
+            newNameBox.style.display = "flex";
+        } else {
+            btn.innerText = "更改頭像";
+            newNameBox.style.display = "none";
+        }
     });
 
     function renderCarousel() {
@@ -238,8 +239,7 @@
                 <img src="${p.photo}" class="comment-avatar">
                 <div><b style="color:var(--accent-gold)">${p.name}</b><p style="margin:8px 0 0 0; color:#fff">${p.lastThought}</p></div>
             </div>`).join('');
-        
-        const offset = -currentIndex * 340; // 300px min-width + 40px margin
+        const offset = -currentIndex * 340;
         list.style.transform = `translateX(${offset}px)`;
     }
 
@@ -251,8 +251,15 @@
 
     function handleUpdate() {
         const name = document.getElementById('user-select').value || document.getElementById('new-name').value.trim();
-        const mins = parseInt(document.getElementById('mins').value);
-        if (!name || isNaN(mins)) { alert("請填寫名字與分鐘"); return; }
+        const minsInput = document.getElementById('mins');
+        const mins = parseInt(minsInput.value);
+
+        // 數值校驗
+        if (!name || isNaN(mins) || mins <= 0) { 
+            alert("請填入數字，還是你沒有運動呢？"); 
+            return; 
+        }
+
         db.ref('players/' + name).once('value').then(s => {
             const d = s.val() || {score:0, photo: window.selectedAvatarUrl || ""};
             db.ref('players/' + name).update({
@@ -263,10 +270,6 @@
             }).then(() => location.reload());
         });
     }
-
-    document.getElementById('user-select').addEventListener('change', function() {
-        document.getElementById('new-name-box').style.display = (this.value === "") ? "flex" : "none";
-    });
 </script>
 </body>
 </html>
