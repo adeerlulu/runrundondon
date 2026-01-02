@@ -56,9 +56,9 @@
         .total-counter-box { text-align: center; margin: 20px auto 20px auto; color: #fff; font-weight: bold; }
         .total-num { color: var(--accent-gold); font-size: 28px; font-weight: 900; margin: 0 8px; }
 
-        /* 跑道區域修正：高度改為自動避免空白，SVG 維持固定寬高比 */
-        .svg-container { position: relative; width: 100%; height: auto; aspect-ratio: 1000 / 450; overflow: visible; }
-        #main-svg { overflow: visible; width: 100%; height: auto; }
+        /* 跑道區域：固定高度為 300px */
+        .svg-container { position: relative; width: 100%; height: 300px; overflow: visible; }
+        #main-svg { width: 100%; height: 100%; overflow: visible; }
 
         .path-main { fill: none; stroke: url(#track-gradient); stroke-width: 14; stroke-linecap: round; stroke-dasharray: 3000; stroke-dashoffset: 3000; animation: flowSlow 3s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
         @keyframes flowSlow { from { stroke-dashoffset: 3000; } to { stroke-dashoffset: 0; } }
@@ -71,18 +71,17 @@
             100% { transform: translate(-50%, -50%); }
         }
 
-        /* 預設桌面版 Runner 大小 */
         .runner { position: absolute; width: 42px; height: 42px; z-index: 50; transform: translate(-50%, -50%); cursor: pointer; animation: float 3s ease-in-out infinite; }
         .runner:hover { animation-play-state: paused; transform: translate(-50%, -50%) scale(1.3); z-index: 100; filter: drop-shadow(0 0 10px var(--accent-blue)); }
         .user-photo { width: 100%; height: 100%; border-radius: 50%; border: 2px solid #fff; background: rgba(255,255,255,0.2); pointer-events: none; }
 
-        /* --- 手機版專屬修正 (APP介面) --- */
+        /* --- 手機版專屬修正 --- */
         @media screen and (max-width: 600px) {
-            .runner { width: 30px; height: 30px; } /* 手機版 icon 縮小 */
-            .milestone-text { font-size: 14px; } /* 手機版里程文字放大確保可讀 */
+            .runner { width: 30px; height: 30px; }
+            .milestone-text { font-size: 14px; }
             .total-num { font-size: 24px; }
-            .svg-container { aspect-ratio: 1000 / 550; } /* 稍微拉高手機版比例防止重疊 */
-            .section-header-talk { margin: 60px auto 5px auto; } /* 手機版間距自動調整 */
+            /* 手機版跑道高度也固定，確保座標一致 */
+            .svg-container { height: 180px; } 
         }
 
         .comment-carousel-container { position: relative; width: 100%; margin: 5px auto 40px auto; display: flex; align-items: center; }
@@ -111,7 +110,7 @@
     <div class="controls-wrapper">
         <div class="control-row">
             <div class="input-box"><label>是哪位運動家</label><select id="user-select"><option value="">+ 新成員</option></select></div>
-            <div id="new-name-box" class="input-box"><label>新成員姓名(限8字)</label><input type="text" id="new-name" maxlength="8"></div>
+            <div id="new-name-box" class="input-box"><label>新成員名字</label><input type="text" id="new-name" maxlength="8"></div>
             <div class="input-box"><div style="height:19px"></div><button id="avatar-btn" style="background:#2c5282; color:white; border:none; padding:12px; border-radius:12px; cursor:pointer; width:100%; font-weight:bold; height:48px;" onclick="toggleAvatarModal(true)">挑選頭像</button></div>
             <div class="input-box" style="flex:0.6"><label>今日運動時數</label><input type="number" id="mins" placeholder="分鐘"></div>
         </div>
@@ -156,7 +155,6 @@
 </div>
 
 <script>
-    // ... 此處保持之前的 Firebase 與 Script 邏輯不變 ...
     const firebaseConfig = { apiKey: "AIzaSyDqX_tZqqfw0txXpd-b4AWuolhgQgU6lLU", authDomain: "runrundondon-31b12.firebaseapp.com", databaseURL: "https://runrundondon-31b12-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "runrundondon-31b12" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
@@ -235,8 +233,9 @@
             const pt = path.getPointAtLength(Math.min(p.score/7500, 1) * pathLength);
             const r = document.createElement('div');
             r.className = 'runner';
+            // 3. 確保座標比例在手機版也能精準同步
             r.style.left = `${(pt.x / 1000) * 100}%`;
-            r.style.top = `${(pt.y / 450) * 100}%`; // 同步修正 SVG 高度比例
+            r.style.top = `${(pt.y / 450) * 100}%`; 
             r.innerHTML = `<img src="${p.photo}" class="user-photo">`;
             r.onclick = () => {
                 const d = new Date(p.lastUpdate);
