@@ -24,11 +24,10 @@
         .logo-container { margin: 20px auto; max-width: 700px; text-align: center; }
         .main-logo { width: 100%; height: auto; filter: drop-shadow(0 0 15px rgba(0, 210, 255, 0.5)); }
 
-        /* 間距精確調整 */
-        .section-header-work { width: 100%; margin: 0 auto 10px auto; padding-top: 10px; } 
+        /* 間距調整 */
+        .section-header-work { width: 100%; margin: 0 auto 20px auto; padding-top: 10px; } 
         .section-header-run { width: 100%; margin: 80px auto 5px auto; padding-top: 10px; } 
         .section-header-talk { width: 100%; margin: 20px auto 5px auto; padding-top: 10px; }
-        
         .section-title { font-size: 19px; font-weight: 900; color: var(--accent-gold); padding-left: 12px; border-left: 5px solid var(--accent-gold); line-height: 1.2; }
 
         .controls-wrapper { 
@@ -46,8 +45,7 @@
             border-radius: 12px; color: #ffffff !important; outline: none; width: 100%; box-sizing: border-box;
             height: 48px;
         }
-        select option { background-color: #1a2a44; color: white; }
-
+        
         .submit-btn { 
             font-family: var(--font-taipei); height: 48px; padding: 0 60px; 
             background: linear-gradient(135deg, #f9d423, #ff4e50); 
@@ -55,46 +53,44 @@
             transition: 0.3s;
         }
 
-        /* 跑道區域動畫 */
+        /* 跑道區域：開場閃過動畫 */
         #track-wrapper { width: 100%; margin: 5px auto; position: relative; }
         .svg-container { position: relative; width: 100%; height: 300px; }
         .path-main { 
             fill: none; stroke: url(#track-gradient); stroke-width: 14; stroke-linecap: round; 
-            stroke-dasharray: 2500; stroke-dashoffset: 0;
-            animation: flowEffect 15s linear infinite;
+            stroke-dasharray: 2500; stroke-dashoffset: 2500;
+            animation: flowOnce 1.5s cubic-bezier(0.23, 1, 0.32, 1) forwards;
         }
-        @keyframes flowEffect { from { stroke-dashoffset: 2500; } to { stroke-dashoffset: 0; } }
+        @keyframes flowOnce { from { stroke-dashoffset: 2500; } to { stroke-dashoffset: 0; } }
 
         .milestone-dot { fill: #ffffff; }
         .milestone-text { font-size: 12px; fill: #ffffff; font-weight: 700; paint-order: stroke; stroke: var(--bg-color); stroke-width: 3px; }
 
+        /* 跑道頭像：懸浮放大 */
         .runner { 
             position: absolute; width: 40px; height: 40px; z-index: 50; 
             transform: translate(-50%, -50%); cursor: pointer;
-            animation: runnerFloating 2.5s ease-in-out infinite;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        @keyframes runnerFloating { 0%, 100% { margin-top: -12px; } 50% { margin-top: -3px; } }
-        .user-photo { width: 100%; height: 100%; border-radius: 50%; border: 2px solid #fff; background: rgba(255,255,255,0.2); }
+        .runner:hover { transform: translate(-50%, -50%) scale(1.3); z-index: 100; filter: drop-shadow(0 0 10px var(--accent-blue)); }
+        .user-photo { width: 100%; height: 100%; border-radius: 50%; border: 2px solid #fff; background: rgba(255,255,255,0.2); pointer-events: none; }
 
-        #info-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 10000; }
-        .info-card { background: #1a2a44; border: 2px solid var(--accent-blue); padding: 30px; border-radius: 25px; text-align: center; color: white; min-width: 280px; }
-        .score-num { font-size: 50px; font-weight: 900; color: var(--accent-gold); display: block; margin: 10px 0; }
-        .last-update-time { font-size: 12px; opacity: 0.6; display: block; margin-top: 15px; }
+        /* 總分統計樣式 */
+        .total-counter-box { text-align: center; margin-top: 20px; color: #fff; font-weight: bold; }
+        .total-num { color: var(--accent-gold); font-size: 28px; font-weight: 900; margin: 0 8px; }
+
+        /* UI 彈窗 (錯誤提示與資訊) */
+        .ui-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 20000; }
+        .ui-card { background: #1a2a44; border: 2px solid var(--accent-gold); padding: 40px; border-radius: 25px; text-align: center; color: white; min-width: 300px; box-shadow: 0 0 30px rgba(0,0,0,0.5); }
+        .ui-card.error-style { border-color: #ff4e50; }
 
         .comment-carousel-container { position: relative; width: 100%; margin: 5px auto 40px auto; display: flex; align-items: center; }
         .comment-window { overflow: hidden; width: 100%; padding: 20px 0; }
         #comment-list { display: flex; transition: transform 0.6s ease; }
-        .comment-item { 
-            min-width: 300px; margin: 0 15px; background: var(--bubble-bg); 
-            padding: 20px; border-radius: 20px; opacity: 0.3; transform: scale(0.9);
-            transition: 0.5s; border: 1px solid rgba(255,255,255,0.1); text-align: left;
-            display: flex; gap: 12px; 
-        }
+        .comment-item { min-width: 300px; margin: 0 15px; background: var(--bubble-bg); padding: 20px; border-radius: 20px; opacity: 0.3; transform: scale(0.9); transition: 0.5s; border: 1px solid rgba(255,255,255,0.1); text-align: left; display: flex; gap: 12px; }
         .comment-item.active { opacity: 1; transform: scale(1.05); border-color: var(--accent-gold); }
         .comment-avatar { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--accent-gold); background: rgba(255,255,255,0.2); }
 
-        .nav-btn { background: rgba(255,255,255,0.1); border: 1px solid var(--accent-gold); color: var(--accent-gold); width: 36px; height: 36px; border-radius: 50%; cursor: pointer; }
-        
         footer { margin: 40px auto 20px auto; text-align: center; color: #fff; font-size: 11px; opacity: 0.5; }
     </style>
 </head>
@@ -126,6 +122,9 @@
                 <g id="milestones-group"></g>
             </svg>
         </div>
+        <div class="total-counter-box">
+            恭喜恭喜！在座各位已經動了 <span class="total-num" id="total-minutes">0</span> 分鐘
+        </div>
     </div>
 
     <div class="section-header-talk"><div class="section-title">動動碎碎念</div></div>
@@ -138,18 +137,12 @@
     <footer>2026 © Designed by 動不起來的我</footer>
 </div>
 
-<div id="info-overlay" onclick="this.style.display='none'">
-    <div class="info-card" onclick="event.stopPropagation()">
-        <h2 id="info-name" style="margin:0; color:var(--accent-blue)"></h2>
-        <p style="margin:10px 0 0 0; opacity:0.8">2026 年已累積運動</p>
-        <span class="score-num" id="info-score">0</span>
-        <p style="margin:0">分鐘</p>
-        <span class="last-update-time" id="info-time"></span>
-        <button class="submit-btn" style="height:40px; padding:0 30px; font-size:14px; margin-top:20px;" onclick="document.getElementById('info-overlay').style.display='none'">關閉</button>
-    </div>
+<div id="ui-overlay" class="ui-modal" onclick="this.style.display='none'">
+    <div class="ui-card" id="ui-card-content" onclick="event.stopPropagation()">
+        </div>
 </div>
 
-<div id="modal-overlay" onclick="toggleModal(false)" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:11000;"></div>
+<div id="modal-overlay" class="ui-modal" onclick="toggleModal(false)" style="z-index:11000;"></div>
 <div id="avatar-modal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:#1a2a44; padding:30px; border-radius:30px; z-index:12000; width: 90%; max-width: 500px; border: 2px solid var(--accent-blue);">
     <div id="avatar-picker" style="display:grid; grid-template-columns: repeat(6, 1fr); gap:10px;"></div>
 </div>
@@ -159,14 +152,32 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    function formatTime(ts) {
-        if(!ts) return "無紀錄";
-        const d = new Date(ts);
-        return `最後登記時間 ${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()} ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}:${d.getSeconds().toString().padStart(2,'0')}`;
+    function showUI(title, content, sub, isError=false) {
+        const card = document.getElementById('ui-card-content');
+        card.parentElement.className = isError ? 'ui-modal error-style' : 'ui-modal';
+        card.innerHTML = `
+            <h2 style="margin:0; color:${isError?'#ff4e50': 'var(--accent-blue)'}">${title}</h2>
+            <div style="font-size:48px; font-weight:900; color:var(--accent-gold); margin:20px 0;">${content}</div>
+            <p style="margin:0; opacity:0.7">${sub}</p>
+            <button class="submit-btn" style="height:40px; margin-top:30px; padding:0 30px; font-size:14px;" onclick="document.getElementById('ui-overlay').style.display='none'">關閉</button>
+        `;
+        document.getElementById('ui-overlay').style.display = 'flex';
+    }
+
+    function animateValue(obj, start, end, duration) {
+        let startTimestamp = null;
+        const step = (timestamp) => {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+            obj.innerHTML = Math.floor(progress * (end - start) + start);
+            if (progress < 1) { window.requestAnimationFrame(step); }
+        };
+        window.requestAnimationFrame(step);
     }
 
     function toggleModal(show) { document.getElementById('avatar-modal').style.display = show ? 'block' : 'none'; document.getElementById('modal-overlay').style.display = show ? 'block' : 'none'; }
     
+    // 初始化頭像清單
     const picker = document.getElementById('avatar-picker');
     for (let i = 1; i <= 24; i++) {
         const num = i < 10 ? '0' + i : i;
@@ -188,6 +199,10 @@
         const players = snapshot.val() || {};
         const playersArr = Object.values(players);
         
+        // 更新統計數字
+        const total = playersArr.reduce((acc, p) => acc + (p.score || 0), 0);
+        animateValue(document.getElementById('total-minutes'), 0, total, 1500);
+
         document.getElementById('user-select').innerHTML = '<option value="">+ 新成員</option>' + 
             playersArr.map(p => `<option value="${p.name}">${p.name}</option>`).join('');
 
@@ -209,11 +224,9 @@
             r.style.top = `${(pt.y / 300) * 100}%`;
             r.innerHTML = `<img src="${p.photo}" class="user-photo">`;
             r.onclick = (e) => {
-                e.stopPropagation();
-                document.getElementById('info-name').innerText = p.name;
-                document.getElementById('info-score').innerText = p.score;
-                document.getElementById('info-time').innerText = formatTime(p.lastUpdate);
-                document.getElementById('info-overlay').style.display = 'flex';
+                const d = new Date(p.lastUpdate);
+                const ts = p.lastUpdate ? `最後登記時間 ${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${d.getMinutes().toString().padStart(2,'0')}:${d.getSeconds().toString().padStart(2,'0')}` : "尚無紀錄";
+                showUI(p.name, p.score, ts);
             };
             document.getElementById('runner-layer').appendChild(r);
         });
@@ -250,7 +263,10 @@
     function handleUpdate() {
         const name = document.getElementById('user-select').value || document.getElementById('new-name').value.trim();
         const mins = parseInt(document.getElementById('mins').value);
-        if (!name || isNaN(mins) || mins <= 0) { alert("請填入數字，還是你沒有運動呢？"); return; }
+        if (!name || isNaN(mins) || mins <= 0) { 
+            showUI("哦哦！出錯了", "請填入數字", "還是你今天沒打算運動呢？", true); 
+            return; 
+        }
         db.ref('players/' + name).once('value').then(s => {
             const d = s.val() || {score:0, photo: window.selectedAvatarUrl || ""};
             db.ref('players/' + name).update({
