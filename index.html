@@ -22,90 +22,71 @@
             font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif; 
             background-color: var(--bg-color); 
             margin: 0; padding: 10px; text-align: center; color: var(--text-main);
-            overflow-x: hidden;
         }
 
-        /* LOGO 區 */
         .logo-container { margin: 20px auto; max-width: 600px; padding: 0 10px; }
         .main-logo { width: 100%; height: auto; display: block; filter: drop-shadow(0 0 12px rgba(0, 210, 255, 0.5)); }
 
-        /* 控制面板 */
+        /* 控制面板整合回一排 */
         .controls-wrapper {
-            margin: 10px auto; max-width: 550px;
+            margin: 10px auto; max-width: 650px;
             background: var(--panel-bg); 
-            padding: 25px; border-radius: 50px; border: 2px solid var(--track-yellow); 
+            padding: 20px 25px; border-radius: 50px; border: 2px solid var(--track-yellow); 
             box-shadow: 0 15px 30px rgba(0, 0, 0, 0.7), inset 0 0 20px rgba(11, 30, 59, 0.9);
-            display: flex; flex-direction: column; gap: 20px;
+            display: flex; flex-direction: column; gap: 15px;
         }
-        .control-row { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-end; gap: 15px; }
+        .control-row { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-end; gap: 12px; }
         .input-box { display: flex; flex-direction: column; align-items: flex-start; }
-        label { font-size: 11px; margin-bottom: 5px; color: var(--accent-blue); font-weight: bold; display: flex; align-items: center; gap: 4px; }
-        .label-icon { width: 14px; height: 14px; }
+        label { font-size: 11px; margin-bottom: 4px; color: var(--accent-blue); font-weight: bold; }
 
         input, select { 
             background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); 
-            padding: 10px; border-radius: 12px; color: #ffffff; outline: none; font-size: 14px;
+            padding: 8px 12px; border-radius: 12px; color: #ffffff; outline: none; font-size: 13px;
         }
-        select option { background-color: #1a2a44; color: #ffffff; }
-        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        #user-select { width: 110px; }
+        #new-name { width: 85px; }
+        #mins { width: 65px; } /* 縮小欄位 */
+        #thought-input { width: 220px; } 
 
-        .submit-container { width: 100%; display: flex; justify-content: center; }
-        button.submit-btn { 
-            padding: 12px 80px; background: linear-gradient(135deg, #f9d423, #ff4e50); 
+        .submit-btn { 
+            padding: 8px 30px; background: linear-gradient(135deg, #f9d423, #ff4e50); 
             color: #000; border: none; border-radius: 30px; cursor: pointer; font-weight: 900; 
-            font-size: 16px; box-shadow: 0 4px 15px rgba(255, 78, 80, 0.4);
+            font-size: 14px; align-self: center;
         }
 
         /* 碎碎念資訊區 */
-        #comment-wall { margin: 30px auto; max-width: 550px; text-align: left; }
+        #comment-wall { margin: 20px auto; max-width: 550px; text-align: left; }
         .comment-item { 
-            position: relative; background: var(--bubble-bg); border-radius: 15px; 
-            padding: 15px 20px; margin-bottom: 20px; font-size: 13px; border: 1px solid rgba(255,255,255,0.1);
+            position: relative; background: var(--bubble-bg); border-radius: 12px; 
+            padding: 10px 18px; margin-bottom: 15px; font-size: 13px; border: 1px solid rgba(255,255,255,0.1);
         }
-        .comment-item::after {
-            content: ''; position: absolute; left: 25px; bottom: -10px;
-            border-width: 10px 10px 0; border-style: solid; border-color: var(--bubble-bg) transparent transparent;
-        }
-        .comment-name { color: var(--accent-gold); font-weight: bold; }
 
-        /* 跑道細線設計 */
-        #track-wrapper { width: 100%; max-width: 450px; margin: 0 auto; position: relative; }
+        /* 跑道細線與數字 */
+        #track-wrapper { width: 100%; max-width: 400px; margin: 20px auto; position: relative; }
         svg { width: 100%; height: auto; overflow: visible; }
         
         .path-main { 
             fill: none; 
             stroke: url(#track-gradient); 
-            stroke-width: 2; /* 纖細線條 */
+            stroke-width: 3; 
             stroke-linecap: round;
-            filter: drop-shadow(0 0 3px rgba(0, 210, 255, 0.5));
         }
-        .path-shadow { fill: none; stroke: rgba(255,255,255,0.05); stroke-width: 1; stroke-dasharray: 4, 4; }
-
-        /* 跑道數字細化 */
+        .milestone-dot { fill: var(--accent-blue); filter: drop-shadow(0 0 2px var(--accent-blue)); }
         .milestone-text { 
-            fill: rgba(255,255,255,0.5); 
-            font-size: 5px; 
-            font-weight: 300; 
-            pointer-events: none;
+            fill: rgba(255,255,255,0.5); font-size: 6px; font-weight: 300; pointer-events: none; 
         }
 
-        /* 角色動畫 */
+        /* 角色與動畫 */
         .runner { 
-            position: absolute; width: 40px; height: 40px; 
-            display: flex; flex-direction: column; align-items: center; 
-            transition: all 1.5s cubic-bezier(0.34, 1.56, 0.64, 1); 
-            z-index: 50; pointer-events: none; margin-left: -20px; margin-top: -35px;
-            animation: runnerFloating 2s ease-in-out infinite !important;
+            position: absolute; width: 40px; height: 40px; display: flex; flex-direction: column; align-items: center; 
+            transition: all 1.5s cubic-bezier(0.34, 1.56, 0.64, 1); z-index: 100; pointer-events: none;
+            margin-left: -20px; margin-top: -35px;
+            animation: runnerFloating 2s ease-in-out infinite;
         }
-        @keyframes runnerFloating { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-        .user-photo { width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid #fff; object-fit: cover; }
-        .label { background: linear-gradient(135deg, #ff4e50, #f9d423); color: #000; font-size: 9px; font-weight: 900; padding: 1px 6px; border-radius: 8px; border: 1px solid #fff; }
+        @keyframes runnerFloating { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+        .user-photo { width: 30px; height: 30px; border-radius: 50%; border: 1.5px solid #fff; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
+        .label { background: rgba(0,0,0,0.7); color: #fff; font-size: 8px; padding: 1px 5px; border-radius: 4px; margin-top: 2px; }
 
-        #avatar-modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #1a2a44; padding: 20px; border-radius: 20px; border: 2px solid var(--accent-blue); z-index: 3000; width: 280px; }
-        .avatar-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-        .avatar-option { width: 50px; height: 50px; border-radius: 8px; cursor: pointer; border: 2px solid transparent; background: #fff; }
-        
-        /* 認證頁面隱藏內容 */
         #auth-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
     </style>
 </head>
@@ -114,7 +95,7 @@
     <div id="auth-overlay">
         <div class="logo-container"><img src="https://raw.githubusercontent.com/adeerlulu/runrundondon/main/links/LOGO.png" class="main-logo"></div>
         <input type="password" id="entry-pw" placeholder="密碼 1234" style="width: 180px; margin-bottom: 20px;">
-        <button class="submit-btn" style="color:white; background: #3a7bd5; padding: 10px 40px;" onclick="checkEntry()">進入網頁</button>
+        <button class="submit-btn" style="color:white; background: #3a7bd5;" onclick="checkEntry()">進入網頁</button>
     </div>
 
     <div id="main-content" style="display:none;">
@@ -125,53 +106,49 @@
         <div class="controls-wrapper">
             <div class="control-row">
                 <div class="input-box">
-                    <label><img src="https://raw.githubusercontent.com/adeerlulu/runrundondon/main/links/flower_1.svg" class="label-icon"> 是哪位運動家</label>
-                    <select id="user-select"><option value="">+ 新運動家</option></select>
+                    <label>運動家</label>
+                    <select id="user-select"><option value="">+ 新成員</option></select>
                 </div>
                 <div class="input-box" id="new-name-box">
-                    <input type="text" id="new-name" placeholder="輸入名字">
+                    <input type="text" id="new-name" placeholder="名字">
                 </div>
-                <div class="input-box" id="avatar-box">
-                    <button id="avatar-btn" style="background:#2c5282; color:white; border:none; padding:10px 12px; border-radius:10px; cursor:pointer; font-size:12px;" onclick="toggleModal(true)">選擇頭像</button>
-                </div>
+                <button id="avatar-btn" style="background:#2c5282; color:white; border:none; padding:8px; border-radius:10px; cursor:pointer; font-size:12px; margin-bottom:2px;" onclick="toggleModal(true)">頭像</button>
                 <div class="input-box">
-                    <label><img src="https://raw.githubusercontent.com/adeerlulu/runrundondon/main/links/flower_1.svg" class="label-icon"> 今日運動量</label>
+                    <label>今日運動量</label>
                     <input type="number" id="mins" placeholder="mins" min="0">
                 </div>
-            </div>
-            <div class="control-row">
-                <div class="input-box" style="width: 100%;">
-                    <label><img src="https://raw.githubusercontent.com/adeerlulu/runrundondon/main/links/flower_1.svg" class="label-icon"> 今日碎碎念</label>
+                <div class="input-box">
+                    <label>今日碎碎念</label>
                     <input type="text" id="thought-input" placeholder="只能碎念30字" maxlength="30">
                 </div>
+                <button class="submit-btn" onclick="handleUpdate()">GO!</button>
             </div>
-            <div class="submit-container"><button class="submit-btn" onclick="handleUpdate()">GO!</button></div>
         </div>
 
         <div id="comment-wall"><div id="comment-list"></div></div>
 
         <div id="modal-overlay" onclick="toggleModal(false)" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:2500;"></div>
-        <div id="avatar-modal"><div class="avatar-grid" id="avatar-picker"></div><button class="submit-btn" style="margin-top:15px; width:100%; color: white; font-size: 14px; padding: 10px;" onclick="toggleModal(false)">確定</button></div>
+        <div id="avatar-modal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:#1a2a44; padding:20px; border-radius:20px; border:2px solid var(--accent-blue); z-index:3000;">
+            <div class="avatar-grid" id="avatar-picker" style="display:grid; grid-template-columns:repeat(4,1fr); gap:10px;"></div>
+            <button class="submit-btn" style="margin-top:15px; width:100%; color:white;" onclick="toggleModal(false)">確定</button>
+        </div>
         
         <div id="track-wrapper">
             <svg viewBox="0 0 200 520" id="main-svg">
                 <defs>
                     <linearGradient id="track-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                        <stop offset="0%" style="stop-color:#9d50bb" /><stop offset="25%" style="stop-color:#ff4e50" /><stop offset="50%" style="stop-color:#f9d423" /><stop offset="75%" style="stop-color:#2ecc71" /><stop offset="100%" style="stop-color:#00d2ff" />
+                        <stop offset="0%" style="stop-color:#00d2ff" /><stop offset="50%" style="stop-color:#f9d423" /><stop offset="100%" style="stop-color:#ff4e50" />
                     </linearGradient>
                 </defs>
-                <path class="path-shadow" d="M 45 50 H 155 A 35 35 0 0 1 155 120 H 45 A 35 35 0 0 0 45 190 H 155 A 35 35 0 0 1 155 260 H 45 A 35 35 0 0 0 45 330 H 155 A 35 35 0 0 1 155 400 H 45 A 35 35 0 0 0 45 470" />
                 <path id="s-path" class="path-main" d="M 45 50 H 155 A 35 35 0 0 1 155 120 H 45 A 35 35 0 0 0 45 190 H 155 A 35 35 0 0 1 155 260 H 45 A 35 35 0 0 0 45 330 H 155 A 35 35 0 0 1 155 400 H 45 A 35 35 0 0 0 45 470" />
                 
-                <text x="15" y="25" fill="#fff" font-size="10" font-weight="bold">START</text>
-                <text x="15" y="505" fill="#ff4e50" font-size="14" font-weight="900">FINISH 7800</text>
+                <text x="15" y="505" fill="#ff4e50" font-size="12" font-weight="900">FINISH 7500</text>
                 <g id="milestones-group"></g>
             </svg>
         </div>
     </div>
 
     <script>
-        // --- 基本設定與認證 ---
         const firebaseConfig = { apiKey: "AIzaSyDqX_tZqqfw0txXpd-b4AWuolhgQgU6lLU", authDomain: "runrundondon-31b12.firebaseapp.com", databaseURL: "https://runrundondon-31b12-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "runrundondon-31b12" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
@@ -182,60 +159,51 @@
             document.getElementById('auth-overlay').style.display = 'none';
         }
 
-        // --- 里程碑數字分布邏輯 ---
+        // 重新設計數字分布
         function drawMilestones() {
             const path = document.getElementById('s-path');
             const group = document.getElementById('milestones-group');
             const pathLength = path.getTotalLength();
             group.innerHTML = "";
 
-            // 邏輯：500, 1000 為排，1500 為轉彎圓環，以此類推
-            for (let i = 500; i < 7800; i += 500) {
-                const point = path.getPointAtLength((i / 7800) * pathLength);
+            for (let i = 0; i <= 7500; i += 500) {
+                const point = path.getPointAtLength((i / 7500) * pathLength);
+                
+                // 1. 繪製小圓點 (在跑道上)
+                const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                dot.setAttribute("cx", point.x);
+                dot.setAttribute("cy", point.y);
+                dot.setAttribute("r", "1.5");
+                dot.setAttribute("class", "milestone-dot");
+                group.appendChild(dot);
+
+                // 2. 繪製數字 (移出跑道)
                 const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
                 text.setAttribute("class", "milestone-text");
                 text.textContent = i;
 
-                // 判斷位置排版：圓環處中置，直線處偏左或偏右
-                if (point.x > 170 || point.x < 30) { // 圓環頂點處
+                if (point.x > 160 || point.x < 40) { // 圓環處
                     text.setAttribute("x", point.x);
-                    text.setAttribute("y", point.y + (point.y < 250 ? -10 : 15));
+                    text.setAttribute("y", point.y + (point.y < 250 ? -8 : 12));
                     text.setAttribute("text-anchor", "middle");
-                } else if (point.x > 100) { // 右側直線
-                    text.setAttribute("x", point.x + 10);
+                } else { // 直線處
+                    const isLeft = (point.y > 110 && point.y < 130) || (point.y > 250 && point.y < 270) || (point.y > 390 && point.y < 410);
+                    text.setAttribute("x", point.x + (isLeft ? 15 : -15));
                     text.setAttribute("y", point.y + 2);
-                    text.setAttribute("text-anchor", "start");
-                } else { // 左側直線
-                    text.setAttribute("x", point.x - 10);
-                    text.setAttribute("y", point.y + 2);
-                    text.setAttribute("text-anchor", "end");
+                    text.setAttribute("text-anchor", isLeft ? "start" : "end");
                 }
                 group.appendChild(text);
             }
         }
 
-        // --- 核心更新功能 ---
-        function handleUpdate() {
-            const name = document.getElementById('user-select').value || document.getElementById('new-name').value.trim();
-            const mins = parseInt(document.getElementById('mins').value);
-            const thought = document.getElementById('thought-input').value.trim();
-            if (!name || isNaN(mins)) { alert("資訊未填寫完整"); return; }
-            const userRef = db.ref('players/' + name);
-            userRef.once('value').then(snapshot => {
-                const data = snapshot.val() || { score: 0, photo: "" };
-                const updates = { name: name, score: data.score + mins, photo: window.selectedAvatarUrl || data.photo, lastUpdate: Date.now() };
-                if (thought) updates.lastThought = thought;
-                return userRef.update(updates);
-            }).then(() => location.reload());
-        }
-
-        // --- 頭像與監聽器 ---
+        // 頭像選擇器
         const baseUrl = "https://raw.githubusercontent.com/adeerlulu/runrundondon/main/icons/";
         for (let i = 1; i <= 12; i++) {
             const fileName = i < 10 ? '0' + i : i;
             const img = document.createElement('img');
             img.src = `${baseUrl}${fileName}.png`;
             img.className = 'avatar-option';
+            img.style = "width:50px; height:50px; cursor:pointer; border:2px solid transparent;";
             img.onclick = function() { 
                 document.querySelectorAll('.avatar-option').forEach(el => el.style.borderColor = 'transparent');
                 this.style.borderColor = '#00d2ff';
@@ -246,20 +214,33 @@
         }
         function toggleModal(show) { document.getElementById('avatar-modal').style.display = show ? 'block' : 'none'; document.getElementById('modal-overlay').style.display = show ? 'block' : 'none'; }
 
+        // 資料更新與渲染
+        function handleUpdate() {
+            const name = document.getElementById('user-select').value || document.getElementById('new-name').value.trim();
+            const mins = parseInt(document.getElementById('mins').value);
+            const thought = document.getElementById('thought-input').value.trim();
+            if (!name || isNaN(mins)) { alert("請填寫資訊"); return; }
+            const userRef = db.ref('players/' + name);
+            userRef.once('value').then(snapshot => {
+                const data = snapshot.val() || { score: 0, photo: "" };
+                const updates = { name: name, score: data.score + mins, photo: window.selectedAvatarUrl || data.photo, lastUpdate: Date.now() };
+                if (thought) updates.lastThought = thought;
+                return userRef.update(updates);
+            }).then(() => location.reload());
+        }
+
         db.ref('players').on('value', (snapshot) => {
             const players = snapshot.val();
             const path = document.getElementById('s-path');
             if(!players || !path) return;
             const playersArr = Object.values(players);
             
-            document.getElementById('user-select').innerHTML = '<option value="">+ 新運動家</option>' + playersArr.map(p => `<option value="${p.name}">${p.name}</option>`).join('');
-
-            const thoughts = playersArr.filter(p => p.lastThought).sort((a,b) => b.lastUpdate - a.lastUpdate).slice(0,3);
-            document.getElementById('comment-list').innerHTML = thoughts.map(p => `<div class="comment-item"><span class="comment-name">${p.name}</span> 說：${p.lastThought}</div>`).join('');
+            document.getElementById('user-select').innerHTML = '<option value="">+ 新成員</option>' + playersArr.map(p => `<option value="${p.name}">${p.name}</option>`).join('');
+            document.getElementById('comment-list').innerHTML = playersArr.filter(p => p.lastThought).sort((a,b) => b.lastUpdate - a.lastUpdate).slice(0,3).map(p => `<div class="comment-item"><b>${p.name}</b>：${p.lastThought}</div>`).join('');
 
             document.querySelectorAll('.runner').forEach(r => r.remove());
             playersArr.forEach(p => {
-                const point = path.getPointAtLength((Math.min(p.score/7800, 1)) * path.getTotalLength());
+                const point = path.getPointAtLength((Math.min(p.score/7500, 1)) * path.getTotalLength());
                 const runner = document.createElement('div');
                 runner.className = 'runner';
                 runner.style.left = `${(point.x / 200) * 100}%`;
@@ -273,7 +254,6 @@
         document.getElementById('user-select').addEventListener('change', function() {
             const isNew = this.value === "";
             document.getElementById('new-name-box').style.display = isNew ? "block" : "none";
-            document.getElementById('avatar-box').style.display = isNew ? "block" : "none";
         });
     </script>
 </body>
