@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>跑跑動動 RunRun! DonDon!</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Quicksand:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     
@@ -12,77 +12,70 @@
         :root {
             --bg-color: #0b1e3b;
             --panel-bg: rgba(255, 255, 255, 0.05);
-            --text-main: #ffffff;
             --accent-blue: #00d2ff;
             --accent-gold: #f9d423;
             --bubble-bg: rgba(255, 255, 255, 0.1);
-            --track-yellow: #f9d423;
             --font-taipei: 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
         }
 
-        body { font-family: var(--font-taipei); background-color: var(--bg-color); margin: 0; padding: 20px; text-align: center; color: var(--text-main); overflow-x: hidden; }
-        .main-container { max-width: 1000px; margin: 0 auto; text-align: left; } /* 縮小主容器以對齊線圖 */
+        body { font-family: var(--font-taipei); background-color: var(--bg-color); margin: 0; padding: 20px; text-align: center; color: #fff; overflow-x: hidden; }
+        .main-container { max-width: 1000px; margin: 0 auto; text-align: left; }
         
-        .logo-container { margin: 30px auto; max-width: 700px; text-align: center; }
+        .logo-container { margin: 20px auto; max-width: 700px; text-align: center; }
         .main-logo { width: 100%; height: auto; filter: drop-shadow(0 0 15px rgba(0, 210, 255, 0.5)); }
 
-        /* 標題與間距優化 */
-        .section-header { width: 100%; margin: 0 auto 10px auto; padding-top: 20px; }
-        .section-title { font-size: 20px; font-weight: 900; color: var(--accent-gold); padding-left: 12px; border-left: 5px solid var(--accent-gold); line-height: 1.2; }
+        /* 間距再縮小 */
+        .section-header { width: 100%; margin: 0 auto 5px auto; padding-top: 10px; }
+        .section-title { font-size: 19px; font-weight: 900; color: var(--accent-gold); padding-left: 12px; border-left: 5px solid var(--accent-gold); line-height: 1.2; }
 
-        /* 控制面板：寬度對齊線圖頭尾 */
         .controls-wrapper { 
-            margin: 0 auto 30px auto; width: 100%; box-sizing: border-box;
-            background: var(--panel-bg); padding: 30px; border-radius: 35px; 
-            border: 2px solid var(--track-yellow); 
-            display: flex; flex-direction: column; gap: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            margin: 0 auto 20px auto; width: 100%; box-sizing: border-box;
+            background: var(--panel-bg); padding: 25px; border-radius: 35px; 
+            border: 2px solid var(--accent-gold); display: flex; flex-direction: column; gap: 15px;
         }
-        .control-row { display: flex; flex-wrap: wrap; justify-content: flex-start; align-items: flex-end; gap: 15px; width: 100%; }
+        .control-row { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; width: 100%; }
         .input-box { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; flex: 1; min-width: 140px; }
         .input-box label { font-size: 13px; color: var(--accent-blue); font-weight: 700; }
         
+        /* 修正選單看不到字的問題 */
         input, select { 
-            font-family: var(--font-taipei); background: rgba(255, 255, 255, 0.15) !important; 
-            border: 1px solid rgba(255, 255, 255, 0.2); padding: 10px; 
-            border-radius: 10px; color: #ffffff !important; outline: none; width: 100%; box-sizing: border-box;
+            font-family: var(--font-taipei); background: #1a2a44 !important; 
+            border: 1px solid rgba(255, 255, 255, 0.3); padding: 12px; 
+            border-radius: 12px; color: #ffffff !important; outline: none; width: 100%; box-sizing: border-box;
+            height: 48px; /* 固定高度 */
         }
+        select option { background-color: #1a2a44; color: white; }
 
+        /* GO按鈕與輸入框同高 */
         .submit-btn { 
-            font-family: var(--font-taipei); padding: 12px 60px; 
+            font-family: var(--font-taipei); height: 48px; padding: 0 60px; 
             background: linear-gradient(135deg, #f9d423, #ff4e50); 
-            color: #000; border: none; border-radius: 30px; cursor: pointer; font-weight: 900; font-size: 16px;
+            color: #000; border: none; border-radius: 12px; cursor: pointer; font-weight: 900; font-size: 18px;
+            transition: 0.3s;
         }
 
-        /* 跑道區域間距縮短 */
-        #track-wrapper { width: 100%; margin: 15px auto; position: relative; }
-        .svg-container { position: relative; width: 100%; z-index: 10; height: 320px; }
+        #track-wrapper { width: 100%; margin: 5px auto; position: relative; }
+        .svg-container { position: relative; width: 100%; height: 300px; }
         .path-main { fill: none; stroke: url(#track-gradient); stroke-width: 14; stroke-linecap: round; }
-
         .milestone-dot { fill: #ffffff; }
         .milestone-text { font-size: 12px; fill: #ffffff; font-weight: 700; paint-order: stroke; stroke: var(--bg-color); stroke-width: 3px; }
 
-        /* 跑道角色：尺寸再縮小 90% (48px -> 43px) */
         .runner { 
-            position: absolute; width: 43px; height: 43px; z-index: 50; 
-            transform: translate(-50%, -50%); cursor: pointer; pointer-events: auto;
+            position: absolute; width: 40px; height: 40px; z-index: 50; 
+            transform: translate(-50%, -50%); cursor: pointer;
             animation: runnerFloating 2.5s ease-in-out infinite;
         }
-        @keyframes runnerFloating {
-            0%, 100% { margin-top: -12px; }
-            50% { margin-top: -3px; }
-        }
-        .user-photo { width: 100%; height: 100%; border-radius: 50%; border: 2.5px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.5); background: #fff; }
+        @keyframes runnerFloating { 0%, 100% { margin-top: -12px; } 50% { margin-top: -3px; } }
+        .user-photo { width: 100%; height: 100%; border-radius: 50%; border: 2px solid #fff; background: rgba(255,255,255,0.2); }
 
-        /* 彈窗樣式 */
-        #info-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 10000; }
-        .info-card { background: #1a2a44; border: 2px solid var(--accent-blue); padding: 35px; border-radius: 30px; text-align: center; color: white; min-width: 280px; }
-        .score-num { font-size: 56px; font-weight: 900; color: var(--accent-gold); display: block; margin: 15px 0; }
+        #info-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 10000; }
+        .info-card { background: #1a2a44; border: 2px solid var(--accent-blue); padding: 30px; border-radius: 25px; text-align: center; color: white; min-width: 280px; }
+        .score-num { font-size: 50px; font-weight: 900; color: var(--accent-gold); display: block; margin: 10px 0; }
+        .last-update-time { font-size: 12px; opacity: 0.6; display: block; margin-top: 15px; }
 
-        /* 碎碎念間距縮短 */
-        .comment-carousel-container { position: relative; width: 100%; margin: 10px auto 60px auto; display: flex; align-items: center; }
-        .comment-window { overflow: hidden; width: 100%; padding: 25px 0; }
-        #comment-list { display: flex; transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1); }
+        .comment-carousel-container { position: relative; width: 100%; margin: 5px auto 40px auto; display: flex; align-items: center; }
+        .comment-window { overflow: hidden; width: 100%; padding: 20px 0; }
+        #comment-list { display: flex; transition: transform 0.6s ease; }
         .comment-item { 
             min-width: 300px; margin: 0 15px; background: var(--bubble-bg); 
             padding: 20px; border-radius: 20px; opacity: 0.3; transform: scale(0.9);
@@ -90,12 +83,14 @@
             display: flex; gap: 12px; 
         }
         .comment-item.active { opacity: 1; transform: scale(1.05); border-color: var(--accent-gold); }
-        .comment-avatar { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--accent-gold); background: #fff; }
-        .comment-time { font-size: 10px; color: #888; margin-top: 4px; display: block; }
+        .comment-avatar { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--accent-gold); background: rgba(255,255,255,0.2); }
 
-        .nav-btn { background: rgba(255,255,255,0.1); border: 2px solid var(--accent-gold); color: var(--accent-gold); width: 36px; height: 36px; border-radius: 50%; cursor: pointer; z-index: 100; }
+        .nav-btn { background: rgba(255,255,255,0.1); border: 1px solid var(--accent-gold); color: var(--accent-gold); width: 36px; height: 36px; border-radius: 50%; cursor: pointer; }
         
-        footer { margin: 60px auto 30px auto; text-align: center; color: #ffffff; font-size: 11px; opacity: 0.6; letter-spacing: 1px; }
+        #avatar-modal img { width: 100%; cursor: pointer; transition: 0.2s; }
+        #avatar-modal img:hover { transform: scale(1.1); }
+        
+        footer { margin: 40px auto 20px auto; text-align: center; color: #fff; font-size: 11px; opacity: 0.5; }
     </style>
 </head>
 <body>
@@ -107,8 +102,8 @@
     <div class="controls-wrapper">
         <div class="control-row">
             <div class="input-box"><label>是哪位運動家</label><select id="user-select"><option value="">+ 新成員</option></select></div>
-            <div id="new-name-box" class="input-box"><label>新同學姓名</label><input type="text" id="new-name"></div>
-            <div class="input-box"><div style="height:20px"></div><button id="avatar-btn" style="background:#2c5282; color:white; border:none; padding:10px; border-radius:10px; cursor:pointer; width:100%; font-weight:bold; font-size: 14px;" onclick="toggleModal(true)">挑選頭像</button></div>
+            <div id="new-name-box" class="input-box"><label>新成員姓名</label><input type="text" id="new-name"></div>
+            <div class="input-box"><div style="height:19px"></div><button id="avatar-btn" style="background:#2c5282; color:white; border:none; padding:12px; border-radius:12px; cursor:pointer; width:100%; font-weight:bold; height:48px;" onclick="toggleModal(true)">挑選頭像</button></div>
             <div class="input-box" style="flex:0.6"><label>今日運動時數</label><input type="number" id="mins" placeholder="分鐘"></div>
         </div>
         <div class="control-row">
@@ -121,11 +116,7 @@
     <div id="track-wrapper">
         <div class="svg-container" id="runner-layer">
             <svg viewBox="0 0 1000 300" id="main-svg" style="width:100%; height:100%;">
-                <defs>
-                    <linearGradient id="track-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" stop-color="#00d2ff" /><stop offset="50%" stop-color="#f9d423" /><stop offset="100%" stop-color="#ff4e50" />
-                    </linearGradient>
-                </defs>
+                <defs><linearGradient id="track-gradient" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#00d2ff" /><stop offset="50%" stop-color="#f9d423" /><stop offset="100%" stop-color="#ff4e50" /></linearGradient></defs>
                 <path id="double-path" class="path-main" d="M 50,110 L 920,110 A 55,55 0 0 1 920,210 L 50,210" />
                 <g id="milestones-group"></g>
             </svg>
@@ -148,7 +139,8 @@
         <p style="margin:10px 0 0 0; opacity:0.8">2026 年已累積運動</p>
         <span class="score-num" id="info-score">0</span>
         <p style="margin:0">分鐘</p>
-        <button class="submit-btn" style="padding:8px 25px; font-size:14px; margin-top:20px;" onclick="document.getElementById('info-overlay').style.display='none'">了解！</button>
+        <span class="last-update-time" id="info-time"></span>
+        <button class="submit-btn" style="height:40px; padding:0 30px; font-size:14px; margin-top:20px;" onclick="document.getElementById('info-overlay').style.display='none'">關閉</button>
     </div>
 </div>
 
@@ -162,6 +154,12 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
+    function formatTime(ts) {
+        if(!ts) return "無紀錄";
+        const d = new Date(ts);
+        return `最後登記時間 ${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()} ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}:${d.getSeconds().toString().padStart(2,'0')}`;
+    }
+
     function toggleModal(show) { document.getElementById('avatar-modal').style.display = show ? 'block' : 'none'; document.getElementById('modal-overlay').style.display = show ? 'block' : 'none'; }
     
     const picker = document.getElementById('avatar-picker');
@@ -169,7 +167,7 @@
         const num = i < 10 ? '0' + i : i;
         const img = document.createElement('img');
         img.src = `https://raw.githubusercontent.com/adeerlulu/runrundondon/main/icons/${num}.png`;
-        img.style = "width:100%; cursor:pointer; background:#fff; border-radius:8px; border:2px solid transparent;";
+        img.style = "width:100%; cursor:pointer; border:2px solid transparent; border-radius:8px;"; // 移除白底
         img.onclick = function() {
             document.querySelectorAll('#avatar-picker img').forEach(i => i.style.borderColor='transparent');
             this.style.borderColor = '#00d2ff';
@@ -194,13 +192,9 @@
         mGroup.innerHTML = "";
         [0, 1000, 2000, 3000, 4500, 5500, 6500, 7500].forEach(score => {
             const pt = path.getPointAtLength((score/7500) * pathLength);
-            mGroup.innerHTML += `
-                <circle cx="${pt.x}" cy="${pt.y}" r="4" class="milestone-dot"/>
-                <text x="${pt.x}" y="${pt.y - 25}" class="milestone-text" text-anchor="middle">${score}</text>
-            `;
+            mGroup.innerHTML += `<circle cx="${pt.x}" cy="${pt.y}" r="4" class="milestone-dot"/><text x="${pt.x}" y="${pt.y - 25}" class="milestone-text" text-anchor="middle">${score}</text>`;
         });
 
-        // 重新繪製角色
         document.querySelectorAll('.runner').forEach(r => r.remove());
         playersArr.forEach(p => {
             const pt = path.getPointAtLength(Math.min(p.score/7500, 1) * pathLength);
@@ -209,14 +203,13 @@
             r.style.left = `${(pt.x / 1000) * 100}%`;
             r.style.top = `${(pt.y / 300) * 100}%`;
             r.innerHTML = `<img src="${p.photo}" class="user-photo">`;
-            
-            // 綁定點擊事件
-            r.addEventListener('click', (e) => {
+            r.onclick = (e) => {
                 e.stopPropagation();
                 document.getElementById('info-name').innerText = p.name;
                 document.getElementById('info-score').innerText = p.score;
+                document.getElementById('info-time').innerText = formatTime(p.lastUpdate);
                 document.getElementById('info-overlay').style.display = 'flex';
-            });
+            };
             document.getElementById('runner-layer').appendChild(r);
         });
 
@@ -226,9 +219,8 @@
 
     document.getElementById('user-select').addEventListener('change', function() {
         const btn = document.getElementById('avatar-btn');
-        const box = document.getElementById('new-name-box');
         btn.innerText = (this.value === "") ? "挑選頭像" : "更改頭像";
-        box.style.display = (this.value === "") ? "flex" : "none";
+        document.getElementById('new-name-box').style.display = (this.value === "") ? "flex" : "none";
     });
 
     function renderCarousel() {
@@ -238,7 +230,7 @@
             const ts = `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${d.getMinutes().toString().padStart(2,'0')}`;
             return `<div class="comment-item ${i === currentIndex ? 'active' : ''}">
                 <img src="${p.photo}" class="comment-avatar">
-                <div><b style="color:var(--accent-gold)">${p.name}</b><p style="margin:5px 0 0 0; color:#fff; font-size:14px;">${p.lastThought}</p><span class="comment-time">${ts}</span></div>
+                <div><b style="color:var(--accent-gold)">${p.name}</b><p style="margin:5px 0 0 0; color:#fff; font-size:14px;">${p.lastThought}</p><span style="font-size:10px; color:#888; display:block; margin-top:4px;">${ts}</span></div>
             </div>`;
         }).join('');
         list.style.transform = `translateX(${-currentIndex * 330}px)`;
