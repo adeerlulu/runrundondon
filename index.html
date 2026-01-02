@@ -41,57 +41,63 @@
 
         .input-box { display: flex; flex-direction: column; align-items: flex-start; }
         label { font-size: 11px; margin-bottom: 5px; color: var(--accent-blue); font-weight: bold; }
+        
+        /* 修正選單文字看不到的問題 */
         input, select { 
-            background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
-            padding: 8px 12px; border-radius: 10px; color: white; outline: none; width: 120px;
+            background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
+            padding: 8px 12px; border-radius: 10px; color: #ffffff; outline: none; width: 125px;
+        }
+        select option { 
+            color: #333333; /* 下拉選項文字改為深色 */
+            background-color: #ffffff; 
         }
 
-        /* 隱藏式頭像選擇器 */
         #avatar-btn {
             background: #2c5282; color: white; border: none; padding: 8px 15px;
             border-radius: 10px; cursor: pointer; font-size: 13px;
         }
+
         #avatar-modal {
             display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
             background: #1a2a44; padding: 20px; border-radius: 20px; border: 2px solid var(--accent-blue);
-            z-index: 3000; box-shadow: 0 0 30px rgba(0,0,0,0.5);
+            z-index: 3000; box-shadow: 0 0 30px rgba(0,0,0,0.8); width: 280px;
         }
+
         .avatar-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
         .avatar-option { 
-            width: 45px; height: 45px; border-radius: 8px; cursor: pointer; 
-            border: 2px solid transparent; transition: 0.2s; background: #0b1e3b;
+            width: 50px; height: 50px; border-radius: 8px; cursor: pointer; 
+            border: 2px solid transparent; transition: 0.2s; background: #fff; object-fit: cover;
         }
-        .avatar-option:hover { transform: scale(1.1); }
         .avatar-option.selected { border-color: var(--accent-blue); box-shadow: 0 0 10px var(--accent-blue); }
 
         button.submit-btn { padding: 10px 25px; background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%); color: white; border: none; border-radius: 30px; cursor: pointer; font-weight: bold; }
 
-        /* 跑道區域 */
         #track-wrapper { width: 100%; max-width: 400px; margin: 0 auto; position: relative; }
         svg { width: 100%; height: auto; display: block; overflow: visible; }
         .path-main { fill: none; stroke: url(#track-gradient); stroke-width: 24; stroke-linecap: round; stroke-linejoin: round; }
         .path-shadow { fill: none; stroke: rgba(255,255,255,0.05); stroke-width: 28; stroke-linecap: round; }
-        .milestone-dot { fill: rgba(255,255,255,0.6); }
-        .milestone-text { fill: rgba(255,255,255,0.4); font-size: 7px; font-weight: bold; }
-
+        
+        /* 跑者標籤 */
         .runner {
             position: absolute; width: 40px; height: 40px;
             display: flex; flex-direction: column; align-items: center;
             transition: all 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
             z-index: 100; pointer-events: none; margin-left: -20px; margin-top: -40px; 
         }
-        .user-photo { width: 32px; height: 32px; border-radius: 8px; border: 2px solid white; box-shadow: 0 0 10px rgba(0, 210, 255, 0.5); object-fit: cover; background: #222; }
+        .user-photo { width: 34px; height: 34px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 10px rgba(0, 210, 255, 0.5); object-fit: cover; background: #fff; }
         .label { background: rgba(0, 0, 0, 0.8); color: white; font-size: 9px; font-weight: bold; padding: 2px 6px; border-radius: 10px; white-space: nowrap; border: 1px solid var(--accent-blue); margin-top: 3px; }
-        
+
         #main-content { display: none; }
         #modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2500; }
+        .milestone-text { fill: rgba(255,255,255,0.4); font-size: 7px; font-weight: bold; }
+        .milestone-dot { fill: rgba(255,255,255,0.6); }
     </style>
 </head>
 <body>
 
     <div id="auth-overlay">
         <h1>跑跑動動</h1>
-        <p>請輸入通關密語以進入</p>
+        <p>請輸入密碼「1234」進入</p>
         <input type="password" id="entry-pw" placeholder="通關密語" style="width: 180px; margin-bottom: 20px;">
         <button class="submit-btn" onclick="checkEntry()">進入網頁</button>
     </div>
@@ -123,7 +129,7 @@
 
         <div id="modal-overlay" onclick="toggleModal(false)"></div>
         <div id="avatar-modal">
-            <h3 style="margin-top:0; font-size:16px;">選擇您的頭像</h3>
+            <h3 style="margin-top:0; font-size:16px; color: white;">選擇頭像</h3>
             <div class="avatar-grid" id="avatar-picker"></div>
             <button class="submit-btn" style="margin-top:15px; width:100%;" onclick="toggleModal(false)">確定</button>
         </div>
@@ -132,11 +138,7 @@
             <svg viewBox="0 0 200 500" id="main-svg">
                 <defs>
                     <linearGradient id="track-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                        <stop offset="0%" style="stop-color:#9d50bb" />
-                        <stop offset="25%" style="stop-color:#ff4e50" />
-                        <stop offset="50%" style="stop-color:#f9d423" />
-                        <stop offset="75%" style="stop-color:#2ecc71" />
-                        <stop offset="100%" style="stop-color:#00d2ff" />
+                        <stop offset="0%" style="stop-color:#9d50bb" /><stop offset="25%" style="stop-color:#ff4e50" /><stop offset="50%" style="stop-color:#f9d423" /><stop offset="75%" style="stop-color:#2ecc71" /><stop offset="100%" style="stop-color:#00d2ff" />
                     </linearGradient>
                 </defs>
                 <path class="path-shadow" d="M 35 50 H 165 A 35 35 0 0 1 165 120 H 35 A 35 35 0 0 0 35 190 H 165 A 35 35 0 0 1 165 260 H 35 A 35 35 0 0 0 35 330 H 165 A 35 35 0 0 1 165 400 H 35 A 35 35 0 0 0 35 470" />
@@ -154,16 +156,15 @@
             authDomain: "runrundondon-31b12.firebaseapp.com",
             databaseURL: "https://runrundondon-31b12-default-rtdb.asia-southeast1.firebasedatabase.app",
             projectId: "runrundondon-31b12",
-            databaseURL: "https://runrundondon-31b12-default-rtdb.asia-southeast1.firebasedatabase.app"
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // 1. 產生頭像選項 (確保路徑正確)
+        const baseUrl = "https://raw.githubusercontent.com/adeerlulu/runrundondon/37d06a054616e7c199a1e53a4f013276c44fea8a/icons/";
         const avatarPicker = document.getElementById('avatar-picker');
         for (let i = 1; i <= 12; i++) {
             const img = document.createElement('img');
-            img.src = `https://raw.githubusercontent.com/adeerlulu/runrundondon/main/icons/${i}.png`;
+            img.src = `${baseUrl}${i}.png`;
             img.className = 'avatar-option';
             img.onclick = function() { selectAvatar(this); };
             avatarPicker.appendChild(img);
@@ -174,7 +175,7 @@
             document.querySelectorAll('.avatar-option').forEach(img => img.classList.remove('selected'));
             el.classList.add('selected');
             selectedAvatarUrl = el.src;
-            document.getElementById('avatar-btn').innerText = "✅ 已選擇";
+            document.getElementById('avatar-btn').innerText = "✅ 已選";
         }
 
         function toggleModal(show) {
@@ -182,19 +183,19 @@
             document.getElementById('modal-overlay').style.display = show ? 'block' : 'none';
         }
 
-        // 2. 驗證登入 (密碼 1234)
         function checkEntry() {
             if (document.getElementById('entry-pw').value === "1234") {
                 document.getElementById('auth-overlay').style.display = 'none';
                 document.getElementById('main-content').style.display = 'block';
                 drawMilestones();
-            } else { alert("密語錯誤！"); }
+            } else { alert("密碼錯誤！"); }
         }
 
         function drawMilestones() {
             const path = document.getElementById('s-path');
             const pathLength = path.getTotalLength();
             const group = document.getElementById('milestones-group');
+            group.innerHTML = "";
             for (let i = 500; i < 7800; i += 500) {
                 const point = path.getPointAtLength((i / 7800) * pathLength);
                 const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
@@ -219,8 +220,8 @@
         function handleUpdate() {
             const name = userSelect.value || newNameInput.value.trim();
             const mins = parseInt(document.getElementById('mins').value);
-            if (!name || isNaN(mins)) { alert("填寫姓名與時數"); return; }
-            if (userSelect.value === "" && !selectedAvatarUrl) { alert("請選擇頭像"); return; }
+            if (!name || isNaN(mins)) { alert("請填寫姓名與時數"); return; }
+            if (userSelect.value === "" && !selectedAvatarUrl) { alert("請選擇一個頭像"); return; }
 
             const userRef = db.ref('players/' + name);
             userRef.once('value').then(snapshot => {
@@ -230,7 +231,7 @@
                     score: data.score + mins,
                     photo: selectedAvatarUrl || data.photo
                 });
-            }).then(() => { alert("💪 更新成功！"); location.reload(); });
+            }).then(() => { location.reload(); });
         }
 
         db.ref('players').on('value', (snapshot) => {
@@ -242,7 +243,11 @@
             userSelect.innerHTML = '<option value="">+ 新運動家</option>';
             if (!players) return;
             Object.values(players).forEach(p => {
-                const opt = document.createElement('option'); opt.value = p.name; opt.innerText = p.name; userSelect.appendChild(opt);
+                const opt = document.createElement('option');
+                opt.value = p.name;
+                opt.innerText = p.name;
+                userSelect.appendChild(opt);
+
                 const point = path.getPointAtLength((Math.min(p.score/7800, 1)) * pathLength);
                 const runner = document.createElement('div');
                 runner.className = 'runner';
