@@ -29,7 +29,6 @@
         body { font-family: var(--font-taipei); background-color: var(--bg-color); margin: 0; padding: 20px; text-align: center; color: #fff; overflow-x: hidden; }
         .main-container { max-width: 1000px; margin: 0 auto; text-align: left; display: none; }
         
-        /* 密碼鎖專屬樣式 */
         #auth-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(11, 30, 59, 0.8); backdrop-filter: blur(15px);
@@ -52,7 +51,7 @@
         
         .section-header { width: 100%; margin: 0 auto 20px auto; } 
         .section-header-talk { width: 100%; margin: 60px auto 20px auto; }
-        .section-header-run { width: 100%; margin: 50px auto 5px auto; }
+        .section-header-run { width: 100%; margin: 100px auto 5px auto; }
         
         .section-title { font-size: 19px; font-weight: 900; color: var(--accent-gold); padding-left: 12px; border-left: 5px solid var(--accent-gold); line-height: 1.2; }
         
@@ -76,13 +75,14 @@
         .runner:hover { animation-play-state: paused; transform: translate(-50%, -50%) scale(1.3); z-index: 100; filter: drop-shadow(0 0 10px var(--accent-blue)); }
         .user-photo { width: 100%; height: 100%; border-radius: 50%; border: 2px solid #fff; background: rgba(255,255,255,0.2); pointer-events: none; }
         
-        /* 碎碎念內文（輪播區） */
+        /* 碎碎念輪播區 */
         .comment-carousel-container { position: relative; width: 100%; margin: 0 auto; display: flex; align-items: center; }
         .comment-window { overflow: hidden; width: 100%; padding: 10px 0; }
         #comment-list { display: flex; transition: transform 0.6s ease; }
         .comment-item { min-width: 300px; margin: 0 15px; background: var(--bubble-bg); padding: 20px; border-radius: 20px; opacity: 0.3; transform: scale(0.9); transition: 0.5s; border: 1px solid rgba(255,255,255,0.1); text-align: left; display: flex; gap: 12px; }
         .comment-item.active { opacity: 1; transform: scale(1.05); border-color: var(--accent-gold); }
         .comment-avatar { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--accent-gold); }
+        .comment-time { font-size: 11px; opacity: 0.4; margin-left: 8px; font-weight: normal; }
         .nav-btn { background: transparent; border: 2px solid var(--accent-gold); color: var(--accent-gold); width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; }
 
         @media screen and (max-width: 600px) {
@@ -200,6 +200,17 @@
         window.requestAnimationFrame(step);
     }
 
+    // 格式化時間 (MM/DD HH:mm)
+    function formatTime(timestamp) {
+        if (!timestamp) return "";
+        const d = new Date(timestamp);
+        const m = (d.getMonth() + 1).toString().padStart(2, '0');
+        const day = d.getDate().toString().padStart(2, '0');
+        const h = d.getHours().toString().padStart(2, '0');
+        const min = d.getMinutes().toString().padStart(2, '0');
+        return `${m}/${day} ${h}:${min}`;
+    }
+
     function showUI(title, name, score, timeStr, isError=false) {
         const card = document.getElementById('ui-card-content');
         if(isError) {
@@ -279,7 +290,15 @@
 
     function renderCarousel() {
         const list = document.getElementById('comment-list');
-        list.innerHTML = allComments.map((p, i) => `<div class="comment-item ${i === currentIndex ? 'active' : ''}"><img src="${p.photo}" class="comment-avatar"><div><b style="color:var(--accent-gold)">${p.name}</b><p style="margin:5px 0 0 0; color:#fff; font-size:14px;">${p.lastThought}</p></div></div>`).join('');
+        list.innerHTML = allComments.map((p, i) => `
+            <div class="comment-item ${i === currentIndex ? 'active' : ''}">
+                <img src="${p.photo}" class="comment-avatar">
+                <div>
+                    <b style="color:var(--accent-gold)">${p.name}<span class="comment-time">${formatTime(p.lastUpdate)}</span></b>
+                    <p style="margin:5px 0 0 0; color:#fff; font-size:14px;">${p.lastThought}</p>
+                </div>
+            </div>
+        `).join('');
         list.style.transform = `translateX(${-currentIndex * 330}px)`;
     }
 
@@ -291,7 +310,7 @@
 
     function handleUpdate() {
         const selectedValue = document.getElementById('user-select').value;
-        const inputName = document.getElementById('new-name').value.trim();
+        const inputName = document.getElementById('new-name').value.trim().toString(); 
         const name = selectedValue || inputName;
         const mins = parseInt(document.getElementById('mins').value);
         if (!name || isNaN(mins) || mins <= 0) { showUI("哦哦！出錯了", "姓名與分鐘數都要填寫喔！", "", "", true); return; }
@@ -302,7 +321,8 @@
         db.ref('players/' + name).once('value').then(s => {
             const d = s.val() || {score:0, photo: ""};
             db.ref('players/' + name).update({
-                name: name, score: d.score + mins, 
+                name: name.toString(), 
+                score: d.score + mins, 
                 photo: window.selectedAvatarUrl || d.photo || "https://raw.githubusercontent.com/adeerlulu/runrundondon/main/icons/01.png",
                 lastThought: document.getElementById('thought-input').value,
                 lastUpdate: Date.now()
