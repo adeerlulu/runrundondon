@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>跑跑動動 RunRun! DonDon!</title>
+    
+    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/adeerlulu/runrundondon/main/links/favicons.png">
+    
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
@@ -20,7 +23,7 @@
         }
 
         body { font-family: var(--font-taipei); background-color: var(--bg-color); margin: 0; padding: 20px; text-align: center; color: #fff; overflow-x: hidden; }
-        .main-container { max-width: 1000px; margin: 0 auto; text-align: left; display: none; /* 預設隱藏，密碼正確後顯示 */ }
+        .main-container { max-width: 1000px; margin: 0 auto; text-align: left; display: none; }
         
         /* 密碼鎖專屬樣式 */
         #auth-overlay {
@@ -40,7 +43,7 @@
             letter-spacing: 5px; margin-bottom: 20px; box-sizing: border-box;
         }
 
-        /* 原有樣式保持不變 */
+        /* 原有樣式 */
         .logo-container { margin: 20px auto; max-width: 700px; text-align: center; }
         .main-logo { width: 100%; height: auto; filter: drop-shadow(0 0 15px rgba(0, 210, 255, 0.5)); }
         .section-header { width: 100%; margin: 0 auto 20px auto; } 
@@ -150,7 +153,6 @@
 </div>
 
 <script>
-    // --- 密碼檢查邏輯 ---
     function checkPassword() {
         const userInput = document.getElementById('pw-input').value;
         if (userInput === "13579") {
@@ -163,12 +165,10 @@
         }
     }
 
-    // 支援 Enter 鍵送出密碼
     document.getElementById('pw-input').addEventListener('keypress', function(e) {
         if (e.key === 'Enter') checkPassword();
     });
 
-    // 檢查 Session
     window.onload = function() {
         if (sessionStorage.getItem('isLoggedIn') === 'true') {
             document.getElementById('auth-overlay').style.display = 'none';
