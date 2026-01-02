@@ -98,6 +98,7 @@
             border: 1px solid var(--accent-color);
         }
 
+        /* 控制面板 */
         .controls { 
             margin-top: 20px; 
             padding: 30px; 
@@ -105,10 +106,18 @@
             display: inline-flex;
             flex-wrap: wrap;
             justify-content: center;
+            align-items: center;
             gap: 15px;
             border-radius: 25px; 
             box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
             max-width: 95%;
+        }
+
+        /* 輸入框組件 */
+        .input-group {
+            position: relative;
+            display: flex;
+            align-items: center;
         }
 
         input { 
@@ -117,6 +126,28 @@
             border-radius: 12px; 
             font-size: 16px;
             background: #f7fafc;
+            outline: none;
+        }
+
+        input:focus { border-color: #667eea; background: #fff; }
+
+        /* 分鐘單位持久顯示 */
+        .unit-wrapper {
+            position: relative;
+        }
+        .unit-wrapper input {
+            padding-right: 50px; /* 為右側單位留空間 */
+        }
+        .unit-wrapper::after {
+            content: "min";
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #a0aec0;
+            font-size: 14px;
+            font-weight: bold;
+            pointer-events: none;
         }
 
         button { 
@@ -143,19 +174,23 @@
     </div>
     
     <div id="track-container">
-        <div style="color:white; padding:50px;">正在連線到跑道...</div>
+        <div style="color:white; padding:50px;">正在讀取跑者進度...</div>
     </div>
 
     <div class="controls">
-        <input type="text" id="name" placeholder="大名">
-        <input type="number" id="mins" placeholder="分鐘">
-        <input type="password" id="pw" placeholder="密碼">
+        <input type="text" id="name" placeholder="運動家">
+        
+        <div class="unit-wrapper">
+            <input type="number" id="mins" placeholder="今日時數">
+        </div>
+        
+        <input type="password" id="pw" placeholder="通關密語">
+        
         <button type="button" onclick="addMins()">回報進度</button>
     </div>
     <p class="hint">目標累積：1000 分鐘 | 專屬密碼驗證</p>
 
     <script>
-        // --- Firebase 設定 ---
         const firebaseConfig = {
             apiKey: "AIzaSyDqX_tZqqfw0txXpd-b4AWuolhgQgU6lLU",
             authDomain: "runrundondon-31b12.firebaseapp.com",
@@ -166,18 +201,16 @@
             appId: "1:466713105396:web:c0651103b028978cd9dfa1"
         };
 
-        // 初始化 Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // 登記功能
         window.addMins = function() {
             const name = document.getElementById('name').value.trim();
             const mins = parseInt(document.getElementById('mins').value);
             const pw = document.getElementById('pw').value;
 
             if (pw !== "hello") { alert("🔒 密碼不正確！"); return; }
-            if (!name || isNaN(mins)) { alert("請填寫姓名與分鐘數"); return; }
+            if (!name || isNaN(mins)) { alert("請填寫姓名與正確的時間"); return; }
 
             const userRef = db.ref('players/' + name);
             userRef.once('value').then(snapshot => {
@@ -190,18 +223,17 @@
             }).then(() => {
                 document.getElementById('mins').value = ''; 
                 document.getElementById('pw').value = '';
-                alert("💪 紀錄成功！");
+                alert("💪 紀錄成功，繼續保持！");
             }).catch(err => alert("失敗: " + err.message));
         };
 
-        // 畫面同步
         db.ref('players').on('value', (snapshot) => {
             const players = snapshot.val();
             const track = document.getElementById('track-container');
             track.innerHTML = ''; 
 
             if (!players) {
-                track.innerHTML = '<div style="color:white; padding:50px;">🏃 等待第一位選手加入...</div>';
+                track.innerHTML = '<div style="color:white; padding:50px;">🏃 等待第一位運動家加入...</div>';
                 return;
             }
 
