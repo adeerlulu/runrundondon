@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>跑跑動動 RunRun! DonDon!</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&family=M+PLUS+Rounded+1c:wght@500;800&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     
@@ -16,10 +17,12 @@
             --accent-gold: #f9d423;
             --bubble-bg: rgba(255, 255, 255, 0.1);
             --track-yellow: #f9d423;
+            /* 套用圓體字型 */
+            --font-round: 'M PLUS Rounded 1c', 'Quicksand', 'Microsoft JhengHei', sans-serif;
         }
 
         body { 
-            font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif; 
+            font-family: var(--font-round); 
             background-color: var(--bg-color); 
             margin: 0; padding: 10px; text-align: center; color: var(--text-main);
         }
@@ -27,68 +30,71 @@
         .logo-container { margin: 20px auto; max-width: 600px; padding: 0 10px; }
         .main-logo { width: 100%; height: auto; display: block; filter: drop-shadow(0 0 12px rgba(0, 210, 255, 0.5)); }
 
-        /* 1. 欄位設定：三層架構 */
+        /* 欄位設定 */
         .controls-wrapper {
-            margin: 10px auto; max-width: 550px; /* 統一寬度 */
+            margin: 10px auto; max-width: 550px;
             background: var(--panel-bg); 
             padding: 25px; border-radius: 40px; border: 2px solid var(--track-yellow); 
             box-shadow: 0 15px 30px rgba(0, 0, 0, 0.7), inset 0 0 20px rgba(11, 30, 59, 0.9);
             display: flex; flex-direction: column; gap: 20px;
         }
 
-        .control-row { display: flex; justify-content: space-between; align-items: flex-end; width: 100%; }
-        .input-group { display: flex; gap: 10px; align-items: flex-end; }
+        .control-row { display: flex; justify-content: space-between; align-items: flex-end; width: 100%; gap: 15px; }
+        .input-group { display: flex; gap: 10px; align-items: flex-end; flex-grow: 2; }
         .input-box { display: flex; flex-direction: column; align-items: flex-start; flex-grow: 1; }
         
-        label { font-size: 11px; margin-bottom: 5px; color: var(--accent-blue); font-weight: bold; }
+        label { font-size: 11px; margin-bottom: 5px; color: var(--accent-blue); font-weight: 800; }
         input, select { 
+            font-family: var(--font-round);
             background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); 
             padding: 10px; border-radius: 12px; color: #ffffff; outline: none; font-size: 14px; width: 100%; box-sizing: border-box;
         }
-        select option { background-color: #1a2a44; color: #ffffff; }
 
-        /* GO 按鈕獨立排 */
+        /* 手機模式適應：第一排改為兩層 */
+        @media (max-width: 480px) {
+            .control-row:first-child { flex-direction: column; align-items: stretch; gap: 20px; }
+            .input-group { width: 100%; }
+            .submit-btn { width: 100%; padding: 12px 0 !important; }
+        }
+
         .submit-container { width: 100%; display: flex; justify-content: center; }
         .submit-btn { 
+            font-family: var(--font-round);
             padding: 12px 100px; background: linear-gradient(135deg, #f9d423, #ff4e50); 
-            color: #000; border: none; border-radius: 30px; cursor: pointer; font-weight: 900; 
+            color: #000; border: none; border-radius: 30px; cursor: pointer; font-weight: 800; 
             font-size: 16px; box-shadow: 0 4px 15px rgba(255, 78, 80, 0.4);
         }
 
-        /* 3. 氣泡對話框碎碎念 */
+        /* 氣泡對話框 */
         #comment-wall { margin: 30px auto; max-width: 550px; text-align: left; }
         .comment-item { 
             position: relative; background: var(--bubble-bg); border-radius: 15px; 
-            padding: 15px 20px; margin-bottom: 20px; font-size: 13px; border: 1px solid rgba(255,255,255,0.1);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            padding: 15px 20px; margin-bottom: 20px; font-size: 14px; border: 1.5px solid rgba(255,255,255,0.15);
         }
         .comment-item::after {
             content: ''; position: absolute; left: 25px; bottom: -10px;
-            border-width: 10px 10px 0; border-style: solid; border-color: var(--bubble-bg) transparent transparent;
+            border-width: 10px 10px 0; border-style: solid; border-color: rgba(255,255,255,0.1) transparent transparent;
         }
-        .comment-name { color: var(--accent-gold); font-weight: bold; margin-right: 5px; }
+        .comment-name { color: var(--accent-gold); font-weight: 800; margin-right: 5px; }
 
-        /* 4. 跑道與數字優化 */
+        /* 跑道與文字 */
         #track-wrapper { width: 100%; max-width: 550px; margin: 0 auto; position: relative; }
         svg { width: 100%; height: auto; overflow: visible; }
-        
-        .path-main { fill: none; stroke: url(#track-gradient); stroke-width: 2.5; stroke-linecap: round; }
-        .milestone-dot { fill: #fff; }
+        .path-main { fill: none; stroke: url(#track-gradient); stroke-width: 3; stroke-linecap: round; }
+        .milestone-dot { fill: #fff; box-shadow: 0 0 5px #fff; }
         .milestone-text { 
-            fill: #ffffff; font-size: 6px; font-weight: bold; pointer-events: none;
-            paint-order: stroke; stroke: var(--bg-color); stroke-width: 1px; /* 讓文字在線上清晰 */
+            font-family: var(--font-round); fill: #ffffff; font-size: 8px; font-weight: 800; 
+            paint-order: stroke; stroke: var(--bg-color); stroke-width: 2px;
         }
 
-        /* 角色：防止擋住文字 */
         .runner { 
-            position: absolute; width: 40px; height: 40px; display: flex; flex-direction: column; align-items: center; 
-            transition: all 1.5s cubic-bezier(0.34, 1.56, 0.64, 1); z-index: 5; pointer-events: none;
-            margin-left: -20px; margin-top: -35px;
+            position: absolute; width: 44px; height: 44px; display: flex; flex-direction: column; align-items: center; 
+            z-index: 5; pointer-events: none; margin-left: -22px; margin-top: -40px;
             animation: runnerFloating 2s ease-in-out infinite !important;
         }
         @keyframes runnerFloating { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-        .user-photo { width: 32px; height: 32px; border-radius: 50%; border: 2px solid #fff; }
-        .label { background: linear-gradient(135deg, #ff4e50, #f9d423); color: #000; font-size: 10px; font-weight: 900; padding: 1px 8px; border-radius: 10px; border: 1px solid #fff; }
+        .user-photo { width: 34px; height: 34px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 10px rgba(0,210,255,0.5); }
+        .label { background: linear-gradient(135deg, #ff4e50, #f9d423); color: #000; font-size: 10px; font-weight: 800; padding: 1px 8px; border-radius: 10px; border: 1px solid #fff; }
 
         #auth-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
     </style>
@@ -97,8 +103,8 @@
 
     <div id="auth-overlay">
         <div class="logo-container"><img src="https://raw.githubusercontent.com/adeerlulu/runrundondon/main/links/LOGO.png" class="main-logo"></div>
-        <input type="password" id="entry-pw" placeholder="密碼 1234" style="width: 180px; margin-bottom: 20px;">
-        <button class="submit-btn" style="color:white; background: #3a7bd5; padding: 10px 40px;" onclick="checkEntry()">進入網頁</button>
+        <input type="password" id="entry-pw" placeholder="密碼 1234">
+        <button class="submit-btn" style="color:white; background: #3a7bd5; margin-top:20px;" onclick="checkEntry()">進入網頁</button>
     </div>
 
     <div id="main-content" style="display:none;">
@@ -106,7 +112,7 @@
 
         <div class="controls-wrapper">
             <div class="control-row">
-                <div class="input-group" style="flex: 2;">
+                <div class="input-group">
                     <div class="input-box">
                         <label>是哪位運動家</label>
                         <select id="user-select"><option value="">+ 新成員</option></select>
@@ -114,9 +120,9 @@
                     <div class="input-box" id="new-name-box">
                         <input type="text" id="new-name" placeholder="輸入名字">
                     </div>
-                    <button id="avatar-btn" style="background:#2c5282; color:white; border:none; padding:10px; border-radius:12px; cursor:pointer; font-size:12px;" onclick="toggleModal(true)">頭像</button>
+                    <button id="avatar-btn" style="font-family: var(--font-round); background:#2c5282; color:white; border:none; padding:10px; border-radius:12px; cursor:pointer; font-size:12px; height:41px; min-width:80px;" onclick="toggleModal(true)">選擇頭像</button>
                 </div>
-                <div class="input-box" style="flex: 1; margin-left: 15px;">
+                <div class="input-box">
                     <label>今日運動量</label>
                     <input type="number" id="mins" placeholder="mins" min="0">
                 </div>
@@ -147,9 +153,9 @@
                         <stop offset="0%" style="stop-color:#00d2ff" /><stop offset="50%" style="stop-color:#f9d423" /><stop offset="100%" style="stop-color:#ff4e50" />
                     </linearGradient>
                 </defs>
-                <path id="s-path" class="path-main" d="M 45 50 H 155 A 35 35 0 0 1 155 120 H 45 A 35 35 0 0 0 45 190 H 155 A 35 35 0 0 1 155 260 H 45 A 35 35 0 0 0 45 330 H 155 A 35 35 0 0 1 155 400 H 45 A 35 35 0 0 0 45 470" />
+                <path id="s-path" class="path-main" d="M 35 50 H 165 A 35 35 0 0 1 165 120 H 35 A 35 35 0 0 0 35 190 H 165 A 35 35 0 0 1 165 260 H 35 A 35 35 0 0 0 35 330 H 165 A 35 35 0 0 1 165 400 H 35 A 35 35 0 0 0 35 470" />
                 <text x="15" y="505" fill="#ff4e50" font-size="12" font-weight="900">FINISH 7500</text>
-                <g id="milestones-group" style="z-index: 10;"></g>
+                <g id="milestones-group"></g>
             </svg>
         </div>
     </div>
@@ -165,33 +171,29 @@
             document.getElementById('auth-overlay').style.display = 'none';
         }
 
-        // 里程碑：0, 500, 1000...
         function drawMilestones() {
             const path = document.getElementById('s-path');
             const group = document.getElementById('milestones-group');
             const pathLength = path.getTotalLength();
             group.innerHTML = "";
-
             for (let i = 0; i <= 7500; i += 500) {
                 const point = path.getPointAtLength((i / 7500) * pathLength);
-                
-                // 小圈圈標記
                 const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-                dot.setAttribute("cx", point.x); dot.setAttribute("cy", point.y); dot.setAttribute("r", "2");
+                dot.setAttribute("cx", point.x); dot.setAttribute("cy", point.y); dot.setAttribute("r", "2.5");
                 dot.setAttribute("class", "milestone-dot");
                 group.appendChild(dot);
 
-                // 數字標記 (在跑道線上)
                 const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
                 text.setAttribute("class", "milestone-text");
                 text.textContent = i;
                 text.setAttribute("x", point.x);
-                text.setAttribute("y", point.y - 5); /* 微微浮在線上 */
+                text.setAttribute("y", point.y - 8);
                 text.setAttribute("text-anchor", "middle");
                 group.appendChild(text);
             }
         }
 
+        // 頭像生成
         const baseUrl = "https://raw.githubusercontent.com/adeerlulu/runrundondon/main/icons/";
         for (let i = 1; i <= 12; i++) {
             const fileName = i < 10 ? '0' + i : i;
@@ -205,6 +207,7 @@
             };
             document.getElementById('avatar-picker').appendChild(img);
         }
+
         function toggleModal(show) { document.getElementById('avatar-modal').style.display = show ? 'block' : 'none'; document.getElementById('modal-overlay').style.display = show ? 'block' : 'none'; }
 
         function handleUpdate() {
@@ -227,7 +230,12 @@
             if(!players || !path) return;
             const playersArr = Object.values(players);
             document.getElementById('user-select').innerHTML = '<option value="">+ 新成員</option>' + playersArr.map(p => `<option value="${p.name}">${p.name}</option>`).join('');
-            document.getElementById('comment-list').innerHTML = playersArr.filter(p => p.lastThought).sort((a,b) => b.lastUpdate - a.lastUpdate).slice(0,3).map(p => `<div class="comment-item"><span class="comment-name">${p.name}</span> 說：${p.lastThought}</div>`).join('');
+            
+            // 碎碎念氣泡列表
+            const thoughts = playersArr.filter(p => p.lastThought).sort((a,b) => b.lastUpdate - a.lastUpdate).slice(0,3);
+            document.getElementById('comment-list').innerHTML = thoughts.map(p => `<div class="comment-item"><span class="comment-name">${p.name}</span> 說：${p.lastThought}</div>`).join('');
+            
+            // 渲染運動家
             document.querySelectorAll('.runner').forEach(r => r.remove());
             playersArr.forEach(p => {
                 const point = path.getPointAtLength((Math.min(p.score/7500, 1)) * path.getTotalLength());
@@ -241,8 +249,12 @@
             drawMilestones();
         });
 
+        // 監聽下拉選單：動態切換按鈕文字與新成員欄位
         document.getElementById('user-select').addEventListener('change', function() {
-            document.getElementById('new-name-box').style.display = this.value === "" ? "block" : "none";
+            const isNew = this.value === "";
+            document.getElementById('new-name-box').style.display = isNew ? "block" : "none";
+            // 變更按鈕文字
+            document.getElementById('avatar-btn').innerText = isNew ? "選擇頭像" : "更改頭像";
         });
     </script>
 </body>
