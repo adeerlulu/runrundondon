@@ -20,229 +20,212 @@
             --font-round: 'M PLUS Rounded 1c', 'Quicksand', 'Microsoft JhengHei', sans-serif;
         }
 
-        body { font-family: var(--font-round); background-color: var(--bg-color); margin: 0; padding: 10px; text-align: center; color: var(--text-main); overflow-x: hidden; }
-        .logo-container { margin: 20px auto; max-width: 600px; padding: 0 10px; }
-        .main-logo { width: 100%; height: auto; display: block; filter: drop-shadow(0 0 12px rgba(0, 210, 255, 0.5)); }
-
-        /* 登入介面 */
-        #auth-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; }
-        #entry-pw { width: 180px; text-align: center; background: rgba(255, 255, 255, 0.1); border: 1px solid var(--accent-blue); color: white; padding: 10px; border-radius: 12px; font-family: var(--font-round); outline: none; }
-        .go-btn { font-family: var(--font-round); padding: 10px 40px; background: linear-gradient(135deg, #00d2ff, #3a7bd5); color: white; border: none; border-radius: 30px; cursor: pointer; font-weight: 800; font-size: 16px; box-shadow: 0 4px 15px rgba(58, 123, 213, 0.4); }
-
-        /* 控制面板 */
-        .section-header { max-width: 550px; margin: 0 auto 15px auto; text-align: left; }
-        .section-title { font-size: 18px; font-weight: 800; color: var(--accent-gold); padding-left: 10px; border-left: 4px solid var(--accent-gold); line-height: 1; }
-        .controls-wrapper { margin: 0 auto 30px auto; max-width: 550px; background: var(--panel-bg); padding: 25px; border-radius: 40px; border: 2px solid var(--track-yellow); box-shadow: 0 15px 30px rgba(0, 0, 0, 0.7), inset 0 0 20px rgba(11, 30, 59, 0.9); display: flex; flex-direction: column; gap: 20px; box-sizing: border-box; }
-        .control-row { display: flex; justify-content: space-between; align-items: flex-end; width: 100%; gap: 15px; }
-        .input-group { display: flex; gap: 10px; align-items: flex-end; flex-grow: 3; }
-        .input-box { display: flex; flex-direction: column; align-items: flex-start; }
-        .input-box.grow { flex-grow: 1; }
-        .input-box.small { width: 90px; flex-shrink: 0; }
-        input, select { font-family: var(--font-round); background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); padding: 10px; border-radius: 12px; color: #ffffff; outline: none; font-size: 14px; width: 100%; box-sizing: border-box; }
-        .submit-btn { font-family: var(--font-round); padding: 12px 100px; background: linear-gradient(135deg, #f9d423, #ff4e50); color: #000; border: none; border-radius: 30px; cursor: pointer; font-weight: 800; font-size: 16px; box-shadow: 0 4px 15px rgba(255, 78, 80, 0.4); }
-
-        /* 跑道區域與顏色流動優化 */
-        #track-wrapper { width: 100%; max-width: 550px; margin: 40px auto; position: relative; }
-        svg { width: 100%; height: auto; overflow: visible; }
+        html { scroll-behavior: smooth; }
+        body { font-family: var(--font-round); background-color: var(--bg-color); margin: 0; padding: 20px; text-align: center; color: var(--text-main); overflow-x: hidden; }
         
-        /* 核心優化：更動感的流動線條 */
-        .path-main { 
-            fill: none; 
-            stroke: url(#track-gradient); 
-            stroke-width: 6; 
-            stroke-linecap: round; 
-            filter: drop-shadow(0 0 8px rgba(0, 210, 255, 0.4));
+        .main-container { max-width: 1200px; margin: 0 auto; }
+        .logo-container { margin: 20px auto; max-width: 400px; }
+        .main-logo { width: 100%; height: auto; filter: drop-shadow(0 0 12px rgba(0, 210, 255, 0.5)); }
+
+        /* 控制面板：電腦版橫向 */
+        .controls-wrapper { 
+            margin: 0 auto 50px auto; max-width: 900px; 
+            background: var(--panel-bg); padding: 30px; border-radius: 40px; 
+            border: 2px solid var(--track-yellow); 
+            display: flex; flex-direction: column; gap: 20px; 
+        }
+        .control-row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 15px; }
+        .input-group { display: flex; gap: 10px; align-items: flex-end; flex: 1; min-width: 300px; }
+        
+        input, select { 
+            font-family: var(--font-round); background: rgba(255, 255, 255, 0.15); 
+            border: 1px solid rgba(255, 255, 255, 0.3); padding: 12px; 
+            border-radius: 15px; color: #fff; outline: none; width: 100%; 
         }
 
-        .milestone-dot { fill: #fff; }
-        .milestone-text { font-family: var(--font-round); fill: #ffffff; font-size: 7px; font-weight: 800; paint-order: stroke; stroke: var(--bg-color); stroke-width: 1.5px; pointer-events: none;}
+        .submit-btn { 
+            font-family: var(--font-round); padding: 12px 60px; 
+            background: linear-gradient(135deg, #f9d423, #ff4e50); 
+            color: #000; border: none; border-radius: 30px; cursor: pointer; font-weight: 800; 
+        }
+
+        /* 跑道區域：電腦版寬螢幕展現 */
+        #track-wrapper { 
+            width: 100%; margin: 150px auto; position: relative; 
+            min-height: 300px;
+        }
+        
+        /* 動態 SVG 容器 */
+        .svg-container { width: 100%; max-width: 1100px; margin: 0 auto; }
+        
+        .path-main { 
+            fill: none; stroke: url(#track-gradient); stroke-width: 8; stroke-linecap: round;
+            filter: drop-shadow(0 0 10px rgba(0, 210, 255, 0.5));
+            stroke-dasharray: 2000; stroke-dashoffset: 0;
+            animation: flowEffect 10s linear infinite; 
+        }
+        @keyframes flowEffect { from { stroke-dashoffset: 2000; } to { stroke-dashoffset: 0; } }
+
+        .milestone-text { font-size: 10px; fill: #fff; font-weight: 800; paint-order: stroke; stroke: var(--bg-color); stroke-width: 2px; }
 
         /* 角色 */
-        .runner { position: absolute; width: 40px; height: 40px; z-index: 50; cursor: pointer; margin-left: -20px; margin-top: -20px; transition: all 1s ease; animation: runnerFloating 2s ease-in-out infinite; }
-        @keyframes runnerFloating { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
-        .user-photo { width: 100%; height: 100%; border-radius: 50%; border: 3px solid #ffffff; box-shadow: 0 0 15px rgba(255, 255, 255, 0.8), 0 4px 10px rgba(0,0,0,0.5); background: #fff; box-sizing: border-box; }
+        .runner { 
+            position: absolute; width: 50px; height: 50px; z-index: 50; cursor: pointer; 
+            transform: translate(-50%, -50%); transition: all 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            animation: runnerFloating 2s ease-in-out infinite;
+        }
+        .user-photo { width: 100%; height: 100%; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 0 15px rgba(255, 255, 255, 0.6); background: #fff; }
 
-        /* 碎碎念（底部） */
-        #comment-wall { margin: 50px auto; max-width: 550px; text-align: left; }
-        .comment-item { display: flex; gap: 12px; position: relative; background: var(--bubble-bg); border-radius: 15px; padding: 15px; margin-bottom: 20px; font-size: 14px; border: 1.5px solid rgba(255,255,255,0.15); align-items: flex-start; }
-        .comment-avatar { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--accent-gold); background: #fff; flex-shrink: 0; }
-        .comment-content { flex-grow: 1; }
-        .comment-header { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 12px; }
-        .comment-name { color: var(--accent-gold); font-weight: 800; }
-        .comment-time { color: rgba(255,255,255,0.4); }
+        /* 碎碎念區域：電腦版三欄排版 */
+        #comment-list { 
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+            gap: 20px; margin-top: 20px; 
+        }
+        .comment-item { 
+            background: var(--bubble-bg); padding: 20px; border-radius: 20px; 
+            display: flex; gap: 15px; border: 1px solid rgba(255,255,255,0.1); text-align: left;
+        }
+        .comment-avatar { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--accent-gold); }
 
-        /* 彈窗 */
-        #info-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 4000; }
-        .info-card { background: rgba(26, 42, 68, 0.95); border: 2px solid var(--accent-blue); padding: 30px; border-radius: 25px; width: 85%; max-width: 320px; text-align: center; animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .score-num { display: block; font-size: 42px; font-weight: 900; color: #fff; text-shadow: 0 0 15px var(--accent-blue); margin: 10px 0; }
+        /* 手機版適應性修正 */
+        @media (max-width: 768px) {
+            #track-wrapper { margin: 80px auto; }
+            .controls-wrapper { padding: 20px; }
+            .runner { width: 40px; height: 40px; }
+        }
     </style>
 </head>
 <body>
 
-    <div id="auth-overlay">
-        <div class="logo-container"><img src="https://raw.githubusercontent.com/adeerlulu/runrundondon/main/links/LOGO.png" class="main-logo"></div>
-        <input type="password" id="entry-pw" placeholder="請輸入通關密語">
-        <button class="go-btn" onclick="checkEntry()">GO!GO!GO</button>
-    </div>
+<div id="auth-overlay">
+    <div class="logo-container"><img src="https://raw.githubusercontent.com/adeerlulu/runrundondon/main/links/LOGO.png" class="main-logo"></div>
+    <input type="password" id="entry-pw" placeholder="請輸入密語">
+    <button class="go-btn" onclick="checkEntry()">GO!</button>
+</div>
 
-    <div id="info-overlay" onclick="closeInfo()">
-        <div class="info-card" onclick="event.stopPropagation()">
-            <h2 id="info-name">運動家</h2>
-            <p style="margin:0;">在 2026 年已運動了</p>
-            <span class="score-num" id="info-score">0</span>
-            <p style="margin:0; margin-bottom: 20px;">分鐘</p>
-            <button class="go-btn" style="padding: 8px 30px; font-size: 14px;" onclick="closeInfo()">關閉</button>
-        </div>
-    </div>
+<div class="main-container" id="main-content" style="display:none;">
+    <div class="logo-container"><img src="https://raw.githubusercontent.com/adeerlulu/runrundondon/main/links/LOGO.png" class="main-logo"></div>
 
-    <div id="main-content" style="display:none;">
-        <div class="logo-container"><img src="https://raw.githubusercontent.com/adeerlulu/runrundondon/main/links/LOGO.png" class="main-logo"></div>
-
-        <div class="section-header"><div class="section-title">今日工事</div></div>
-        <div class="controls-wrapper">
-            <div class="control-row">
-                <div class="input-group">
-                    <div class="input-box grow"><label>是哪位運動家</label><select id="user-select"><option value="">+ 新成員</option></select></div>
-                    <div class="input-box grow" id="new-name-box"><label>輸入名字</label><input type="text" id="new-name" placeholder="名字"></div>
-                    <button id="avatar-btn" style="background:#2c5282; color:white; border:none; padding:10px; border-radius:12px; cursor:pointer; font-size:12px; height:41px; min-width:80px;" onclick="toggleModal(true)">選擇頭像</button>
-                </div>
-                <div class="input-box small"><label>運動量</label><input type="number" id="mins" placeholder="mins"></div>
+    <div class="controls-wrapper">
+        <div class="control-row">
+            <div class="input-group">
+                <select id="user-select"><option value="">+ 新運動家</option></select>
+                <div id="new-name-box"><input type="text" id="new-name" placeholder="名字"></div>
+                <button id="avatar-btn" style="background:#2c5282; color:white; border:none; padding:10px; border-radius:12px; cursor:pointer; min-width:80px;" onclick="toggleModal(true)">頭像</button>
             </div>
-            <div class="control-row"><div class="input-box grow"><label>今日碎碎念</label><input type="text" id="thought-input" placeholder="只能碎念30字" maxlength="30"></div></div>
-            <button class="submit-btn" onclick="handleUpdate()">GO!</button>
+            <input type="number" id="mins" style="width:100px" placeholder="分鐘">
         </div>
+        <div class="control-row">
+            <input type="text" id="thought-input" placeholder="寫下今天的碎碎念..." maxlength="30">
+            <button class="submit-btn" onclick="handleUpdate()">送出紀錄</button>
+        </div>
+    </div>
 
-        <div id="track-wrapper">
-            <div class="section-header"><div class="section-title">跑跑跑！向前跑！</div></div>
-            <svg viewBox="0 0 200 520" id="main-svg">
+    <div id="track-wrapper">
+        <h3 style="color:var(--accent-gold); margin-bottom:40px">跑跑跑！向前跑！</h3>
+        <div class="svg-container">
+            <svg id="main-svg" viewBox="0 0 1000 200">
                 <defs>
-                    <linearGradient id="track-gradient" x1="0%" y1="0%" x2="0%" y2="100%" gradientUnits="userSpaceOnUse">
+                    <linearGradient id="track-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
                         <stop offset="0%" stop-color="#00d2ff" />
-                        <stop offset="25%" stop-color="#f9d423" />
-                        <stop offset="50%" stop-color="#ff4e50" />
-                        <stop offset="75%" stop-color="#f9d423" />
-                        <stop offset="100%" stop-color="#00d2ff" />
+                        <stop offset="50%" stop-color="#f9d423" />
+                        <stop offset="100%" stop-color="#ff4e50" />
                     </linearGradient>
-                    
-                    <style>
-                        /* 使用 CSS 直接對 SVG 漸層進行背景位移動畫，效能極佳 */
-                        .path-main {
-                            stroke-dasharray: 2000; /* 設定足夠長度確保漸層鋪滿 */
-                            stroke-dashoffset: 0;
-                            animation: flowEffect 15s linear infinite;
-                        }
-                        @keyframes flowEffect {
-                            from { stroke-dashoffset: 2000; }
-                            to { stroke-dashoffset: 0; }
-                        }
-                    </style>
                 </defs>
-                <path id="s-path" class="path-main" d="M 0 50 H 165 A 35 35 0 0 1 165 120 H 35 A 35 35 0 0 0 35 190 H 165 A 35 35 0 0 1 165 260 H 35 A 35 35 0 0 0 35 330 H 165 A 35 35 0 0 1 165 400 H 35 A 35 35 0 0 0 35 470" />
-                <text x="0" y="505" fill="#ff4e50" font-size="11" font-weight="900">FINISH 7500</text>
+                <path id="h-path" class="path-main" d="M 50 100 C 250 20, 450 180, 650 100 C 850 20, 950 100, 950 100" />
                 <g id="milestones-group"></g>
             </svg>
         </div>
-
-        <div id="comment-wall">
-            <div class="section-header"><div class="section-title">動動碎碎念</div></div>
-            <div id="comment-list"></div>
-        </div>
     </div>
 
-    <div id="modal-overlay" onclick="toggleModal(false)" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:2500;"></div>
-    <div id="avatar-modal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:#1a2a44; padding:20px; border-radius:20px; border:2px solid var(--accent-blue); z-index:3000; width: 280px;">
-        <div class="avatar-grid" id="avatar-picker" style="display:grid; grid-template-columns:repeat(4,1fr); gap:10px;"></div>
-        <button class="submit-btn" style="margin-top:15px; width:100%; color: white; font-size:14px; padding:10px;" onclick="toggleModal(false)">確定</button>
+    <div id="comment-wall" style="margin-top: 200px">
+        <h3 style="color:var(--accent-gold); text-align:left">動動碎碎念</h3>
+        <div id="comment-list"></div>
     </div>
+</div>
 
-    <script>
-        const firebaseConfig = { apiKey: "AIzaSyDqX_tZqqfw0txXpd-b4AWuolhgQgU6lLU", authDomain: "runrundondon-31b12.firebaseapp.com", databaseURL: "https://runrundondon-31b12-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "runrundondon-31b12" };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+<div id="info-overlay" onclick="closeInfo()">
+    <div class="info-card" onclick="event.stopPropagation()">
+        <h2 id="info-name"></h2><span class="score-num" id="info-score"></span><p>分鐘</p>
+    </div>
+</div>
 
-        function checkEntry() { if (document.getElementById('entry-pw').value === "1234") { localStorage.setItem('last_login_time', new Date().getTime().toString()); location.reload(); } else { alert("通關密語錯誤！"); } }
-        if (localStorage.getItem('last_login_time') && (new Date().getTime() - parseInt(localStorage.getItem('last_login_time'))) / 60000 < 30) {
-            document.getElementById('main-content').style.display = 'block'; document.getElementById('auth-overlay').style.display = 'none';
-        }
+<div id="modal-overlay" onclick="toggleModal(false)" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:2500;"></div>
+<div id="avatar-modal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:#1a2a44; padding:20px; border-radius:20px; z-index:3000; width: 280px;">
+    <div class="avatar-grid" id="avatar-picker" style="display:grid; grid-template-columns:repeat(4,1fr); gap:10px;"></div>
+</div>
 
-        function closeInfo() { document.getElementById('info-overlay').style.display = 'none'; }
-        function showInfo(name, score) { document.getElementById('info-name').innerText = name; document.getElementById('info-score').innerText = score; document.getElementById('info-overlay').style.display = 'flex'; }
-        function toggleModal(show) { document.getElementById('avatar-modal').style.display = show ? 'block' : 'none'; document.getElementById('modal-overlay').style.display = show ? 'block' : 'none'; }
+<script>
+    const firebaseConfig = { apiKey: "AIzaSyDqX_tZqqfw0txXpd-b4AWuolhgQgU6lLU", authDomain: "runrundondon-31b12.firebaseapp.com", databaseURL: "https://runrundondon-31b12-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "runrundondon-31b12" };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-        function drawMilestones() {
-            const path = document.getElementById('s-path');
-            const group = document.getElementById('milestones-group');
-            const pathLength = path.getTotalLength();
-            group.innerHTML = "";
-            for (let i = 0; i <= 7500; i += 500) {
-                let percent = (i === 0) ? (35 / pathLength) : (i / 7500);
-                const point = path.getPointAtLength(percent * pathLength);
-                const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-                dot.setAttribute("cx", point.x); dot.setAttribute("cy", point.y); dot.setAttribute("r", "2.5");
-                dot.setAttribute("class", "milestone-dot"); group.appendChild(dot);
-                const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                text.setAttribute("class", "milestone-text"); text.textContent = i;
-                text.setAttribute("x", point.x); text.setAttribute("y", point.y + 12);
-                text.setAttribute("text-anchor", "middle"); group.appendChild(text);
-            }
-        }
+    function checkEntry() { if (document.getElementById('entry-pw').value === "1234") { localStorage.setItem('last_login_time', new Date().getTime()); location.reload(); } }
+    if (localStorage.getItem('last_login_time')) { document.getElementById('main-content').style.display = 'block'; document.getElementById('auth-overlay').style.display = 'none'; }
 
-        const baseUrl = "https://raw.githubusercontent.com/adeerlulu/runrundondon/main/icons/";
-        for (let i = 1; i <= 12; i++) {
-            const fileName = i < 10 ? '0' + i : i;
-            const img = document.createElement('img'); img.src = `${baseUrl}${fileName}.png`;
-            img.style = "width:50px; height:50px; cursor:pointer; border-radius:8px; border:2px solid transparent; background:#fff;";
-            img.onclick = function() { document.querySelectorAll('#avatar-picker img').forEach(el => el.style.borderColor = 'transparent'); this.style.borderColor = '#00d2ff'; window.selectedAvatarUrl = this.src; };
-            document.getElementById('avatar-picker').appendChild(img);
-        }
+    function toggleModal(show) { document.getElementById('avatar-modal').style.display = show ? 'block' : 'none'; document.getElementById('modal-overlay').style.display = show ? 'block' : 'none'; }
+    function closeInfo() { document.getElementById('info-overlay').style.display = 'none'; }
 
-        function handleUpdate() {
-            const name = document.getElementById('user-select').value || document.getElementById('new-name').value.trim();
-            const mins = parseInt(document.getElementById('mins').value);
-            const thought = document.getElementById('thought-input').value.trim();
-            if (!name || isNaN(mins)) { alert("請填寫資訊"); return; }
-            const userRef = db.ref('players/' + name);
-            userRef.once('value').then(snapshot => {
-                const data = snapshot.val() || { score: 0, photo: "" };
-                const updates = { name: name, score: data.score + mins, photo: window.selectedAvatarUrl || data.photo, lastUpdate: Date.now() };
-                if (thought) updates.lastThought = thought;
-                return userRef.update(updates);
-            }).then(() => location.reload());
-        }
+    const baseUrl = "https://raw.githubusercontent.com/adeerlulu/runrundondon/main/icons/";
+    for (let i = 1; i <= 12; i++) {
+        let img = document.createElement('img'); img.src = `${baseUrl}${i<10?'0'+i:i}.png`;
+        img.className = "picker-img";
+        img.style = "width:50px; cursor:pointer; background:#fff; border-radius:8px;";
+        img.onclick = function() { window.selectedAvatarUrl = this.src; toggleModal(false); };
+        document.getElementById('avatar-picker').appendChild(img);
+    }
 
-        db.ref('players').on('value', (snapshot) => {
-            const players = snapshot.val();
-            const path = document.getElementById('s-path');
-            if(!players || !path) return;
-            const playersArr = Object.values(players);
-            document.getElementById('user-select').innerHTML = '<option value="">+ 新成員</option>' + playersArr.map(p => `<option value="${p.name}">${p.name}</option>`).join('');
-            
-            const thoughts = playersArr.filter(p => p.lastThought).sort((a,b) => b.lastUpdate - a.lastUpdate).slice(0,3);
-            document.getElementById('comment-list').innerHTML = thoughts.map(p => {
-                const date = new Date(p.lastUpdate);
-                return `<div class="comment-item"><img src="${p.photo}" class="comment-avatar"><div class="comment-content"><div class="comment-header"><span class="comment-name">${p.name}</span><span class="comment-time">${date.getMonth()+1}/${date.getDate()}</span></div><div>${p.lastThought}</div></div></div>`;
-            }).join('');
+    db.ref('players').on('value', (snapshot) => {
+        const players = snapshot.val() || {};
+        const path = document.getElementById('h-path');
+        const pathLength = path.getTotalLength();
+        const playersArr = Object.values(players);
 
-            document.querySelectorAll('.runner').forEach(r => r.remove());
-            playersArr.forEach(p => {
-                const totalL = path.getTotalLength();
-                // 嚴格起跑線修正：物理座標 x=35 對應的比例
-                const startRatio = 35 / totalL;
-                let moveRatio = (p.score <= 0) ? startRatio : startRatio + (p.score / 7500) * (1 - startRatio);
-                const point = path.getPointAtLength(Math.min(moveRatio, 1) * totalL);
-                
-                const runner = document.createElement('div');
-                runner.className = 'runner';
-                runner.style.left = `${(point.x / 200) * 100}%`;
-                runner.style.top = `${(point.y / 520) * 100}%`;
-                runner.innerHTML = `<img src="${p.photo}" class="user-photo">`;
-                runner.onclick = () => showInfo(p.name, p.score);
-                document.getElementById('track-wrapper').appendChild(runner);
-            });
-            drawMilestones();
+        // 碎碎念列表
+        document.getElementById('comment-list').innerHTML = playersArr.filter(p => p.lastThought).sort((a,b) => b.lastUpdate - a.lastUpdate).slice(0,6).map(p => `
+            <div class="comment-item">
+                <img src="${p.photo}" class="comment-avatar">
+                <div><b style="color:var(--accent-gold)">${p.name}</b><br><span style="font-size:13px">${p.lastThought}</span></div>
+            </div>`).join('');
+
+        // 跑者定位
+        document.querySelectorAll('.runner').forEach(r => r.remove());
+        playersArr.forEach(p => {
+            const ratio = Math.min(p.score / 7500, 1);
+            const point = path.getPointAtLength(ratio * pathLength);
+            const runner = document.createElement('div');
+            runner.className = 'runner';
+            runner.style.left = `${(point.x / 1000) * 100}%`;
+            runner.style.top = `${(point.y / 200) * 100}%`;
+            runner.innerHTML = `<img src="${p.photo}" class="user-photo">`;
+            runner.onclick = () => { document.getElementById('info-name').innerText = p.name; document.getElementById('info-score').innerText = p.score; document.getElementById('info-overlay').style.display='flex'; };
+            document.getElementById('track-wrapper').appendChild(runner);
         });
 
-        document.getElementById('user-select').addEventListener('change', function() { document.getElementById('new-name-box').style.display = (this.value === "") ? "block" : "none"; });
-    </script>
+        // 繪製刻度
+        const mGroup = document.getElementById('milestones-group');
+        mGroup.innerHTML = "";
+        for (let i = 0; i <= 7500; i += 1500) {
+            const pt = path.getPointAtLength((i/7500) * pathLength);
+            mGroup.innerHTML += `<circle cx="${pt.x}" cy="${pt.y}" r="4" fill="#fff"/>
+                                 <text x="${pt.x}" y="${pt.y+25}" class="milestone-text" text-anchor="middle">${i}</text>`;
+        }
+    });
+
+    function handleUpdate() {
+        const name = document.getElementById('user-select').value || document.getElementById('new-name').value.trim();
+        const mins = parseInt(document.getElementById('mins').value);
+        if (!name || isNaN(mins)) return;
+        db.ref('players/' + name).once('value').then(s => {
+            const d = s.val() || {score:0, photo: window.selectedAvatarUrl || ""};
+            db.ref('players/' + name).update({
+                name: name, score: d.score + mins, 
+                photo: window.selectedAvatarUrl || d.photo,
+                lastThought: document.getElementById('thought-input').value,
+                lastUpdate: Date.now()
+            }).then(() => location.reload());
+        });
+    }
+</script>
 </body>
 </html>
