@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>跑跑動動 RunRun!DonDon!</title>
+    <title>跑跑動動 RunRun! DonDon!</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
@@ -22,12 +22,12 @@
             margin: 0; 
             padding: 30px 20px;
             color: #333;
+            min-height: 100vh;
         }
 
-        /* 標題樣式優化 */
         .title-container { margin-bottom: 40px; }
         h1 { 
-            font-size: 3.5rem; 
+            font-size: 3rem; 
             margin: 0; 
             background: var(--header-gradient);
             -webkit-background-clip: text;
@@ -43,7 +43,6 @@
             letter-spacing: 2px;
         }
 
-        /* 跑道容器 */
         #track-container { 
             width: 100%; 
             max-width: 900px; 
@@ -55,6 +54,7 @@
             box-shadow: 0 20px 40px rgba(0,0,0,0.2);
             position: relative;
             overflow: hidden;
+            min-height: 150px;
         }
 
         .lane { 
@@ -100,7 +100,7 @@
 
         .controls { 
             margin-top: 20px; 
-            padding: 35px; 
+            padding: 30px; 
             background: white; 
             display: inline-flex;
             flex-wrap: wrap;
@@ -112,38 +112,26 @@
         }
 
         input { 
-            padding: 14px 18px; 
+            padding: 12px 15px; 
             border: 2px solid #edf2f7; 
-            border-radius: 15px; 
+            border-radius: 12px; 
             font-size: 16px;
             background: #f7fafc;
-            transition: all 0.3s;
-        }
-
-        input:focus { 
-            border-color: #667eea; 
-            background: #fff;
-            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
         }
 
         button { 
-            padding: 14px 35px; 
+            padding: 12px 30px; 
             background: var(--header-gradient); 
             color: white; 
             border: none; 
-            border-radius: 15px; 
+            border-radius: 12px; 
             cursor: pointer; 
             font-weight: 800;
             font-size: 16px;
-            transition: all 0.3s;
-            box-shadow: 0 6px 20px rgba(118, 75, 162, 0.3);
+            transition: 0.3s;
         }
 
-        button:hover { 
-            transform: scale(1.05);
-            box-shadow: 0 8px 25px rgba(118, 75, 162, 0.4);
-        }
-
+        button:hover { transform: scale(1.05); opacity: 0.9; }
         .hint { color: #a0aec0; font-size: 14px; margin-top: 15px; font-style: italic; }
     </style>
 </head>
@@ -155,18 +143,19 @@
     </div>
     
     <div id="track-container">
-        </div>
+        <div style="color:white; padding:50px;">正在連線到跑道...</div>
+    </div>
 
     <div class="controls">
-        <input type="text" id="name" placeholder="輸入大名">
-        <input type="number" id="mins" placeholder="運動(min)">
+        <input type="text" id="name" placeholder="大名">
+        <input type="number" id="mins" placeholder="分鐘">
         <input type="password" id="pw" placeholder="密碼">
         <button type="button" onclick="addMins()">回報進度</button>
     </div>
     <p class="hint">目標累積：1000 分鐘 | 專屬密碼驗證</p>
 
     <script>
-        // --- 1. 初始化 Firebase ---
+        // --- Firebase 設定 ---
         const firebaseConfig = {
             apiKey: "AIzaSyDqX_tZqqfw0txXpd-b4AWuolhgQgU6lLU",
             authDomain: "runrundondon-31b12.firebaseapp.com",
@@ -177,24 +166,18 @@
             appId: "1:466713105396:web:c0651103b028978cd9dfa1"
         };
 
+        // 初始化 Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // --- 2. 增加時間邏輯 ---
+        // 登記功能
         window.addMins = function() {
             const name = document.getElementById('name').value.trim();
             const mins = parseInt(document.getElementById('mins').value);
             const pw = document.getElementById('pw').value;
 
-            if (pw !== "hello") {
-                alert("🔒 密碼不正確喔！");
-                return;
-            }
-
-            if (!name || isNaN(mins)) {
-                alert("請填寫姓名與正確的分鐘數");
-                return;
-            }
+            if (pw !== "hello") { alert("🔒 密碼不正確！"); return; }
+            if (!name || isNaN(mins)) { alert("請填寫姓名與分鐘數"); return; }
 
             const userRef = db.ref('players/' + name);
             userRef.once('value').then(snapshot => {
@@ -207,29 +190,24 @@
             }).then(() => {
                 document.getElementById('mins').value = ''; 
                 document.getElementById('pw').value = '';
-                alert("💪 紀錄成功！繼續加油！");
-            }).catch(err => {
-                alert("連線發生問題: " + err.message);
-            });
+                alert("💪 紀錄成功！");
+            }).catch(err => alert("失敗: " + err.message));
         };
 
-        // --- 3. 監聽資料庫 ---
+        // 畫面同步
         db.ref('players').on('value', (snapshot) => {
             const players = snapshot.val();
             const track = document.getElementById('track-container');
             track.innerHTML = ''; 
 
             if (!players) {
-                track.innerHTML = '<div style="color:rgba(255,255,255,0.4); padding:60px; font-weight:bold;">🏃 虛位以待，快來加入！</div>';
+                track.innerHTML = '<div style="color:white; padding:50px;">🏃 等待第一位選手加入...</div>';
                 return;
             }
 
             const GOAL = 1000; 
-
-            for (let id in players) {
-                const p = players[id];
+            Object.values(players).forEach(p => {
                 const progress = Math.min((p.score / GOAL) * 85, 92); 
-                
                 const lane = document.createElement('div');
                 lane.className = 'lane';
                 lane.innerHTML = `
@@ -239,7 +217,7 @@
                     </div>
                 `;
                 track.appendChild(lane);
-            }
+            });
         });
     </script>
 </body>
