@@ -284,18 +284,20 @@
             // 基礎頭像
             let runnerContent = `<img src="${p.photo}" class="user-photo">`;
             
-            // 修正位置：讓小狗連接在頭像圓框的右下角邊緣
+            // 條件設定：超過 100 分鐘出現 deco-02
+            // 位置調整說明：
+            // bottom: -12px (往下移一點)
+            // right: -30px (往右推，讓小狗的左側邊緣剛好切到頭像圓框)
             if (p.score >= 100) {
                 runnerContent += `
-                    <img src="https://raw.githubusercontent.com/adeerlulu/runrundondon/main/decos/deco-01.svg" 
+                    <img src="https://raw.githubusercontent.com/adeerlulu/runrundondon/main/decos/deco-02.svg" 
                          style="position: absolute; 
-                                width: 32px; 
-                                height: 32px; 
-                                bottom: -5px; 
-                                right: -15px; 
+                                width: 38px; 
+                                height: 38px; 
+                                bottom: -12px; 
+                                right: -30px; 
                                 z-index: 51; 
-                                pointer-events: none;
-                                filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.3));">
+                                pointer-events: none;">
                 `;
             }
 
@@ -388,4 +390,5 @@
 </script>
 </body>
 </html>
+
 
