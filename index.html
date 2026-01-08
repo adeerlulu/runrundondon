@@ -280,17 +280,37 @@
             r.className = 'runner';
             r.style.left = `${(pt.x / 1000) * 100}%`;
             r.style.top = `${(pt.y / 400) * 100}%`; 
-            r.innerHTML = `<img src="${p.photo}" class="user-photo">`;
+            
+            // 基礎頭像
+            let runnerContent = `<img src="${p.photo}" class="user-photo">`;
+            
+            // 獎勵：超過 100 分鐘增加遛狗圖案 (會跟著 runner 容器一起飄動)
+            if (p.score >= 100) {
+                runnerContent += `
+                    <img src="https://raw.githubusercontent.com/adeerlulu/runrundondon/main/decos/deco-01.svg" 
+                         style="position: absolute; width: 35px; height: 35px; bottom: -10px; right: -20px; z-index: 51; pointer-events: none;">
+                `;
+            }
+
+            r.innerHTML = runnerContent;
+            
             r.onclick = () => {
+                const surpriseTexts = [
+                    "天啊天啊天啊", "歐某歐某!", "又要變美了嗎", "簡直是運動神童",
+                    "是位練武奇才", "動ㄘ動ㄘ", "您跑得實在太快惹",
+                    "管理員追不上啊啊啊", "我的老天鵝", "是不是偷偷在跑",
+                    "再跑下去就要去奧運了", "願膽固醇遠離您"
+                ];
+                const randomTitle = surpriseTexts[Math.floor(Math.random() * surpriseTexts.length)];
                 const d = new Date(p.lastUpdate);
                 const timeStr = p.lastUpdate ? `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()} ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}` : "無紀錄";
-                showUI("天啊天啊天啊", p.name, p.score, timeStr);
+                showUI(randomTitle, p.name, p.score, timeStr);
             };
             document.getElementById('runner-layer').appendChild(r);
         });
     });
 
-    // 監聽新版留言區 (改為獨立節點，不會被覆寫)
+    // 監聽新版留言區
     db.ref('comments').limitToLast(30).on('value', (snapshot) => {
         const commentsObj = snapshot.val() || {};
         allComments = Object.values(commentsObj).sort((a, b) => b.timestamp - a.timestamp);
@@ -339,7 +359,6 @@
             const now = Date.now();
             const photoUrl = window.selectedAvatarUrl || d.photo || "https://raw.githubusercontent.com/adeerlulu/runrundondon/main/icons/01.png";
             
-            // 1. 更新個人累積總分
             const playerUpdates = {
                 name: name.toString(), 
                 score: d.score + mins, 
@@ -347,7 +366,6 @@
                 lastUpdate: now
             };
 
-            // 2. 如果有留言，存入獨立的 comments 節點 (不會被覆蓋)
             if (thought) {
                 db.ref('comments').push({
                     name: name,
