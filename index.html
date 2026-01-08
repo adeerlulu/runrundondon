@@ -274,7 +274,7 @@
         }
 
         document.querySelectorAll('.runner').forEach(r => r.remove());
-        playersArr.forEach(p => {
+       playersArr.forEach(p => {
             const pt = path.getPointAtLength(Math.min(p.score/7500, 1) * pathLength);
             const r = document.createElement('div');
             r.className = 'runner';
@@ -284,11 +284,18 @@
             // 基礎頭像
             let runnerContent = `<img src="${p.photo}" class="user-photo">`;
             
-            // 獎勵：超過 100 分鐘增加遛狗圖案 (會跟著 runner 容器一起飄動)
+            // 修正位置：讓小狗連接在頭像圓框的右下角邊緣
             if (p.score >= 100) {
                 runnerContent += `
                     <img src="https://raw.githubusercontent.com/adeerlulu/runrundondon/main/decos/deco-01.svg" 
-                         style="position: absolute; width: 35px; height: 35px; bottom: -10px; right: -20px; z-index: 51; pointer-events: none;">
+                         style="position: absolute; 
+                                width: 32px; 
+                                height: 32px; 
+                                bottom: -5px; 
+                                right: -15px; 
+                                z-index: 51; 
+                                pointer-events: none;
+                                filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.3));">
                 `;
             }
 
@@ -381,3 +388,4 @@
 </script>
 </body>
 </html>
+
