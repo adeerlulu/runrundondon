@@ -28,48 +28,40 @@
         
         #auth-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(11, 30, 59, 1); /* 提高不透明度避免閃爍 */
-            display: flex; justify-content: center; align-items: center; z-index: 999999;
+            background: #0b1e3b; display: flex; justify-content: center; align-items: center; z-index: 999999;
         }
         .auth-card {
             background: #1a2a44; border: 2px solid var(--accent-gold);
-            padding: 40px; border-radius: 30px; text-align: center;
-            box-shadow: 0 0 30px rgba(0,0,0,0.5); width: 90%; max-width: 350px;
+            padding: 40px; border-radius: 30px; text-align: center; width: 90%; max-width: 350px;
         }
         .auth-input { 
             width: 100%; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2);
             background: rgba(0,0,0,0.3); color: white; text-align: center; font-size: 20px; 
             letter-spacing: 5px; margin-bottom: 20px; box-sizing: border-box;
         }
-        .submit-btn { font-family: var(--font-taipei); height: 48px; padding: 0 60px; background: var(--btn-confirm); color: #fff; border: none; border-radius: 12px; cursor: pointer; font-weight: 900; font-size: 18px; transition: 0.3s; }
+        .submit-btn { height: 48px; padding: 0 60px; background: var(--btn-confirm); color: #fff; border: none; border-radius: 12px; cursor: pointer; font-weight: 900; font-size: 18px; width: 100%; }
 
-        /* 這裡保留您原本所有的 CSS ... */
-        .logo-container { margin: 20px auto; max-width: 700px; text-align: center; }
-        .main-logo { width: 100%; height: auto; filter: drop-shadow(0 0 15px rgba(0, 210, 255, 0.5)); }
-        .section-header { width: 100%; margin: 0 auto 20px auto; } 
-        .section-title { font-size: 19px; font-weight: 900; color: var(--accent-gold); padding-left: 12px; border-left: 5px solid var(--accent-gold); line-height: 1.2; }
-        .controls-wrapper { margin: 0 auto 20px auto; width: 100%; box-sizing: border-box; background: var(--panel-bg); padding: 25px; border-radius: 35px; border: 2px solid var(--accent-gold); display: flex; flex-direction: column; gap: 15px; }
-        .control-row { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; width: 100%; }
-        .input-box { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; flex: 1; min-width: 140px; }
-        .input-box label { font-size: 13px; color: var(--accent-blue); font-weight: 700; }
-        input, select { font-family: var(--font-taipei); background: #1a2a44 !important; border: 1px solid rgba(255, 255, 255, 0.3); padding: 12px; border-radius: 12px; color: #ffffff !important; outline: none; width: 100%; box-sizing: border-box; height: 48px; }
-        .total-counter-box { text-align: center; margin: 20px auto 0 auto; color: #fff; font-weight: bold; }
-        .total-num { color: var(--accent-gold); font-size: 28px; font-weight: 900; margin: 0 8px; }
-        .svg-container { position: relative; width: 100%; height: auto; aspect-ratio: 1000 / 400; overflow: visible; margin-bottom: 0; }
-        #main-svg { width: 100%; height: auto; overflow: visible; display: block; }
-        .path-main { fill: none; stroke: url(#track-gradient); stroke-width: 14; stroke-linecap: round; stroke-dasharray: 3000; stroke-dashoffset: 3000; animation: flowSlow 3s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
-        @keyframes flowSlow { from { stroke-dashoffset: 3000; } to { stroke-dashoffset: 0; } }
-        .runner { position: absolute; width: 42px; height: 42px; z-index: 50; transform: translate(-50%, -50%); cursor: pointer; animation: float 3s ease-in-out infinite; }
-        .user-photo { width: 100%; height: 100%; border-radius: 50%; border: 2px solid #fff; background: rgba(255,255,255,0.2); pointer-events: none; }
-        .comment-carousel-container { position: relative; width: 100%; margin: 0 auto; display: flex; align-items: center; }
-        .comment-window { overflow: hidden; width: 100%; padding: 10px 0; }
-        #comment-list { display: flex; transition: transform 0.6s ease; }
-        .comment-item { min-width: 300px; margin: 0 15px; background: var(--bubble-bg); padding: 20px; border-radius: 20px; opacity: 0.3; transform: scale(0.9); transition: 0.5s; border: 1px solid rgba(255,255,255,0.1); text-align: left; display: flex; gap: 12px; }
-        .comment-item.active { opacity: 1; transform: scale(1.05); border-color: var(--accent-gold); }
-        .ui-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 99999; }
-        .ui-card { background: #1a2a44; border: 2px solid var(--accent-gold); padding: 40px; border-radius: 25px; text-align: center; color: white; min-width: 300px; max-width: 500px; }
-        .confirm-btn { background-color: var(--btn-confirm) !important; color: white !important; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        @keyframes float { 0% { transform: translate(-50%, -50%); } 50% { transform: translate(-50%, -62%); } 100% { transform: translate(-50%, -50%); } }
+        .logo-container { margin: 20px auto; text-align: center; }
+        .main-logo { width: 100%; max-width: 700px; height: auto; }
+        .section-header { width: 100%; margin: 20px 0; } 
+        .section-title { font-size: 19px; font-weight: 900; color: var(--accent-gold); padding-left: 12px; border-left: 5px solid var(--accent-gold); }
+        .controls-wrapper { background: var(--panel-bg); padding: 25px; border-radius: 35px; border: 2px solid var(--accent-gold); display: flex; flex-direction: column; gap: 15px; }
+        .control-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; }
+        .input-box { display: flex; flex-direction: column; flex: 1; min-width: 140px; text-align: left; }
+        .input-box label { font-size: 13px; color: var(--accent-blue); margin-bottom: 5px; font-weight: bold; }
+        input, select { background: #1a2a44; border: 1px solid rgba(255,255,255,0.3); padding: 12px; border-radius: 12px; color: white; height: 48px; box-sizing: border-box; }
+        .total-counter-box { margin: 30px 0; font-weight: bold; }
+        .total-num { color: var(--accent-gold); font-size: 28px; }
+        .svg-container { position: relative; width: 100%; aspect-ratio: 1000/400; }
+        #main-svg { width: 100%; height: auto; }
+        .path-main { fill: none; stroke: url(#track-gradient); stroke-width: 14; stroke-linecap: round; }
+        .runner { position: absolute; width: 42px; height: 42px; transform: translate(-50%, -50%); cursor: pointer; animation: float 3s infinite ease-in-out; }
+        .user-photo { width: 100%; height: 100%; border-radius: 50%; border: 2px solid white; }
+        .ui-modal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); display:none; justify-content:center; align-items:center; z-index:9999; }
+        .ui-card { background:#1a2a44; border:2px solid var(--accent-gold); padding:40px; border-radius:25px; text-align:center; max-width:400px; }
+        .comment-item { background: var(--bubble-bg); padding: 15px; border-radius: 15px; margin-bottom: 10px; display: flex; align-items: center; gap: 15px; text-align: left; }
+        .comment-avatar { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--accent-gold); }
+        @keyframes float { 0%, 100% { transform: translate(-50%, -50%); } 50% { transform: translate(-50%, -60%); } }
     </style>
 </head>
 <body>
@@ -78,75 +70,63 @@
     <div class="auth-card">
         <h2>請輸入通關密語</h2>
         <input type="password" id="pw-input" class="auth-input" placeholder="•••••">
-        <button class="submit-btn" style="width:100%;" onclick="checkPassword()">進入網頁</button>
+        <button class="submit-btn" onclick="checkPassword()">進入網頁</button>
         <p id="pw-error" style="color:#ff4e50; font-size:13px; margin-top:10px; display:none;">密碼錯誤，請再試一次</p>
     </div>
 </div>
 
 <div class="main-container" id="main-content">
     <div class="logo-container"><img src="https://raw.githubusercontent.com/adeerlulu/runrundondon/main/links/LOGO.png" class="main-logo"></div>
+    
     <div class="section-header"><div class="section-title">今日工事</div></div>
     <div class="controls-wrapper">
         <div class="control-row">
             <div class="input-box"><label>是哪位運動家</label><select id="user-select"><option value="">+ 新成員</option></select></div>
-            <div id="new-name-box" class="input-box"><label>新成員名字</label><input type="text" id="new-name" maxlength="8"></div>
-            <div class="input-box"><div style="height:19px"></div><button id="avatar-btn" style="background:#2c5282; color:white; border:none; padding:12px; border-radius:12px; cursor:pointer; width:100%; font-weight:bold; height:48px;" onclick="toggleAvatarModal(true)">挑選頭像</button></div>
-            <div class="input-box" style="flex:0.6"><label>今日運動時數</label><input type="number" id="mins" placeholder="分鐘"></div>
+            <div id="new-name-box" class="input-box"><label>新成員名字</label><input type="text" id="new-name"></div>
+            <div class="input-box"><label>頭像</label><button onclick="toggleAvatarModal(true)" style="height:48px; border-radius:12px; background:#2c5282; color:white; border:none; cursor:pointer;">挑選頭像</button></div>
+            <div class="input-box"><label>分鐘數</label><input type="number" id="mins"></div>
         </div>
         <div class="control-row">
-            <div class="input-box" style="flex:3"><label>今日碎碎念</label><input type="text" id="thought-input" placeholder="只能碎念30字" maxlength="30"></div>
-            <button class="submit-btn" onclick="handleUpdate()">GO!</button>
+            <div class="input-box" style="flex:3"><label>碎碎念</label><input type="text" id="thought-input" maxlength="30"></div>
+            <button class="submit-btn" style="width:auto; padding:0 40px;" onclick="handleUpdate()">GO!</button>
         </div>
     </div>
-    <div class="section-header-talk" style="margin-top:60px;"><div class="section-title">動動碎碎念</div></div>
-    <div class="comment-carousel-container">
-        <div class="comment-window"><div id="comment-list"></div></div>
-    </div>
-    <div class="section-header-run" style="margin-top:100px;"><div class="section-title">跑跑跑！向前跑！</div></div>
-    <div class="total-counter-box">恭喜恭喜！在座各位已經動了 <span class="total-num" id="total-minutes">0</span> 分鐘</div>
-    <div id="track-wrapper">
-        <div class="svg-container" id="runner-layer">
-            <svg viewBox="0 0 1000 400" id="main-svg">
-                <defs><linearGradient id="track-gradient" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#00d2ff" /><stop offset="50%" stop-color="#f9d423" /><stop offset="100%" stop-color="#ff4e50" /></linearGradient></defs>
-                <path id="double-path" class="path-main" d="M 50,80 L 900,80 A 60,60 0 0 1 900,200 L 100,200 A 60,60 0 0 0 100,320 L 950,320" />
-                <g id="milestones-group"></g>
-            </svg>
-        </div>
+
+    <div class="section-header" style="margin-top:40px;"><div class="section-title">動動碎碎念</div></div>
+    <div id="comment-list"></div>
+
+    <div class="total-counter-box">我們已經動了 <span class="total-num" id="total-minutes">0</span> 分鐘</div>
+    <div class="svg-container" id="runner-layer">
+        <svg viewBox="0 0 1000 400" id="main-svg">
+            <defs><linearGradient id="track-gradient"><stop offset="0%" stop-color="#00d2ff"/><stop offset="100%" stop-color="#f9d423"/></linearGradient></defs>
+            <path id="double-path" class="path-main" d="M 50,80 L 900,80 A 60,60 0 0 1 900,200 L 100,200 A 60,60 0 0 0 100,320 L 950,320" />
+        </svg>
     </div>
 </div>
 
 <div id="ui-overlay" class="ui-modal" onclick="this.style.display='none'">
     <div class="ui-card" id="ui-card-content" onclick="event.stopPropagation()"></div>
 </div>
-<div id="avatar-modal-overlay" class="ui-modal" style="display:none;" onclick="toggleAvatarModal(false)">
-    <div class="ui-card" onclick="event.stopPropagation()" style="max-width:600px;">
-        <div id="avatar-picker" style="display:grid; grid-template-columns: repeat(6, 1fr); gap:12px; max-height:400px; overflow-y:auto; padding:10px;"></div>
-        <button class="confirm-btn" style="height:48px; margin-top:20px; width:100%; font-size:18px;" onclick="toggleAvatarModal(false)">確定</button>
+
+<div id="avatar-modal-overlay" class="ui-modal" onclick="toggleAvatarModal(false)">
+    <div class="ui-card" onclick="event.stopPropagation()">
+        <div id="avatar-picker" style="display:grid; grid-template-columns: repeat(4, 1fr); gap:10px; max-height:300px; overflow-y:auto;"></div>
     </div>
 </div>
 
 <script>
-    // --- 密碼邏輯優先放在最上面 ---
+    // 1. 密碼檢查
     function checkPassword() {
-        const userInput = document.getElementById('pw-input').value;
-        if (userInput === "13579") {
+        const val = document.getElementById('pw-input').value;
+        if (val === "13579") {
             sessionStorage.setItem('isLoggedIn', 'true');
             document.getElementById('auth-overlay').style.display = 'none';
             document.getElementById('main-content').style.display = 'block';
         } else {
             document.getElementById('pw-error').style.display = 'block';
-            document.getElementById('pw-input').value = '';
         }
     }
 
-    // 監聽 Enter 鍵
-    document.getElementById('pw-input').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            checkPassword();
-        }
-    });
-
-    // 頁面加載檢查
     window.onload = function() {
         if (sessionStorage.getItem('isLoggedIn') === 'true') {
             document.getElementById('auth-overlay').style.display = 'none';
@@ -154,7 +134,7 @@
         }
     };
 
-    // --- Firebase 初始化 ---
+    // 2. Firebase
     const firebaseConfig = { 
         apiKey: "AIzaSyDqX_tZqqfw0txXpd-b4AWuolhgQgU6lLU", 
         authDomain: "runrundondon-31b12.firebaseapp.com", 
@@ -164,33 +144,34 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // --- 其他邏輯 ---
-    let currentIndex = 0;
-    let allComments = [];
-    let existingNames = [];
-
-    // 監聽玩家與跑道
+    // 3. 核心邏輯
     db.ref('players').on('value', (snapshot) => {
         const players = snapshot.val() || {};
         const playersArr = Object.values(players);
-        existingNames = Object.keys(players);
+        
+        // 更新總時數
         const total = playersArr.reduce((acc, p) => acc + (p.score || 0), 0);
         document.getElementById('total-minutes').innerText = total.toLocaleString();
 
-        document.getElementById('user-select').innerHTML = '<option value="">+ 新成員</option>' + playersArr.map(p => `<option value="${p.name}">${p.name}</option>`).join('');
+        // 更新選單
+        document.getElementById('user-select').innerHTML = '<option value="">+ 新成員</option>' + 
+            playersArr.map(p => `<option value="${p.name}">${p.name}</option>`).join('');
 
+        // 更新跑道
         const path = document.getElementById('double-path');
         const pathLength = path.getTotalLength();
-        
         document.querySelectorAll('.runner').forEach(r => r.remove());
+
         playersArr.forEach(p => {
             const pt = path.getPointAtLength(Math.min(p.score/7500, 1) * pathLength);
             const r = document.createElement('div');
             r.className = 'runner';
-            r.style.left = `${(pt.x / 1000) * 100}%`;
-            r.style.top = `${(pt.y / 400) * 100}%`; 
+            r.style.left = (pt.x / 1000 * 100) + '%';
+            r.style.top = (pt.y / 400 * 100) + '%';
             r.innerHTML = `<img src="${p.photo}" class="user-photo">`;
+            
             r.onclick = () => {
+                // 您指定的最後文字清單（已修復逗號）
                 const surpriseTexts = [
                     "天啊天啊天啊", 
                     "歐某歐某!", 
@@ -200,71 +181,59 @@
                     "動ㄘ動ㄘ", 
                     "您跑得實在太快惹",
                     "管理員追不上啊啊啊",
-                    "我的老天鵝"
-                    "是不是偷偷在跑"
-                    "再跑下去就要去奧運了"
-                    "願膽固醇遠離您"];
+                    "我的老天鵝",
+                    "是不是偷偷在跑",
+                    "再跑下去就要去奧運了",
+                    "願膽固醇遠離您"
+                ];
                 const randomTitle = surpriseTexts[Math.floor(Math.random() * surpriseTexts.length)];
-                const d = new Date(p.lastUpdate);
-                const timeStr = p.lastUpdate ? `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()} ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}` : "無紀錄";
-                showUI(randomTitle, p.name, p.score, timeStr);
+                showUI(randomTitle, p.name, p.score);
             };
             document.getElementById('runner-layer').appendChild(r);
         });
     });
 
-    // 監聽留言
-    db.ref('comments').limitToLast(20).on('value', (snapshot) => {
-        const commentsObj = snapshot.val() || {};
-        allComments = Object.values(commentsObj).sort((a, b) => b.timestamp - a.timestamp);
-        renderCarousel();
-    });
-
-    function renderCarousel() {
-        const list = document.getElementById('comment-list');
-        list.innerHTML = allComments.map((c, i) => `
-            <div class="comment-item active">
+    db.ref('comments').limitToLast(10).on('value', (snapshot) => {
+        const data = snapshot.val() || {};
+        const list = Object.values(data).sort((a,b) => b.timestamp - a.timestamp);
+        document.getElementById('comment-list').innerHTML = list.map(c => `
+            <div class="comment-item">
                 <img src="${c.photo}" class="comment-avatar">
-                <div>
-                    <b style="color:var(--accent-gold)">${c.name}</b>
-                    <p style="margin:5px 0 0 0; color:#fff; font-size:14px;">${c.content}</p>
-                </div>
+                <div><b>${c.name}</b><br><small>${c.content}</small></div>
             </div>
         `).join('');
-    }
-
-    function showUI(title, name, score, timeStr) {
-        document.getElementById('ui-card-content').innerHTML = `<h2>${title}</h2><p>${name} 累計 ${score} 分鐘</p><p style="font-size:12px; opacity:0.5;">${timeStr}</p><button class="confirm-btn" onclick="document.getElementById('ui-overlay').style.display='none'">確定</button>`;
-        document.getElementById('ui-overlay').style.display = 'flex';
-    }
+    });
 
     function handleUpdate() {
-        const name = document.getElementById('user-select').value || document.getElementById('new-name').value.trim();
+        const name = document.getElementById('user-select').value || document.getElementById('new-name').value;
         const mins = parseInt(document.getElementById('mins').value);
-        const thought = document.getElementById('thought-input').value.trim();
+        const thought = document.getElementById('thought-input').value;
         if (!name || !mins) return;
 
         db.ref('players/' + name).once('value').then(s => {
             const d = s.val() || {score:0, photo: "https://raw.githubusercontent.com/adeerlulu/runrundondon/main/icons/01.png"};
-            const now = Date.now();
             const photoUrl = window.selectedAvatarUrl || d.photo;
+            const now = Date.now();
             
-            if (thought) {
-                db.ref('comments').push({ name, photo: photoUrl, content: thought, timestamp: now });
-            }
+            if (thought) db.ref('comments').push({ name, content: thought, photo: photoUrl, timestamp: now });
             db.ref('players/' + name).update({ name, score: d.score + mins, photo: photoUrl, lastUpdate: now })
               .then(() => location.reload());
         });
     }
 
-    function toggleAvatarModal(show) { document.getElementById('avatar-modal-overlay').style.display = show ? 'flex' : 'none'; }
+    function showUI(title, name, score) {
+        document.getElementById('ui-card-content').innerHTML = `<h3>${title}</h3><p>${name} 已累計 ${score} 分鐘</p><button class="submit-btn" onclick="document.getElementById('ui-overlay').style.display='none'">確定</button>`;
+        document.getElementById('ui-overlay').style.display = 'flex';
+    }
+
+    function toggleAvatarModal(s) { document.getElementById('avatar-modal-overlay').style.display = s ? 'flex' : 'none'; }
     const picker = document.getElementById('avatar-picker');
-    for (let i = 1; i <= 24; i++) {
-        const num = i < 10 ? '0' + i : i;
+    for(let i=1; i<=24; i++) {
         const img = document.createElement('img');
-        img.src = `https://raw.githubusercontent.com/adeerlulu/runrundondon/main/icons/${num}.png`;
-        img.style.width = "100%";
-        img.onclick = function() { window.selectedAvatarUrl = this.src; toggleAvatarModal(false); };
+        const n = i < 10 ? '0'+i : i;
+        img.src = `https://raw.githubusercontent.com/adeerlulu/runrundondon/main/icons/${n}.png`;
+        img.style.width="100%"; img.style.cursor="pointer";
+        img.onclick = () => { window.selectedAvatarUrl = img.src; toggleAvatarModal(false); };
         picker.appendChild(img);
     }
 </script>
