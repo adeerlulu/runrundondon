@@ -97,6 +97,10 @@
         #avatar-picker img:hover { transform: scale(1.2); }
         #avatar-picker img.selected { border-color: var(--accent-gold); background: rgba(249, 212, 35, 0.2); }
         footer { margin: 40px auto 20px auto; text-align: center; color: #fff; font-size: 11px; opacity: 0.5; }
+
+        .flower-deco { position: fixed; pointer-events: none; z-index: -1; transition: transform 0.2s ease-out; opacity: 0.6; }
+        @keyframes flowerSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .flower-inner { width: 100%; height: 100%; animation: flowerSpin 10s linear infinite; }
     </style>
 </head>
 <body>
@@ -160,6 +164,8 @@
     </div>
 </div>
 
+<div id="flower-container"></div>
+
 <script>
     function checkPassword() {
         const userInput = document.getElementById('pw-input').value;
@@ -167,6 +173,7 @@
             sessionStorage.setItem('isLoggedIn', 'true');
             document.getElementById('auth-overlay').style.display = 'none';
             document.getElementById('main-content').style.display = 'block';
+            initFlowers();
         } else {
             document.getElementById('pw-error').style.display = 'block';
             document.getElementById('pw-input').value = '';
@@ -181,6 +188,7 @@
         if (sessionStorage.getItem('isLoggedIn') === 'true') {
             document.getElementById('auth-overlay').style.display = 'none';
             document.getElementById('main-content').style.display = 'block';
+            initFlowers();
         }
     };
 
@@ -250,7 +258,6 @@
     let hasAnimated = false;
     let existingNames = [];
 
-    // 監聽玩家資料 (位置與總分)
     db.ref('players').on('value', (snapshot) => {
         const players = snapshot.val() || {};
         const playersArr = Object.values(players);
@@ -274,17 +281,15 @@
         }
 
         document.querySelectorAll('.runner').forEach(r => r.remove());
-       playersArr.forEach(p => {
+        playersArr.forEach(p => {
             const pt = path.getPointAtLength(Math.min(p.score/7500, 1) * pathLength);
             const r = document.createElement('div');
             r.className = 'runner';
             r.style.left = `${(pt.x / 1000) * 100}%`;
             r.style.top = `${(pt.y / 400) * 100}%`; 
             
-            // 基礎頭像
             let runnerContent = `<img src="${p.photo}" class="user-photo">`;
             
-            // >100
             if (p.score >= 100) {
                 runnerContent += `
                     <img src="https://raw.githubusercontent.com/adeerlulu/runrundondon/main/decos/deco-02.svg" 
@@ -292,7 +297,6 @@
                 `;
             }
 
-            // >400
             if (p.score >= 400) {
                 runnerContent += `
                     <img src="https://raw.githubusercontent.com/adeerlulu/runrundondon/main/decos/deco-03.svg" 
@@ -300,7 +304,6 @@
                 `;
             }
 
-            // >1000
             if (p.score >= 1000) {
                 runnerContent += `
                     <img src="https://raw.githubusercontent.com/adeerlulu/runrundondon/main/decos/deco-04.svg" 
@@ -311,12 +314,7 @@
             r.innerHTML = runnerContent;
             
             r.onclick = () => {
-                const surpriseTexts = [
-                    "天啊天啊天啊", "歐某歐某!", "又要變美了嗎", "簡直是運動神童",
-                    "是位練武奇才", "動ㄘ動ㄘ", "您跑得實在太快惹",
-                    "管理員追不上啊啊啊", "我的老天鵝", "是不是偷偷在跑",
-                    "再跑下去就要去奧運了", "請參加奧運吧","動起來動起來","快使用雙節棍","願膽固醇遠離您"
-                ];
+                const surpriseTexts = ["天啊天啊天啊", "歐某歐某!", "又要變美了嗎", "簡直是運動神童", "是位練武奇才", "動ㄘ動ㄘ", "您跑得實在太快惹", "管理員追不上啊啊啊", "我的老天鵝", "是不是偷偷在跑", "再跑下去就要去奧運了", "請參加奧運吧","動起來動起來","快使用雙節棍","願膽固醇遠離您"];
                 const randomTitle = surpriseTexts[Math.floor(Math.random() * surpriseTexts.length)];
                 const d = new Date(p.lastUpdate);
                 const timeStr = p.lastUpdate ? `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()} ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}` : "無紀錄";
@@ -326,7 +324,6 @@
         });
     });
 
-    // 監聽新版留言區
     db.ref('comments').limitToLast(30).on('value', (snapshot) => {
         const commentsObj = snapshot.val() || {};
         allComments = Object.values(commentsObj).sort((a, b) => b.timestamp - a.timestamp);
@@ -375,39 +372,45 @@
             const now = Date.now();
             const photoUrl = window.selectedAvatarUrl || d.photo || "https://raw.githubusercontent.com/adeerlulu/runrundondon/main/icons/01.png";
             
-            const playerUpdates = {
-                name: name.toString(), 
-                score: d.score + mins, 
-                photo: photoUrl,
-                lastUpdate: now
-            };
+            const playerUpdates = { name: name.toString(), score: d.score + mins, photo: photoUrl, lastUpdate: now };
 
             if (thought) {
-                db.ref('comments').push({
-                    name: name,
-                    photo: photoUrl,
-                    content: thought,
-                    timestamp: now
-                });
+                db.ref('comments').push({ name: name, photo: photoUrl, content: thought, timestamp: now });
             }
 
             db.ref('players/' + name).update(playerUpdates).then(() => location.reload());
         });
     }
+
+    const flowerContainer = document.getElementById('flower-container');
+    const flowers = [];
+    function initFlowers() {
+        if(flowers.length > 0) return;
+        for (let i = 0; i < 12; i++) {
+            const flower = document.createElement('div');
+            flower.className = 'flower-deco';
+            const fNum = Math.floor(Math.random() * 6) + 1;
+            const side = i % 2 === 0 ? 'left' : 'right';
+            const size = Math.random() * 30 + 25;
+            const posX = Math.random() * 6;
+            const posY = Math.random() * 90;
+            flower.style.width = `${size}px`;
+            flower.style.height = `${size}px`;
+            flower.style[side] = `${posX}%`;
+            flower.style.top = `${posY}%`;
+            flower.innerHTML = `<img src="https://raw.githubusercontent.com/adeerlulu/runrundondon/main/links/f-${fNum}.svg" class="flower-inner">`;
+            flowerContainer.appendChild(flower);
+            flowers.push({ el: flower, speed: Math.random() * 0.15 + 0.05 });
+        }
+    }
+    window.addEventListener('scroll', () => {
+        const scrolled = window.scrollY;
+        flowers.forEach(f => {
+            const move = scrolled * f.speed;
+            const rotation = scrolled * 0.1;
+            f.el.style.transform = `translateY(${-move}px) rotate(${rotation}deg)`;
+        });
+    });
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
