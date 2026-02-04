@@ -124,6 +124,23 @@
             <div id="new-name-box" class="input-box"><label>新成員名字</label><input type="text" id="new-name" maxlength="8"></div>
             <div class="input-box"><div style="height:19px"></div><button id="avatar-btn" style="background:#2c5282; color:white; border:none; padding:12px; border-radius:12px; cursor:pointer; width:100%; font-weight:bold; height:48px;" onclick="toggleAvatarModal(true)">挑選頭像</button></div>
             <div class="input-box" style="flex:0.6"><label>今日運動時數</label><input type="number" id="mins" placeholder="分鐘"></div>
+            <div class="input-box">
+                <label>運動類型</label>
+                <select id="sport-type">
+                    <option value="健走">健走</option>
+                    <option value="跑步">跑步</option>
+                    <option value="登山">登山</option>
+                    <option value="有氧">有氧</option>
+                    <option value="瑜珈">瑜珈</option>
+                    <option value="單車">單車</option>
+                    <option value="游泳">游泳</option>
+                    <option value="肌力訓練">肌力訓練</option>
+                    <option value="HiIT間歇訓練">HiIT間歇訓練</option>
+                    <option value="皮拉提斯">皮拉提斯</option>
+                    <option value="球類">球類</option>
+                    <option value="其他請告知管理員XD">其他...</option>
+                </select>
+            </div>
         </div>
         <div class="control-row">
             <div class="input-box" style="flex:3"><label>今日碎碎念</label><input type="text" id="thought-input" placeholder="只能碎念30字" maxlength="30"></div>
@@ -222,12 +239,34 @@
         return `${m}/${day} ${h}:${min}`;
     }
 
-    function showUI(title, name, score, timeStr, isError=false) {
+    // 修改 showUI 增加 stats 參數，顯示運動類型明細
+    function showUI(title, name, score, timeStr, isError=false, stats={}) {
         const card = document.getElementById('ui-card-content');
         if(isError) {
             card.innerHTML = `<h2 style="color:#ff4e50; margin-top:0;">${title}</h2><p style="margin:20px 0;">${name}</p><button class="confirm-btn" style="height:44px; padding:0 40px;" onclick="document.getElementById('ui-overlay').style.display='none'">關閉</button>`;
         } else {
-            card.innerHTML = `<h2 style="color:var(--accent-blue); margin-top:0;">${title}</h2><div style="font-size:18px; margin:20px 0; line-height:1.8; color:#fff;">${name} 今年已動了<br><span style="font-size:48px; font-weight:900; color:var(--accent-gold); margin:10px 0; display:inline-block;">${score}</span> 分鐘</div><p style="opacity:0.6; font-size:12px; border-top:1px solid rgba(255,255,255,0.1); padding-top:15px;">最後登記時間：${timeStr}</p><button class="confirm-btn" style="height:44px; margin-top:10px; padding:0 40px;" onclick="document.getElementById('ui-overlay').style.display='none'">確定</button>`;
+            // 生成統計明細 HTML
+            let statsHtml = '<div style="background:rgba(255,255,255,0.1); padding:12px; border-radius:15px; margin-top:10px; text-align:left; font-size:13px; line-height:1.6;"><b style="color:var(--accent-gold); display:block; margin-bottom:5px;">📊 小計：</b>';
+            if (stats && Object.keys(stats).length > 0) {
+                let items = [];
+                for (const [type, min] of Object.entries(stats)) {
+                    items.push(`${type} <span style="color:var(--accent-blue)">${min}</span> 分鐘`);
+                }
+                statsHtml += items.join('、');
+            } else {
+                statsHtml += '尚無分類數據';
+            }
+            statsHtml += '</div>';
+
+            card.innerHTML = `
+                <h2 style="color:var(--accent-blue); margin-top:0;">${title}</h2>
+                <div style="font-size:18px; margin:15px 0; line-height:1.2; color:#fff;">
+                    ${name} 今年已動了<br>
+                    <span style="font-size:48px; font-weight:900; color:var(--accent-gold); margin:10px 0; display:inline-block;">${score}</span> 分鐘
+                </div>
+                ${statsHtml}
+                <p style="opacity:0.6; font-size:11px; border-top:1px solid rgba(255,255,255,0.1); padding-top:15px; margin-top:15px;">最後登記時間：${timeStr}</p>
+                <button class="confirm-btn" style="height:44px; margin-top:10px; padding:0 40px;" onclick="document.getElementById('ui-overlay').style.display='none'">確定</button>`;
         }
         document.getElementById('ui-overlay').style.display = 'flex';
     }
@@ -291,24 +330,13 @@
             let runnerContent = `<img src="${p.photo}" class="user-photo">`;
             
             if (p.score >= 100) {
-                runnerContent += `
-                    <img src="https://raw.githubusercontent.com/adeerlulu/runrundondon/main/decos/deco-02.svg" 
-                         style="position: absolute; width: 22px; height: 22px; bottom: -12px; right: -18px; z-index: 51; pointer-events: none;">
-                `;
+                runnerContent += `<img src="https://raw.githubusercontent.com/adeerlulu/runrundondon/main/decos/deco-02.svg" style="position: absolute; width: 22px; height: 22px; bottom: -12px; right: -18px; z-index: 51; pointer-events: none;">`;
             }
-
             if (p.score >= 400) {
-                runnerContent += `
-                    <img src="https://raw.githubusercontent.com/adeerlulu/runrundondon/main/decos/deco-03.svg" 
-                         style="position: absolute; width: 22px; height: 22px; bottom: -18px; right: -22px; z-index: 52; pointer-events: none;">
-                `;
+                runnerContent += `<img src="https://raw.githubusercontent.com/adeerlulu/runrundondon/main/decos/deco-03.svg" style="position: absolute; width: 22px; height: 22px; bottom: -18px; right: -22px; z-index: 52; pointer-events: none;">`;
             }
-
             if (p.score >= 1200) {
-                runnerContent += `
-                    <img src="https://raw.githubusercontent.com/adeerlulu/runrundondon/main/decos/deco-04.svg" 
-                         style="position: absolute; width: 22px; height: 22px; bottom: -24px; right: -26px; z-index: 53; pointer-events: none;">
-                `;
+                runnerContent += `<img src="https://raw.githubusercontent.com/adeerlulu/runrundondon/main/decos/deco-04.svg" style="position: absolute; width: 22px; height: 22px; bottom: -24px; right: -26px; z-index: 53; pointer-events: none;">`;
             }
 
             r.innerHTML = runnerContent;
@@ -318,7 +346,8 @@
                 const randomTitle = surpriseTexts[Math.floor(Math.random() * surpriseTexts.length)];
                 const d = new Date(p.lastUpdate);
                 const timeStr = p.lastUpdate ? `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()} ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}` : "無紀錄";
-                showUI(randomTitle, p.name, p.score, timeStr);
+                // 點擊時傳入 p.stats 以顯示小計
+                showUI(randomTitle, p.name, p.score, timeStr, false, p.stats || {});
             };
             document.getElementById('runner-layer').appendChild(r);
         });
@@ -343,8 +372,7 @@
                     <b style="color:var(--accent-gold)">${c.name}<span class="comment-time">${formatTime(c.timestamp)}</span></b>
                     <p style="margin:5px 0 0 0; color:#fff; font-size:14px;">${c.content}</p>
                 </div>
-            </div>
-        `).join('');
+            </div>`).join('');
         list.style.transform = `translateX(${-currentIndex * 330}px)`;
     }
 
@@ -354,12 +382,14 @@
         renderCarousel();
     }
 
+    // 修改 handleUpdate 儲存運動類型與小計
     function handleUpdate() {
         const selectedValue = document.getElementById('user-select').value;
         const inputName = document.getElementById('new-name').value.trim(); 
         const name = selectedValue || inputName;
         const mins = parseInt(document.getElementById('mins').value);
         const thought = document.getElementById('thought-input').value.trim();
+        const sportType = document.getElementById('sport-type').value;
 
         if (!name || isNaN(mins) || mins <= 0) { showUI("哦哦！出錯了", "姓名與分鐘數都要填寫喔！", "", "", true); return; }
         if (!selectedValue && existingNames.includes(name)) {
@@ -368,11 +398,21 @@
         }
 
         db.ref('players/' + name).once('value').then(s => {
-            const d = s.val() || {score:0, photo: ""};
+            const d = s.val() || {score:0, photo: "", stats: {}};
             const now = Date.now();
             const photoUrl = window.selectedAvatarUrl || d.photo || "https://raw.githubusercontent.com/adeerlulu/runrundondon/main/icons/01.png";
             
-            const playerUpdates = { name: name.toString(), score: d.score + mins, photo: photoUrl, lastUpdate: now };
+            // 更新運動類型統計
+            const newStats = d.stats || {};
+            newStats[sportType] = (newStats[sportType] || 0) + mins;
+
+            const playerUpdates = { 
+                name: name.toString(), 
+                score: d.score + mins, 
+                photo: photoUrl, 
+                lastUpdate: now,
+                stats: newStats
+            };
 
             if (thought) {
                 db.ref('comments').push({ name: name, photo: photoUrl, content: thought, timestamp: now });
@@ -414,4 +454,3 @@
 </script>
 </body>
 </html>
-
