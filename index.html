@@ -138,6 +138,8 @@
                     <option value="HiIT間歇訓練">HiIT間歇訓練</option>
                     <option value="皮拉提斯">皮拉提斯</option>
                     <option value="球類">球類</option>
+                    <option value="拉筋">拉筋</option>
+                    <option value="跳舞">跳舞</option>
                     <option value="其他請告知管理員XD">其他...</option>
                 </select>
             </div>
@@ -239,20 +241,17 @@
         return `${m}/${day} ${h}:${min}`;
     }
 
-    // 修改 showUI 增加 stats 參數，顯示運動類型明細
+    // 修改 showUI，顯示斷行置中的小計數據
     function showUI(title, name, score, timeStr, isError=false, stats={}) {
         const card = document.getElementById('ui-card-content');
         if(isError) {
             card.innerHTML = `<h2 style="color:#ff4e50; margin-top:0;">${title}</h2><p style="margin:20px 0;">${name}</p><button class="confirm-btn" style="height:44px; padding:0 40px;" onclick="document.getElementById('ui-overlay').style.display='none'">關閉</button>`;
         } else {
-            // 生成統計明細 HTML
-            let statsHtml = '<div style="background:rgba(255,255,255,0.1); padding:12px; border-radius:15px; margin-top:10px; text-align:left; font-size:13px; line-height:1.6;"><b style="color:var(--accent-gold); display:block; margin-bottom:5px;">📊 小計：</b>';
+            let statsHtml = '<div style="background:rgba(255,255,255,0.1); padding:15px; border-radius:15px; margin-top:15px; text-align:center; font-size:14px; line-height:1.8;"><b style="color:var(--accent-gold); display:block; margin-bottom:8px; font-size:16px;">小計</b>';
             if (stats && Object.keys(stats).length > 0) {
-                let items = [];
                 for (const [type, min] of Object.entries(stats)) {
-                    items.push(`${type} <span style="color:var(--accent-blue)">${min}</span> 分鐘`);
+                    statsHtml += `<div>${type} ${min} 分鐘</div>`;
                 }
-                statsHtml += items.join('、');
             } else {
                 statsHtml += '尚無分類數據';
             }
@@ -328,25 +327,16 @@
             r.style.top = `${(pt.y / 400) * 100}%`; 
             
             let runnerContent = `<img src="${p.photo}" class="user-photo">`;
-            
-            if (p.score >= 100) {
-                runnerContent += `<img src="https://raw.githubusercontent.com/adeerlulu/runrundondon/main/decos/deco-02.svg" style="position: absolute; width: 22px; height: 22px; bottom: -12px; right: -18px; z-index: 51; pointer-events: none;">`;
-            }
-            if (p.score >= 400) {
-                runnerContent += `<img src="https://raw.githubusercontent.com/adeerlulu/runrundondon/main/decos/deco-03.svg" style="position: absolute; width: 22px; height: 22px; bottom: -18px; right: -22px; z-index: 52; pointer-events: none;">`;
-            }
-            if (p.score >= 1200) {
-                runnerContent += `<img src="https://raw.githubusercontent.com/adeerlulu/runrundondon/main/decos/deco-04.svg" style="position: absolute; width: 22px; height: 22px; bottom: -24px; right: -26px; z-index: 53; pointer-events: none;">`;
-            }
+            if (p.score >= 100) runnerContent += `<img src="https://raw.githubusercontent.com/adeerlulu/runrundondon/main/decos/deco-02.svg" style="position: absolute; width: 22px; height: 22px; bottom: -12px; right: -18px; z-index: 51; pointer-events: none;">`;
+            if (p.score >= 400) runnerContent += `<img src="https://raw.githubusercontent.com/adeerlulu/runrundondon/main/decos/deco-03.svg" style="position: absolute; width: 22px; height: 22px; bottom: -18px; right: -22px; z-index: 52; pointer-events: none;">`;
+            if (p.score >= 1200) runnerContent += `<img src="https://raw.githubusercontent.com/adeerlulu/runrundondon/main/decos/deco-04.svg" style="position: absolute; width: 22px; height: 22px; bottom: -24px; right: -26px; z-index: 53; pointer-events: none;">`;
 
             r.innerHTML = runnerContent;
-            
             r.onclick = () => {
                 const surpriseTexts = ["天啊天啊天啊", "歐某歐某!", "又要變美了嗎", "簡直是運動神童", "是位練武奇才", "動ㄘ動ㄘ", "您跑得實在太快惹", "管理員追不上啊啊啊", "我的老天鵝", "是不是偷偷在跑", "再跑下去就要去奧運了", "請參加奧運吧","動起來動起來","快使用雙節棍","願膽固醇遠離您"];
                 const randomTitle = surpriseTexts[Math.floor(Math.random() * surpriseTexts.length)];
                 const d = new Date(p.lastUpdate);
                 const timeStr = p.lastUpdate ? `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()} ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}` : "無紀錄";
-                // 點擊時傳入 p.stats 以顯示小計
                 showUI(randomTitle, p.name, p.score, timeStr, false, p.stats || {});
             };
             document.getElementById('runner-layer').appendChild(r);
@@ -382,7 +372,6 @@
         renderCarousel();
     }
 
-    // 修改 handleUpdate 儲存運動類型與小計
     function handleUpdate() {
         const selectedValue = document.getElementById('user-select').value;
         const inputName = document.getElementById('new-name').value.trim(); 
@@ -402,7 +391,6 @@
             const now = Date.now();
             const photoUrl = window.selectedAvatarUrl || d.photo || "https://raw.githubusercontent.com/adeerlulu/runrundondon/main/icons/01.png";
             
-            // 更新運動類型統計
             const newStats = d.stats || {};
             newStats[sportType] = (newStats[sportType] || 0) + mins;
 
@@ -414,10 +402,7 @@
                 stats: newStats
             };
 
-            if (thought) {
-                db.ref('comments').push({ name: name, photo: photoUrl, content: thought, timestamp: now });
-            }
-
+            if (thought) db.ref('comments').push({ name: name, photo: photoUrl, content: thought, timestamp: now });
             db.ref('players/' + name).update(playerUpdates).then(() => location.reload());
         });
     }
