@@ -140,7 +140,7 @@
                     <option value="球類">球類</option>
                     <option value="拉筋">拉筋</option>
                     <option value="跳舞">跳舞</option>
-                    <option value="其他請告知管理員XD">其他...</option>
+                    <option value="其他">其他可請管理員新增</option>
                 </select>
             </div>
         </div>
@@ -247,7 +247,7 @@
         if(isError) {
             card.innerHTML = `<h2 style="color:#ff4e50; margin-top:0;">${title}</h2><p style="margin:20px 0;">${name}</p><button class="confirm-btn" style="height:44px; padding:0 40px;" onclick="document.getElementById('ui-overlay').style.display='none'">關閉</button>`;
         } else {
-            let statsHtml = '<div style="background:rgba(255,255,255,0.1); padding:15px; border-radius:15px; margin-top:15px; text-align:center; font-size:14px; line-height:1.8;"><b style="color:var(--accent-gold); display:block; margin-bottom:8px; font-size:16px;">小計</b>';
+            let statsHtml = '<div style="background:rgba(255,255,255,0.1); padding:15px; border-radius:15px; margin-top:15px; text-align:center; font-size:14px; line-height:1.8;"><b style="color:var(--accent-gold); display:block; margin-bottom:8px; font-size:16px;">今年小計</b>';
             if (stats && Object.keys(stats).length > 0) {
                 for (const [type, min] of Object.entries(stats)) {
                     statsHtml += `<div>${type} ${min} 分鐘</div>`;
@@ -439,3 +439,4 @@
 </script>
 </body>
 </html>
+
