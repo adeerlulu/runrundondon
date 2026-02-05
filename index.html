@@ -241,16 +241,18 @@
         return `${m}/${day} ${h}:${min}`;
     }
 
-    // 修改 showUI，顯示斷行置中的小計數據
+   //  showUI
     function showUI(title, name, score, timeStr, isError=false, stats={}) {
         const card = document.getElementById('ui-card-content');
         if(isError) {
             card.innerHTML = `<h2 style="color:#ff4e50; margin-top:0;">${title}</h2><p style="margin:20px 0;">${name}</p><button class="confirm-btn" style="height:44px; padding:0 40px;" onclick="document.getElementById('ui-overlay').style.display='none'">關閉</button>`;
         } else {
-            let statsHtml = '<div style="background:rgba(255,255,255,0.1); padding:15px; border-radius:15px; margin-top:15px; text-align:center; font-size:14px; line-height:1.8;"><b style="color:var(--accent-gold); display:block; margin-bottom:8px; font-size:16px;">今年小計</b>';
+            let statsHtml = '<div style="background:rgba(255,255,255,0.1); padding:15px; border-radius:15px; margin-top:15px; text-align:center; font-size:14px; line-height:1.8;"><b style="color:var(--accent-gold); display:block; margin-bottom:8px; font-size:16px;">小計</b>';
+            
             if (stats && Object.keys(stats).length > 0) {
                 for (const [type, min] of Object.entries(stats)) {
-                    statsHtml += `<div>${type} ${min} 分鐘</div>`;
+                   
+                    statsHtml += `<div>${type} <span style="color:var(--accent-blue); font-weight:900;">${min}</span> 分鐘</div>`;
                 }
             } else {
                 statsHtml += '尚無分類數據';
@@ -269,7 +271,6 @@
         }
         document.getElementById('ui-overlay').style.display = 'flex';
     }
-
     function toggleAvatarModal(show) { document.getElementById('avatar-modal-overlay').style.display = show ? 'flex' : 'none'; }
     
     const picker = document.getElementById('avatar-picker');
@@ -439,4 +440,5 @@
 </script>
 </body>
 </html>
+
 
