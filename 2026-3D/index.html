@@ -14,17 +14,23 @@
   <!-- 初始懸浮按鈕 -->
   <button id="open-panel-btn" class="floating-btn">今日工事</button>
 
-  <!-- 你的選單 UI (預設隱藏) -->
+  <!-- 草地正下方的留言輪播 Bar -->
+  <div id="ticker-container" class="ticker-bar">
+    <div id="ticker-content" class="ticker-text">歡迎來到 2026 跑跑動動！大家一起動起來！🏃‍♂️</div>
+  </div>
+
+  <!-- 今日工事選單 UI (預設隱藏) -->
   <div class="main-container hidden" id="main-content">
       <button id="close-panel-btn" class="close-x">×</button>
 
       <div class="section-header"><div class="section-title">今日工事</div></div>
       
       <div class="controls-wrapper">
+          <!-- 獨立預覽區 (頭像與裝備分開呈現) -->
           <div class="preview-container">
               <div class="preview-box">
-                  <img id="preview-avatar" src="" alt="請選擇頭像" style="display:none;">
-                  <img id="preview-hand" src="" alt="" style="display:none;">
+                  <img id="preview-avatar" src="" alt="頭像" style="display:none;">
+                  <img id="preview-hand" src="" alt="裝備" style="display:none;">
                   <span id="preview-placeholder">尚未選擇角色</span>
               </div>
           </div>
@@ -69,8 +75,16 @@
                       <option value="球類">球類</option>
                       <option value="拉筋">拉筋</option>
                       <option value="跳舞">跳舞</option>
-                      <option value="其他">其他可請管理員新增</option>
+                      <option value="其他">其他</option>
                   </select>
+              </div>
+          </div>
+
+          <!-- 新增 Murmur 留言輸入框 -->
+          <div class="control-row" style="margin-top: 15px;">
+              <div class="input-box" style="flex: 1;">
+                  <label>今日 Murmur (心情小語)</label>
+                  <input type="text" id="murmur-input" maxlength="30" class="form-input" placeholder="寫一句今日心情，會出現在下方輪播喔！">
               </div>
           </div>
 
@@ -86,6 +100,15 @@
       <h2 id="modal-title" style="margin-top:0;">請選擇</h2>
       <div id="items-grid" class="grid-container"></div>
       <button class="close-btn" onclick="closeModal()">關閉</button>
+    </div>
+  </div>
+
+  <!-- 點擊角色後的運動紀錄彈窗 (Modal) -->
+  <div id="record-modal" class="modal hidden">
+    <div class="modal-content">
+      <h2 id="record-title" style="margin-top:0; color:#2c5282;">運動紀錄</h2>
+      <div id="record-body" style="text-align: left; margin: 15px 0; font-size: 14px; line-height: 1.6;"></div>
+      <button class="close-btn" onclick="closeRecordModal()">關閉</button>
     </div>
   </div>
 
