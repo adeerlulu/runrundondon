@@ -20,7 +20,8 @@ const dbRef = firebase.database().ref('2026_records'); // 獨立的 2026 資料�
 // 1. 圖庫資料設定 (已指向正確的 PNG 角色與手勢)
 // ==========================================
 const characterList = [
-  './character/ani/ani_1.png'
+  './character/ani/ani_1.png',
+  './character/ani/ani_2.png'
 ];
 
 const handList = [
