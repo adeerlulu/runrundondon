@@ -1,0 +1,29 @@
+body, html {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden; /* 防止滾動條破壞滿版效果 */
+  font-family: sans-serif;
+}
+
+/* 將 Canvas 釘在背景最底層 */
+#bg-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1; 
+}
+
+/* 前方文字與 UI 的排版 */
+.content {
+  position: relative;
+  z-index: 1;
+  color: white;
+  text-align: center;
+  padding-top: 20vh;
+  /* 加上文字陰影確保在亮色 3D 背景前依然清晰 */
+  text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+}
