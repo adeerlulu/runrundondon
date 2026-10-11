@@ -12,12 +12,11 @@ const firebaseConfig = {
   measurementId: "G-D5D9SP15X4"
 };
 
-// 初始化 Firebase
 firebase.initializeApp(firebaseConfig);
-const dbRef = firebase.database().ref('2026_records'); // 獨立的 2026 資料夾，不影響舊資料
+const dbRef = firebase.database().ref('2026_records'); 
 
 // ==========================================
-// 1. 圖庫資料設定 (已指向正確的 PNG 角色與手勢)
+// 1. 圖庫資料設定 (支援多頭像與手勢)
 // ==========================================
 const characterList = [
   './character/ani/ani_1.png',
@@ -60,7 +59,7 @@ dirLight.position.set(0, 20, -30);
 scene.add(dirLight);
 
 // ==========================================
-// 3. 地形與山脈 (噪點安全版)
+// 3. 地形與山脈
 // ==========================================
 function createNoiseTexture() {
   const size = 256; const data = new Uint8Array(size * size * 4);
@@ -94,59 +93,64 @@ terrain.rotation.x = -Math.PI/2; terrain.position.set(0, -2, -30);
 scene.add(terrain);
 
 // ==========================================
-// 4. 角色與手勢系統 (已完美解決透明黑塊問題)
+// 4. 多角色群組管理系統 (避免重疊)
 // ==========================================
-const playerGroup = new THREE.Group();
-playerGroup.position.set(0, 0, -10); 
-scene.add(playerGroup);
-
-let charSprite = null;
-let leftHand = null;
-let rightHand = null;
 const textureLoader = new THREE.TextureLoader();
+const allPlayerGroups = []; // 存放畫面上所有的角色群組
 
-let currentCharUrl = '';
-let currentHandUrl = '';
+let tempCharUrl = './character/ani/ani_1.png'; // 預設頭像
+let tempHandUrl = '';
 
-function loadCharacter(url) {
-  currentCharUrl = url;
-  if (charSprite) playerGroup.remove(charSprite);
-  
-  textureLoader.load(url, (tex) => {
-    tex.magFilter = THREE.NearestFilter;
-    if (THREE.SRGBColorSpace) tex.colorSpace = THREE.SRGBColorSpace;
-    
-    charSprite = new THREE.Sprite(new THREE.SpriteMaterial({ 
-      map: tex, 
-      transparent: true, 
-      alphaTest: 0.1,
-      depthWrite: false 
-    }));
-    charSprite.scale.set(4, 4, 1);
-    playerGroup.add(charSprite);
-  });
-
+// 暫時預覽當前選中的頭像或手勢（在面板中操作時用）
+function previewCharacter(url) {
+  tempCharUrl = url;
   document.getElementById('hand-box').style.display = 'flex'; 
 }
 
-function loadHand(url) {
-  currentHandUrl = url;
-  if (leftHand) playerGroup.remove(leftHand);
-  if (rightHand) playerGroup.remove(rightHand);
+function previewHand(url) {
+  tempHandUrl = url;
+}
 
-  textureLoader.load(url, (tex) => {
+// 建立並新增一個角色到畫面上（透過傳入 x 軸偏移量來避免重疊）
+function spawnCharacter(charUrl, handUrl, customX = 0) {
+  const group = new THREE.Group();
+  // 讓不同角色有不同的基礎 X 軸位置，防止重疊
+  group.userData = { baseX: customX, randomOffset: Math.random() * 100 };
+  scene.add(group);
+
+  // 載入角色本體
+  textureLoader.load(charUrl, (tex) => {
     tex.magFilter = THREE.NearestFilter;
     if (THREE.SRGBColorSpace) tex.colorSpace = THREE.SRGBColorSpace;
-
-    leftHand = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, alphaTest: 0.1, depthWrite: false }));
-    leftHand.scale.set(1.5, 1.5, 1);
-
-    rightHand = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, alphaTest: 0.1, depthWrite: false }));
-    rightHand.scale.set(1.5, 1.5, 1);
-
-    playerGroup.add(leftHand);
-    playerGroup.add(rightHand);
+    
+    const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ 
+      map: tex, transparent: true, alphaTest: 0.1, depthWrite: false 
+    }));
+    sprite.scale.set(4, 4, 1);
+    group.add(sprite);
   });
+
+  // 如果有選擇手勢，則載入雙手
+  if (handUrl) {
+    textureLoader.load(handUrl, (tex) => {
+      tex.magFilter = THREE.NearestFilter;
+      if (THREE.SRGBColorSpace) tex.colorSpace = THREE.SRGBColorSpace;
+
+      const leftHand = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, alphaTest: 0.1, depthWrite: false }));
+      leftHand.scale.set(1.5, 1.5, 1);
+      leftHand.position.set(-2.5, 0, 0.1);
+      group.add(leftHand);
+
+      const rightHand = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, alphaTest: 0.1, depthWrite: false }));
+      rightHand.scale.set(1.5, 1.5, 1);
+      rightHand.position.set(2.5, 0, 0.1);
+      group.add(rightHand);
+      
+      group.userData.hasHands = true;
+    });
+  }
+
+  allPlayerGroups.push(group);
 }
 
 // ==========================================
@@ -158,14 +162,8 @@ const closePanelBtn = document.getElementById('close-panel-btn');
 const userSelect = document.getElementById('user-select');
 const newNameInput = document.getElementById('new-name');
 
-openPanelBtn.onclick = () => {
-  mainContent.classList.remove('hidden');
-  openPanelBtn.classList.add('hidden');
-};
-closePanelBtn.onclick = () => {
-  mainContent.classList.add('hidden');
-  openPanelBtn.classList.remove('hidden');
-};
+openPanelBtn.onclick = () => { mainContent.classList.remove('hidden'); openPanelBtn.classList.add('hidden'); };
+closePanelBtn.onclick = () => { mainContent.classList.add('hidden'); openPanelBtn.classList.remove('hidden'); };
 
 const modal = document.getElementById('selector-modal');
 const itemsGrid = document.getElementById('items-grid');
@@ -181,8 +179,8 @@ window.openModal = function(type) {
     img.src = url;
     img.className = 'grid-item';
     img.onclick = () => {
-      if (type === 'char') loadCharacter(url);
-      if (type === 'hand') loadHand(url);
+      if (type === 'char') previewCharacter(url);
+      if (type === 'hand') previewHand(url);
       closeModal();
     };
     itemsGrid.appendChild(img);
@@ -190,27 +188,43 @@ window.openModal = function(type) {
   modal.classList.remove('hidden');
 }
 
-window.closeModal = function() {
-  modal.classList.add('hidden');
-}
+window.closeModal = function() { modal.classList.add('hidden'); }
 
-// 從 Firebase 載入已有成員列表到下拉選單
-function loadMembersFromFirebase() {
+// 從 Firebase 載入所有歷史成員，並自動在畫面上展開不重疊的角色
+let isLoadedFromFirebase = false;
+function loadAllMembersFromFirebase() {
   dbRef.on('value', (snapshot) => {
     userSelect.innerHTML = '<option value="">+ 新成員</option>';
     const data = snapshot.val();
+    
+    // 如果還沒載入過，先清空畫面上預設的角色群組
+    if (!isLoadedFromFirebase) {
+      allPlayerGroups.forEach(g => scene.remove(g));
+      allPlayerGroups.length = 0;
+    }
+
     if (data) {
-      Object.keys(data).forEach(name => {
+      const names = Object.keys(data);
+      names.forEach((name, index) => {
+        // 下拉選單加入選項
         const opt = document.createElement('option');
         opt.value = name;
         opt.innerText = name;
         userSelect.appendChild(opt);
+
+        // 如果是剛進網頁，把資料庫裡的所有成員依照順序散開排列在畫面上 (防重疊)
+        if (!isLoadedFromFirebase && data[name].charUrl) {
+          // 透過 index 計算不同的 X 軸位置 (例如: -6, -2, 2, 6...)
+          const spreadX = (index - (names.length - 1) / 2) * 4.5;
+          spawnCharacter(data[name].charUrl, data[name].handUrl, spreadX);
+        }
       });
+      isLoadedFromFirebase = true;
     }
   });
 }
 
-// 當下拉選單切換時，自動帶入該成員上次的設定與角色
+// 切換下拉選單時填入資料
 userSelect.onchange = (e) => {
   const selectedName = e.target.value;
   if (selectedName) {
@@ -220,8 +234,8 @@ userSelect.onchange = (e) => {
       if (val) {
         if (val.mins) document.getElementById('mins').value = val.mins;
         if (val.sportType) document.getElementById('sport-type').value = val.sportType;
-        if (val.charUrl) loadCharacter(val.charUrl);
-        if (val.handUrl) loadHand(val.handUrl);
+        if (val.charUrl) tempCharUrl = val.charUrl;
+        if (val.handUrl) tempHandUrl = val.handUrl;
       }
     });
   } else {
@@ -229,7 +243,7 @@ userSelect.onchange = (e) => {
   }
 };
 
-// 點擊確認送出：將資料寫入 Firebase 2026 專屬路徑
+// 確認送出：儲存並在畫面上新增一隻專屬角色（自動錯開位置）
 window.submitData = function() {
   const nameInput = newNameInput.value.trim();
   const selectUser = userSelect.value;
@@ -237,42 +251,36 @@ window.submitData = function() {
   const mins = document.getElementById('mins').value;
   const sportType = document.getElementById('sport-type').value;
 
-  if(!finalName) {
-    alert("請輸入或選擇成員名字！");
-    return;
-  }
-  if(!charSprite) {
-    alert("請先選擇一位角色！");
-    return;
-  }
+  if(!finalName) { alert("請輸入或選擇成員名字！"); return; }
 
   const memberData = {
     name: finalName,
     mins: mins || '0',
     sportType: sportType,
-    charUrl: currentCharUrl,
-    handUrl: currentHandUrl,
+    charUrl: tempCharUrl,
+    handUrl: tempHandUrl,
     updatedAt: Date.now()
   };
 
   dbRef.child(finalName).set(memberData)
     .then(() => {
-      alert(`成功儲存！${finalName} 的 2026 今日工事已更新至資料庫。`);
+      // 算出一個新的不重疊位置並直接在畫面上生成
+      const newX = (allPlayerGroups.length * 4) - 2;
+      spawnCharacter(tempCharUrl, tempHandUrl, newX);
+
+      alert(`成功儲存！${finalName} 已加入 2026 跑跑動動陣容。`);
       mainContent.classList.add('hidden');
       openPanelBtn.classList.remove('hidden');
     })
-    .catch((error) => {
-      alert("儲存失敗：" + error.message);
-    });
+    .catch((error) => { alert("儲存失敗：" + error.message); });
 }
 
-// 網頁載入時抓取成員清單
 window.addEventListener('DOMContentLoaded', () => {
-  loadMembersFromFirebase();
+  loadAllMembersFromFirebase();
 });
 
 // ==========================================
-// 6. 動畫與滑鼠互動
+// 6. 動畫迴圈 (讓所有角色各自走動、彈跳、手部擺動)
 // ==========================================
 let mouseX = 0, mouseY = 0;
 document.addEventListener('mousemove', (e) => {
@@ -284,24 +292,35 @@ function animate() {
   requestAnimationFrame(animate);
   const time = performance.now(); 
 
-  // A. 角色動態
-  if (charSprite) {
-    const walkX = Math.sin(time * 0.001) * 3;     
-    const bounceY = Math.abs(Math.sin(time * 0.004)) * 0.6; 
-    const rotateZ = Math.sin(time * 0.003) * 0.1; 
+  // 讓畫面上所有的角色各自獨立進行晃動與散步
+  allPlayerGroups.forEach((group, idx) => {
+    const offset = group.userData.randomOffset || 0;
+    const baseX = group.userData.baseX || 0;
 
-    charSprite.position.set(walkX, bounceY, 0);
-    charSprite.material.rotation = rotateZ;
+    // 每個角色有微微不同的移動頻率，看起來更生動自然
+    const walkX = baseX + Math.sin(time * 0.001 + offset) * 1.5;     
+    const bounceY = Math.abs(Math.sin(time * 0.004 + offset)) * 0.6; 
+    const rotateZ = Math.sin(time * 0.003 + offset) * 0.1; 
 
-    if (leftHand && rightHand) {
-      const sway = Math.sin(time * 0.003); 
-      const swayFast = Math.cos(time * 0.005);
-      leftHand.position.set(walkX - 2.5, bounceY + swayFast * 0.2, 0.1);
+    group.position.set(walkX, bounceY, -10);
+
+    // 角色本體旋轉
+    const sprite = group.children[0];
+    if (sprite) sprite.material.rotation = rotateZ;
+
+    // 如果有左右手，讓手勢跟著呼吸擺動
+    if (group.userData.hasHands && group.children.length >= 3) {
+      const leftHand = group.children[1];
+      const rightHand = group.children[2];
+      const sway = Math.sin(time * 0.003 + offset); 
+      const swayFast = Math.cos(time * 0.005 + offset);
+
+      leftHand.position.set(-2.5, swayFast * 0.2, 0.1);
       leftHand.material.rotation = sway * 0.3;
-      rightHand.position.set(walkX + 2.5, bounceY - swayFast * 0.2, 0.1);
+      rightHand.position.set(2.5, -swayFast * 0.2, 0.1);
       rightHand.material.rotation = -sway * 0.3;
     }
-  }
+  });
 
   // B. 地形前進
   const pPos = pGeo.attributes.position;
