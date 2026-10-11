@@ -74,7 +74,7 @@ dirLight.position.set(0, 20, -30);
 scene.add(dirLight);
 
 // ==========================================
-// 3. 地形、山脈與草叢滿版散佈
+// 3. 地形與草叢滿版散佈
 // ==========================================
 function createNoiseTexture() {
   const size = 256; const data = new Uint8Array(size * size * 4);
@@ -139,7 +139,7 @@ function spawnFullGrassField() {
 spawnFullGrassField();
 
 // ==========================================
-// 4. 多角色系統與拖曳互動 (Drag & Drop)
+// 4. 多角色系統與防重複生成更新機制
 // ==========================================
 const allPlayerGroups = []; 
 let allMembersData = {}; 
@@ -176,7 +176,21 @@ function previewHand(url) {
   updatePreviewUI();
 }
 
-function spawnCharacter(charUrl, handUrl, memberName = '成員', sportType = '健走', mins = '0', customX = 0, customY = 0, customZ = -10, scaleMultiplier = 1) {
+// 建立角色或更新現有角色資料
+function spawnOrUpdateCharacter(charUrl, handUrl, memberName = '成員', sportType = '健走', mins = '0', customX = 0, customY = 0, customZ = -10, scaleMultiplier = 1) {
+  // 檢查畫面上是否已經有這位成員的群組
+  let existingGroup = allPlayerGroups.find(g => g.userData.name === memberName);
+
+  if (existingGroup) {
+    // 如果已經存在，直接更新對話泡泡文字內容，避免重複生出新角色
+    const bubbleChild = existingGroup.children.find(child => child.element && child.element.classList.contains('player-speech-bubble'));
+    if (bubbleChild) {
+      bubbleChild.element.textContent = `${sportType} ${mins}分`;
+    }
+    return;
+  }
+
+  // 若不存在，才全新建立
   const group = new THREE.Group();
   group.userData = { 
     name: memberName,
@@ -243,14 +257,14 @@ function spawnCharacter(charUrl, handUrl, memberName = '成員', sportType = '�
 }
 
 // ==========================================
-// 5. 滑鼠拖曳 (Drag & Drop) 與點擊彈窗系統
+// 5. 滑鼠拖曳與點擊彈窗系統
 // ==========================================
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
-let draggedGroup = null; // 當前被拖曳的角色群組
-const dragPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 10); // 拖曳對齊的隱形平面
+let draggedGroup = null; 
+const dragPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 10); 
 const planeIntersectPoint = new THREE.Vector3();
-let isClickAction = true; // 用來區分是「點擊」還是「拖曳」
+let isClickAction = true; 
 
 window.addEventListener('mousedown', (event) => {
   if (event.target.closest('.main-container') || event.target.closest('.modal') || event.target.closest('.floating-btn')) return;
@@ -268,39 +282,32 @@ window.addEventListener('mousedown', (event) => {
   if (intersects.length > 0) {
     draggedGroup = intersects[0].object.parent;
     draggedGroup.userData.isDragging = true;
-    isClickAction = true; // 預設為點擊，若有移動會改成 false
-
-    // 設定拖曳平面對應當前角色的 Z 深度
+    isClickAction = true; 
     dragPlane.setFromNormalAndCoplanarPoint(new THREE.Vector3(0, 0, 1), draggedGroup.position);
   }
 });
 
 window.addEventListener('mousemove', (event) => {
   if (!draggedGroup) return;
-  isClickAction = false; // 只要有移動滑鼠，就不是點擊彈窗
+  isClickAction = false; 
 
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
   raycaster.setFromCamera(mouse, camera);
 
   raycaster.ray.intersectPlane(dragPlane, planeIntersectPoint);
-  
-  // 更新角色的基準位置，讓牠跟著游標跑，放開後會以新位置繼續跳動
   draggedGroup.userData.baseX = planeIntersectPoint.x;
-  draggedGroup.userData.baseY = Math.max(-1, planeIntersectPoint.y); // 限制不要陷入地下太深
+  draggedGroup.userData.baseY = Math.max(-1, planeIntersectPoint.y); 
 });
 
 window.addEventListener('mouseup', (event) => {
   if (draggedGroup) {
     draggedGroup.userData.isDragging = false;
-
-    // 如果沒有移動過滑鼠，則判定為「點擊角色」開啟運動紀錄彈窗
     if (isClickAction) {
       const name = draggedGroup.userData.name;
       const data = allMembersData[name];
       if (data) showRecordModal(data);
     }
-
     draggedGroup = null;
   }
 });
@@ -326,7 +333,7 @@ window.closeRecordModal = function() {
 }
 
 // ==========================================
-// 6. UI、Firebase 與留言輪播
+// 6. UI、Firebase 與碎碎念輪播
 // ==========================================
 const mainContent = document.getElementById('main-content');
 const openPanelBtn = document.getElementById('open-panel-btn');
@@ -362,18 +369,22 @@ window.openModal = function(type) {
 
 window.closeModal = function() { modal.classList.add('hidden'); }
 
+// 碎碎念輪播系統
 let murmurList = [];
 let currentMurmurIndex = 0;
 function startMurmurTicker() {
   const tickerEl = document.getElementById('ticker-content');
-  if (murmurList.length === 0) return;
   
   setInterval(() => {
     if (murmurList.length > 0) {
       currentMurmurIndex = (currentMurmurIndex + 1) % murmurList.length;
-      tickerEl.innerText = murmurList[currentMurmurIndex];
+      tickerEl.style.opacity = 0;
+      setTimeout(() => {
+        tickerEl.innerText = murmurList[currentMurmurIndex];
+        tickerEl.style.opacity = 1;
+      }, 300);
     }
-  }, 4000); 
+  }, 4500); 
 }
 
 let isLoadedFromFirebase = false;
@@ -382,16 +393,6 @@ function loadAllMembersFromFirebase() {
     userSelect.innerHTML = '<option value="">+ 新成員</option>';
     const data = snapshot.val();
     allMembersData = data || {};
-    
-    if (!isLoadedFromFirebase) {
-      allPlayerGroups.forEach(g => {
-        scene.remove(g);
-        g.children.forEach(child => {
-          if (child instanceof THREE.CSS2DObject) child.element.remove();
-        });
-      });
-      allPlayerGroups.length = 0;
-    }
 
     murmurList = [];
     if (data) {
@@ -406,13 +407,13 @@ function loadAllMembersFromFirebase() {
           murmurList.push(`💬 ${name}: ${data[name].murmur}`);
         }
 
-        if (!isLoadedFromFirebase && data[name].charUrl) {
+        if (data[name].charUrl) {
           const spreadX = (index % 4 - 1.5) * 5.0 + (Math.random() - 0.5) * 1.5; 
           const spreadY = (index % 3) * 1.2 - 1.0; 
           const spreadZ = -8 - (index * 3); 
           const scaleFactor = Math.max(0.6, 1.2 - (index * 0.15)); 
 
-          spawnCharacter(data[name].charUrl, data[name].handUrl, name, data[name].sportType, data[name].mins, spreadX, spreadY, spreadZ, scaleFactor);
+          spawnOrUpdateCharacter(data[name].charUrl, data[name].handUrl, name, data[name].sportType, data[name].mins, spreadX, spreadY, spreadZ, scaleFactor);
         }
       });
       if (murmurList.length > 0) {
@@ -472,7 +473,7 @@ window.submitData = function() {
       const newX = (Math.random() - 0.5) * 10;
       const newY = (Math.random() - 0.5) * 1.5;
       const newZ = -10 - Math.random() * 6;
-      spawnCharacter(tempCharUrl, tempHandUrl, finalName, sportType, mins || '0', newX, newY, newZ, 1.0);
+      spawnOrUpdateCharacter(tempCharUrl, tempHandUrl, finalName, sportType, mins || '0', newX, newY, newZ, 1.0);
 
       alert(`成功儲存！${finalName} 的 2026 今日工事已更新。`);
       mainContent.classList.add('hidden');
@@ -487,7 +488,7 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 // ==========================================
-// 7. 動畫迴圈 (支援拖曳更新與持續跳動)
+// 7. 動畫迴圈
 // ==========================================
 let mouseX = 0, mouseY = 0;
 document.addEventListener('mousemove', (e) => {
@@ -508,7 +509,6 @@ function animate() {
     let walkX = baseX;
     let bounceY = baseY;
 
-    // 如果正在被拖曳，直接跟隨滑鼠位置；否則繼續進行原本的散步與上下彈跳
     if (!group.userData.isDragging) {
       walkX = baseX + Math.sin(time * 0.001 + offset) * 1.2;     
       bounceY = baseY + Math.abs(Math.sin(time * 0.004 + offset)) * 0.4; 
