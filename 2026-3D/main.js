@@ -75,7 +75,7 @@ terrain.rotation.x = -Math.PI/2; terrain.position.set(0, -2, -30);
 scene.add(terrain);
 
 // ==========================================
-// 3. 角色與手勢系統 (已修復黑塊問題)
+// 3. 角色與手勢系統 (已徹底解決黑塊問題)
 // ==========================================
 const playerGroup = new THREE.Group();
 playerGroup.position.set(0, 0, -10); 
@@ -86,49 +86,54 @@ let leftHand = null;
 let rightHand = null;
 const textureLoader = new THREE.TextureLoader();
 
+// 當前選擇的圖片路徑紀錄
+let currentCharUrl = '';
+let currentHandUrl = '';
+
 function loadCharacter(url) {
+  currentCharUrl = url;
   if (charSprite) playerGroup.remove(charSprite);
   
-  const tex = textureLoader.load(url);
-  tex.magFilter = THREE.NearestFilter; 
-  
-  // 【關鍵修正】加入 depthWrite: false 與色調修正，徹底解決黑塊問題
-  charSprite = new THREE.Sprite(new THREE.SpriteMaterial({ 
-    map: tex, 
-    color: 0xffffff, 
-    transparent: true, 
-    alphaTest: 0.1,
-    depthWrite: false 
-  }));
-  charSprite.scale.set(4, 4, 1);
-  playerGroup.add(charSprite);
+  textureLoader.load(url, (tex) => {
+    tex.magFilter = THREE.NearestFilter;
+    // 關鍵修復：確保色彩空間正確，避免透明 PNG 變成黑塊
+    if (THREE.SRGBColorSpace) tex.colorSpace = THREE.SRGBColorSpace;
+    
+    charSprite = new THREE.Sprite(new THREE.SpriteMaterial({ 
+      map: tex, 
+      transparent: true, 
+      alphaTest: 0.1,
+      depthWrite: false 
+    }));
+    charSprite.scale.set(4, 4, 1);
+    playerGroup.add(charSprite);
+  });
 
   document.getElementById('hand-box').style.display = 'flex'; 
 }
 
 function loadHand(url) {
+  currentHandUrl = url;
   if (leftHand) playerGroup.remove(leftHand);
   if (rightHand) playerGroup.remove(rightHand);
 
-  const tex = textureLoader.load(url);
-  tex.magFilter = THREE.NearestFilter;
+  textureLoader.load(url, (tex) => {
+    tex.magFilter = THREE.NearestFilter;
+    if (THREE.SRGBColorSpace) tex.colorSpace = THREE.SRGBColorSpace;
 
-  leftHand = new THREE.Sprite(new THREE.SpriteMaterial({ 
-    map: tex, color: 0xffffff, transparent: true, alphaTest: 0.1, depthWrite: false 
-  }));
-  leftHand.scale.set(1.5, 1.5, 1);
+    leftHand = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, alphaTest: 0.1, depthWrite: false }));
+    leftHand.scale.set(1.5, 1.5, 1);
 
-  rightHand = new THREE.Sprite(new THREE.SpriteMaterial({ 
-    map: tex, color: 0xffffff, transparent: true, alphaTest: 0.1, depthWrite: false 
-  }));
-  rightHand.scale.set(1.5, 1.5, 1);
+    rightHand = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, alphaTest: 0.1, depthWrite: false }));
+    rightHand.scale.set(1.5, 1.5, 1);
 
-  playerGroup.add(leftHand);
-  playerGroup.add(rightHand);
+    playerGroup.add(leftHand);
+    playerGroup.add(rightHand);
+  });
 }
 
 // ==========================================
-// 4. UI 介面與表單送出邏輯
+// 4. UI 介面與資料儲存 (LocalStorage) 邏輯
 // ==========================================
 const mainContent = document.getElementById('main-content');
 const openPanelBtn = document.getElementById('open-panel-btn');
@@ -170,22 +175,64 @@ window.closeModal = function() {
   modal.classList.add('hidden');
 }
 
+// 讀取並初始化 LocalStorage 儲存的角色
+function loadSavedMember() {
+  const savedData = localStorage.getItem('runrundondon_last_member');
+  if (savedData) {
+    const member = JSON.parse(savedData);
+    if (member.name) {
+      // 自動填入名字與選項
+      const select = document.getElementById('user-select');
+      const opt = document.createElement('option');
+      opt.value = member.name;
+      opt.innerText = member.name;
+      opt.selected = true;
+      select.appendChild(opt);
+      document.getElementById('new-name').value = member.name;
+    }
+    if (member.charUrl) loadCharacter(member.charUrl);
+    if (member.handUrl) loadHand(member.handUrl);
+  }
+}
+
+// 點擊確認送出：儲存資料並保留角色在畫面上
 window.submitData = function() {
-  const name = document.getElementById('new-name').value;
+  const nameInput = document.getElementById('new-name').value.trim();
+  const selectUser = document.getElementById('user-select').value;
+  const finalName = nameInput || selectUser;
   const mins = document.getElementById('mins').value;
   const sportType = document.getElementById('sport-type').value;
 
+  if(!finalName) {
+    alert("請輸入或選擇成員名字！");
+    return;
+  }
   if(!charSprite) {
     alert("請先選擇一位角色！");
     return;
   }
 
-  console.log("送出成功！", { name, mins, sportType });
+  // 包裝成物件存入 LocalStorage
+  const memberData = {
+    name: finalName,
+    mins: mins,
+    sportType: sportType,
+    charUrl: currentCharUrl,
+    handUrl: currentHandUrl
+  };
+
+  localStorage.setItem('runrundondon_last_member', JSON.stringify(memberData));
+  alert(`成功儲存！${finalName} 的今日工事已記錄。`);
   
-  // 關閉面板，保留角色在畫面上走動
+  // 關閉面板，保留角色在畫面中走動
   mainContent.classList.add('hidden');
   openPanelBtn.classList.remove('hidden');
 }
+
+// 網頁載入時自動讀取上次儲存的角色
+window.addEventListener('DOMContentLoaded', () => {
+  loadSavedMember();
+});
 
 // ==========================================
 // 5. 動畫與滑鼠互動
