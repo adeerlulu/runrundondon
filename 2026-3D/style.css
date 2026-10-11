@@ -1,105 +1,61 @@
 body, html {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  height: 100%;
-  overflow: hidden; 
-  font-family: 'Helvetica Neue', Arial, sans-serif;
+  margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; font-family: 'Helvetica Neue', Arial, sans-serif;
 }
 
-#bg-canvas {
-  position: fixed;
-  top: 0; left: 0; width: 100vw; height: 100vh;
-  z-index: -1; 
-}
+#bg-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; }
 
-/* 你的選單主容器 */
+.floating-btn {
+  position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
+  background: #2c5282; color: white; border: none; padding: 12px 30px;
+  border-radius: 20px; font-size: 18px; font-weight: bold; cursor: pointer;
+  z-index: 5; box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: 0.3s;
+}
+.floating-btn:hover { background: #1a365d; }
+
 .main-container {
-  position: absolute;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(255, 255, 255, 0.95);
-  padding: 20px;
-  border-radius: 20px;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.2);
-  z-index: 5;
-  width: 90%;
-  max-width: 600px;
-  color: #333;
+  position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
+  background: rgba(255, 255, 255, 0.95); padding: 30px 20px 20px;
+  border-radius: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+  z-index: 6; width: 90%; max-width: 600px; color: #333;
 }
 
-.logo-container { text-align: center; margin-bottom: 15px; }
-.main-logo { height: 40px; }
+.close-x {
+  position: absolute; top: 10px; right: 15px; background: transparent;
+  border: none; font-size: 24px; color: #888; cursor: pointer; line-height: 1;
+}
+.close-x:hover { color: #333; }
 
 .section-header { margin-bottom: 15px; border-bottom: 2px solid #2c5282; padding-bottom: 5px; }
 .section-title { font-size: 18px; font-weight: bold; color: #2c5282; }
 
-.control-row {
-  display: flex;
-  gap: 15px;
-  align-items: flex-end;
-}
-.input-box {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-}
-.input-box label {
-  font-size: 14px;
-  margin-bottom: 5px;
-  color: #555;
-  font-weight: bold;
-}
-.input-box input, .input-box select {
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  font-size: 14px;
-}
+.control-row { display: flex; gap: 15px; align-items: flex-end; }
+.input-box { display: flex; flex-direction: column; flex: 1; }
+.input-box label { font-size: 14px; margin-bottom: 5px; color: #555; font-weight: bold; }
 
-/* 彈出視窗 (Modal) */
+.form-input { padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 14px; width: 100%; box-sizing: border-box; }
+
+.action-btn { border: none; padding: 12px; border-radius: 12px; cursor: pointer; width: 100%; font-weight: bold; height: 48px; color: white; transition: 0.2s;}
+.primary-btn { background: #2c5282; }
+.secondary-btn { background: #2b6cb0; }
+.submit-btn { background: #38a169; font-size: 16px; } /* 送出按鈕專屬綠色 */
+.submit-btn:hover { background: #2f855a; }
+
 .modal {
-  position: fixed;
-  top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(0, 0, 0, 0.7);
-  z-index: 10;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.7); z-index: 10; display: flex;
+  justify-content: center; align-items: center;
 }
-.modal.hidden { display: none; }
+.hidden { display: none !important; }
+
 .modal-content {
-  background: rgba(255, 255, 255, 0.95);
-  padding: 20px;
-  border-radius: 15px;
-  width: 80%;
-  max-width: 400px;
-  text-align: center;
+  background: rgba(255, 255, 255, 0.95); padding: 20px; border-radius: 15px;
+  width: 80%; max-width: 400px; text-align: center;
 }
 
-.grid-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  justify-content: center;
-  margin: 20px 0;
-}
+.grid-container { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 20px 0; }
 .grid-item {
-  width: 70px;
-  height: 70px;
-  background: #f0f0f0;
-  border-radius: 10px;
-  cursor: pointer;
-  object-fit: contain;
-  border: 3px solid transparent;
-  transition: 0.2s;
-  padding: 5px;
+  width: 70px; height: 70px; background: #f0f0f0; border-radius: 10px; cursor: pointer;
+  object-fit: contain; border: 3px solid transparent; transition: 0.2s; padding: 5px;
 }
-.grid-item:hover {
-  border-color: #2c5282;
-  transform: scale(1.1);
-}
-.close-btn {
-  background: #ccc; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: bold;
-}
+.grid-item:hover { border-color: #2c5282; transform: scale(1.1); }
+.close-btn { background: #ccc; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: bold; }
