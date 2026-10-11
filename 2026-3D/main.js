@@ -1,8 +1,26 @@
 // ==========================================
-// 0. 圖庫資料設定
+// 0. Firebase 初始化設定 (2026 獨立專案路徑)
+// ==========================================
+const firebaseConfig = {
+  apiKey: "AIzaSyDqX_tZqqfw0txXpd-b4AWuolhgQgU6lLU",
+  authDomain: "runrundondon-31b12.firebaseapp.com",
+  databaseURL: "https://runrundondon-31b12-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "runrundondon-31b12",
+  storageBucket: "runrundondon-31b12.firebasestorage.app",
+  messagingSenderId: "466713105396",
+  appId: "1:466713105396:web:c0651103b028978cd9dfa1",
+  measurementId: "G-D5D9SP15X4"
+};
+
+// 初始化 Firebase
+firebase.initializeApp(firebaseConfig);
+const dbRef = firebase.database().ref('2026_records'); // 獨立的 2026 資料夾，不影響舊資料
+
+// ==========================================
+// 1. 圖庫資料設定 (已指向正確的 PNG 角色與手勢)
 // ==========================================
 const characterList = [
-  './character/ani/ani_1.svg'
+  './character/ani/ani_1.png'
 ];
 
 const handList = [
@@ -15,7 +33,7 @@ const handList = [
 ];
 
 // ==========================================
-// 1. 場景、霧氣、攝影機初始化
+// 2. 場景、霧氣、攝影機初始化
 // ==========================================
 const config = {
   bgColor: 0xe6d5b8, fogColor: 0xe6d5b8, terrainColor: 0x828a5c,  
@@ -41,7 +59,7 @@ dirLight.position.set(0, 20, -30);
 scene.add(dirLight);
 
 // ==========================================
-// 2. 地形與山脈 (噪點安全版)
+// 3. 地形與山脈 (噪點安全版)
 // ==========================================
 function createNoiseTexture() {
   const size = 256; const data = new Uint8Array(size * size * 4);
@@ -75,7 +93,7 @@ terrain.rotation.x = -Math.PI/2; terrain.position.set(0, -2, -30);
 scene.add(terrain);
 
 // ==========================================
-// 3. 角色與手勢系統 (已徹底解決黑塊問題)
+// 4. 角色與手勢系統 (已完美解決透明黑塊問題)
 // ==========================================
 const playerGroup = new THREE.Group();
 playerGroup.position.set(0, 0, -10); 
@@ -86,7 +104,6 @@ let leftHand = null;
 let rightHand = null;
 const textureLoader = new THREE.TextureLoader();
 
-// 當前選擇的圖片路徑紀錄
 let currentCharUrl = '';
 let currentHandUrl = '';
 
@@ -96,7 +113,6 @@ function loadCharacter(url) {
   
   textureLoader.load(url, (tex) => {
     tex.magFilter = THREE.NearestFilter;
-    // 關鍵修復：確保色彩空間正確，避免透明 PNG 變成黑塊
     if (THREE.SRGBColorSpace) tex.colorSpace = THREE.SRGBColorSpace;
     
     charSprite = new THREE.Sprite(new THREE.SpriteMaterial({ 
@@ -133,11 +149,13 @@ function loadHand(url) {
 }
 
 // ==========================================
-// 4. UI 介面與資料儲存 (LocalStorage) 邏輯
+// 5. UI 與 Firebase 資料讀寫
 // ==========================================
 const mainContent = document.getElementById('main-content');
 const openPanelBtn = document.getElementById('open-panel-btn');
 const closePanelBtn = document.getElementById('close-panel-btn');
+const userSelect = document.getElementById('user-select');
+const newNameInput = document.getElementById('new-name');
 
 openPanelBtn.onclick = () => {
   mainContent.classList.remove('hidden');
@@ -175,30 +193,45 @@ window.closeModal = function() {
   modal.classList.add('hidden');
 }
 
-// 讀取並初始化 LocalStorage 儲存的角色
-function loadSavedMember() {
-  const savedData = localStorage.getItem('runrundondon_last_member');
-  if (savedData) {
-    const member = JSON.parse(savedData);
-    if (member.name) {
-      // 自動填入名字與選項
-      const select = document.getElementById('user-select');
-      const opt = document.createElement('option');
-      opt.value = member.name;
-      opt.innerText = member.name;
-      opt.selected = true;
-      select.appendChild(opt);
-      document.getElementById('new-name').value = member.name;
+// 從 Firebase 載入已有成員列表到下拉選單
+function loadMembersFromFirebase() {
+  dbRef.on('value', (snapshot) => {
+    userSelect.innerHTML = '<option value="">+ 新成員</option>';
+    const data = snapshot.val();
+    if (data) {
+      Object.keys(data).forEach(name => {
+        const opt = document.createElement('option');
+        opt.value = name;
+        opt.innerText = name;
+        userSelect.appendChild(opt);
+      });
     }
-    if (member.charUrl) loadCharacter(member.charUrl);
-    if (member.handUrl) loadHand(member.handUrl);
-  }
+  });
 }
 
-// 點擊確認送出：儲存資料並保留角色在畫面上
+// 當下拉選單切換時，自動帶入該成員上次的設定與角色
+userSelect.onchange = (e) => {
+  const selectedName = e.target.value;
+  if (selectedName) {
+    newNameInput.value = selectedName;
+    dbRef.child(selectedName).once('value', (snapshot) => {
+      const val = snapshot.val();
+      if (val) {
+        if (val.mins) document.getElementById('mins').value = val.mins;
+        if (val.sportType) document.getElementById('sport-type').value = val.sportType;
+        if (val.charUrl) loadCharacter(val.charUrl);
+        if (val.handUrl) loadHand(val.handUrl);
+      }
+    });
+  } else {
+    newNameInput.value = '';
+  }
+};
+
+// 點擊確認送出：將資料寫入 Firebase 2026 專屬路徑
 window.submitData = function() {
-  const nameInput = document.getElementById('new-name').value.trim();
-  const selectUser = document.getElementById('user-select').value;
+  const nameInput = newNameInput.value.trim();
+  const selectUser = userSelect.value;
   const finalName = nameInput || selectUser;
   const mins = document.getElementById('mins').value;
   const sportType = document.getElementById('sport-type').value;
@@ -212,30 +245,33 @@ window.submitData = function() {
     return;
   }
 
-  // 包裝成物件存入 LocalStorage
   const memberData = {
     name: finalName,
-    mins: mins,
+    mins: mins || '0',
     sportType: sportType,
     charUrl: currentCharUrl,
-    handUrl: currentHandUrl
+    handUrl: currentHandUrl,
+    updatedAt: Date.now()
   };
 
-  localStorage.setItem('runrundondon_last_member', JSON.stringify(memberData));
-  alert(`成功儲存！${finalName} 的今日工事已記錄。`);
-  
-  // 關閉面板，保留角色在畫面中走動
-  mainContent.classList.add('hidden');
-  openPanelBtn.classList.remove('hidden');
+  dbRef.child(finalName).set(memberData)
+    .then(() => {
+      alert(`成功儲存！${finalName} 的 2026 今日工事已更新至資料庫。`);
+      mainContent.classList.add('hidden');
+      openPanelBtn.classList.remove('hidden');
+    })
+    .catch((error) => {
+      alert("儲存失敗：" + error.message);
+    });
 }
 
-// 網頁載入時自動讀取上次儲存的角色
+// 網頁載入時抓取成員清單
 window.addEventListener('DOMContentLoaded', () => {
-  loadSavedMember();
+  loadMembersFromFirebase();
 });
 
 // ==========================================
-// 5. 動畫與滑鼠互動
+// 6. 動畫與滑鼠互動
 // ==========================================
 let mouseX = 0, mouseY = 0;
 document.addEventListener('mousemove', (e) => {
