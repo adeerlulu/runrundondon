@@ -2,7 +2,7 @@
 // 0. 圖庫資料設定 (對齊你 GitHub 的名稱)
 // ==========================================
 const characterList = [
-  './character/ani/char_01.png'
+  './character/ani/ani_1.svg'
 ];
 
 const handList = [
