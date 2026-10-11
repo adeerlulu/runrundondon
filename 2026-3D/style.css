@@ -25,8 +25,22 @@ body, html {
 }
 .close-x:hover { color: #333; }
 
-.section-header { margin-bottom: 15px; border-bottom: 2px solid #2c5282; padding-bottom: 5px; }
+.section-header { margin-bottom: 10px; border-bottom: 2px solid #2c5282; padding-bottom: 5px; }
 .section-title { font-size: 18px; font-weight: bold; color: #2c5282; }
+
+/* 獨立預覽區樣式 */
+.preview-container {
+  display: flex; justify-content: center; margin-bottom: 15px;
+}
+.preview-box {
+  width: 100px; height: 100px; background: #edf2f7; border-radius: 15px;
+  border: 2px dashed #cbd5e0; display: flex; justify-content: center; align-items: center;
+  position: relative; overflow: hidden;
+}
+.preview-box img {
+  position: absolute; max-width: 80%; max-height: 80%; object-fit: contain;
+}
+#preview-placeholder { font-size: 12px; color: #a0aec0; text-align: center; }
 
 .control-row { display: flex; gap: 15px; align-items: flex-end; }
 .input-box { display: flex; flex-direction: column; flex: 1; }
@@ -37,7 +51,7 @@ body, html {
 .action-btn { border: none; padding: 12px; border-radius: 12px; cursor: pointer; width: 100%; font-weight: bold; height: 48px; color: white; transition: 0.2s;}
 .primary-btn { background: #2c5282; }
 .secondary-btn { background: #2b6cb0; }
-.submit-btn { background: #38a169; font-size: 16px; } /* 送出按鈕專屬綠色 */
+.submit-btn { background: #38a169; font-size: 16px; }
 .submit-btn:hover { background: #2f855a; }
 
 .modal {
