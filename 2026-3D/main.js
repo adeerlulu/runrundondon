@@ -1,44 +1,82 @@
-// 1. 初始化場景、攝影機、渲染器
-const scene = new THREE.Scene();
+// 1. 取得當前時間並判斷日夜
+const currentHour = new Date().getHours();
+// 判斷：大於等於 6 且小於 18 為白天 (06:00 - 17:59)，否則為夜晚
+const isDayTime = currentHour >= 6 && currentHour < 18;
 
-// 設定日出氛圍的霧氣 (粉橘色)
-const fogColor = new THREE.Color(0xff8c42);
-scene.fog = new THREE.Fog(fogColor, 10, 50);
-scene.background = fogColor;
+// 2. 根據日夜設定顏色風格參數
+const config = {
+  bgColor: isDayTime ? 0xff8c42 : 0x05051a,      // 白天暖橘色 / 晚上深藍黑
+  fogColor: isDayTime ? 0xff8c42 : 0x0a0a2a,     // 白天霧氣 / 晚上深色霧氣
+  sphereColor: isDayTime ? 0xffd700 : 0xe0e0ff,  // 太陽金黃色 / 月亮冷白色
+  gridColor: isDayTime ? 0xffffff : 0x00ffff,    // 白天地板白線 / 晚上霓虹青藍色
+};
+
+// 3. 初始化場景、攝影機、渲染器
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(config.bgColor);
+scene.fog = new THREE.Fog(config.fogColor, 10, 50);
 
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-// 讓攝影機稍微抬高並往下看
 camera.position.set(0, 5, 20);
 
 const canvas = document.querySelector('#bg-canvas');
 const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // 效能優化
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-// 2. 建立日出的太陽 (發光球體)
-const sunGeometry = new THREE.SphereGeometry(15, 32, 32);
-// 使用 BasicMaterial 不受光照影響，呈現自發光效果
-const sunMaterial = new THREE.MeshBasicMaterial({ color: 0xffd700 }); 
-const sun = new THREE.Mesh(sunGeometry, sunMaterial);
-sun.position.set(0, -5, -40); // 放在遠方地平線下
-scene.add(sun);
+// 4. 建立天體 (太陽或月亮)
+const sphereGeometry = new THREE.SphereGeometry(15, 32, 32);
+const sphereMaterial = new THREE.MeshBasicMaterial({ color: config.sphereColor }); 
+const celestialBody = new THREE.Mesh(sphereGeometry, sphereMaterial);
+celestialBody.position.set(0, -5, -40);
+scene.add(celestialBody);
 
-// 3. 建立網格地面 (跑動的地形)
+// 5. 建立網格地面
 const planeGeometry = new THREE.PlaneGeometry(100, 100, 20, 20);
-// 暫時使用 Wireframe 方便觀察地面的推移
-const planeMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, wireframe: true });
+const planeMaterial = new THREE.MeshBasicMaterial({ color: config.gridColor, wireframe: true });
 const plane = new THREE.Mesh(planeGeometry, planeMaterial);
-plane.rotation.x = -Math.PI / 2; // 將平面平放
+plane.rotation.x = -Math.PI / 2;
 plane.position.y = -2;
 scene.add(plane);
 
-// 4. 動畫迴圈 (推移地形營造速度感)
+// 6. 如果是晚上，額外加入星空粒子特效
+if (!isDayTime) {
+  const starsGeometry = new THREE.BufferGeometry();
+  const starsCount = 500;
+  const posArray = new Float32Array(starsCount * 3);
+  
+  for(let i = 0; i < starsCount * 3; i++) {
+    // 讓星星隨機散佈在畫面上方與遠處
+    posArray[i] = (Math.random() - 0.5) * 100; // x, y, z 隨機分佈
+  }
+  
+  // 將 z 軸向後推，避免擋住月亮
+  for(let i = 2; i < starsCount * 3; i+=3) {
+      posArray[i] = -Math.random() * 50 - 20; 
+  }
+  // 將 y 軸往上推，避免出現在地板下
+  for(let i = 1; i < starsCount * 3; i+=3) {
+      posArray[i] = Math.random() * 40; 
+  }
+
+  starsGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+  const starsMaterial = new THREE.PointsMaterial({
+    size: 0.1,
+    color: 0xffffff,
+    transparent: true,
+    opacity: 0.8
+  });
+  
+  const starMesh = new THREE.Points(starsGeometry, starsMaterial);
+  scene.add(starMesh);
+}
+
+// 7. 動畫迴圈 (推移地形)
 function animate() {
   requestAnimationFrame(animate);
 
   // 讓網格地面持續往攝影機方向移動
   plane.position.z += 0.1;
-  // 當地面移動超過一個區塊時，重置位置以達到無限延伸的效果
   if(plane.position.z > 5) {
       plane.position.z = 0;
   }
@@ -47,7 +85,7 @@ function animate() {
 }
 animate();
 
-// 5. 響應式：監聽視窗大小改變
+// 8. 響應式：監聽視窗大小改變
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
