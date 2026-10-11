@@ -16,12 +16,20 @@
 
   <!-- 你的選單 UI (預設隱藏) -->
   <div class="main-container hidden" id="main-content">
-      <!-- 面板關閉按鈕 -->
       <button id="close-panel-btn" class="close-x">×</button>
 
       <div class="section-header"><div class="section-title">今日工事</div></div>
       
       <div class="controls-wrapper">
+          <!-- 獨立預覽區：讓你在面板內直接預覽搭配結果 -->
+          <div class="preview-container">
+              <div class="preview-box">
+                  <img id="preview-avatar" src="" alt="請選擇頭像" style="display:none;">
+                  <img id="preview-hand" src="" alt="" style="display:none;">
+                  <span id="preview-placeholder">尚未選擇角色</span>
+              </div>
+          </div>
+
           <div class="control-row">
               <div class="input-box">
                   <label>是哪位運動家</label>
@@ -33,12 +41,10 @@
               </div>
               <div class="input-box">
                   <div style="height:19px"></div>
-                  <!-- 開啟選角 Modal -->
                   <button id="avatar-btn" class="action-btn primary-btn" onclick="openModal('char')">挑選頭像</button>
               </div>
               <div class="input-box" id="hand-box" style="display: none;">
                   <div style="height:19px"></div>
-                  <!-- 開啟手勢 Modal -->
                   <button id="hand-btn" class="action-btn secondary-btn" onclick="openModal('hand')">挑選裝備</button>
               </div>
           </div>
@@ -69,7 +75,6 @@
               </div>
           </div>
 
-          <!-- 確認送出按鈕 -->
           <div class="control-row" style="margin-top: 20px;">
               <button id="submit-btn" class="action-btn submit-btn" onclick="submitData()">確認送出</button>
           </div>
@@ -85,13 +90,9 @@
     </div>
   </div>
 
-  <!-- 引入 Three.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  
-  <!-- 引入 Firebase SDK (Compat 版本) -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
-
   <script src="main.js"></script>
 </body>
 </html>
