@@ -16,7 +16,7 @@ firebase.initializeApp(firebaseConfig);
 const dbRef = firebase.database().ref('2026_records'); 
 
 // ==========================================
-// 1. 圖庫資料設定 (支援多頭像與手勢)
+// 1. 圖庫資料設定
 // ==========================================
 const characterList = [
   './character/ani/ani_1.png',
@@ -93,32 +93,55 @@ terrain.rotation.x = -Math.PI/2; terrain.position.set(0, -2, -30);
 scene.add(terrain);
 
 // ==========================================
-// 4. 多角色群組管理系統 (避免重疊)
+// 4. 多角色群組與獨立預覽管理
 // ==========================================
 const textureLoader = new THREE.TextureLoader();
-const allPlayerGroups = []; // 存放畫面上所有的角色群組
+const allPlayerGroups = []; 
 
-let tempCharUrl = './character/ani/ani_1.png'; // 預設頭像
+let tempCharUrl = '';
 let tempHandUrl = '';
 
-// 暫時預覽當前選中的頭像或手勢（在面板中操作時用）
+// 更新面板中的獨立預覽區
+function updatePreviewUI() {
+  const avatarImg = document.getElementById('preview-avatar');
+  const handImg = document.getElementById('preview-hand');
+  const placeholder = document.getElementById('preview-placeholder');
+
+  if (tempCharUrl) {
+    avatarImg.src = tempCharUrl;
+    avatarImg.style.display = 'block';
+    placeholder.style.display = 'none';
+  }
+  if (tempHandUrl) {
+    handImg.src = tempHandUrl;
+    handImg.style.display = 'block';
+  } else {
+    handImg.style.display = 'none';
+  }
+}
+
 function previewCharacter(url) {
   tempCharUrl = url;
+  updatePreviewUI();
   document.getElementById('hand-box').style.display = 'flex'; 
 }
 
 function previewHand(url) {
   tempHandUrl = url;
+  updatePreviewUI();
 }
 
-// 建立並新增一個角色到畫面上（透過傳入 x 軸偏移量來避免重疊）
-function spawnCharacter(charUrl, handUrl, customX = 0) {
+// 在草地上生成角色（加入 X、Y、Z 軸差異，讓位置與高度錯開，絕不重疊）
+function spawnCharacter(charUrl, handUrl, customX = 0, customY = 0, customZ = -10) {
   const group = new THREE.Group();
-  // 讓不同角色有不同的基礎 X 軸位置，防止重疊
-  group.userData = { baseX: customX, randomOffset: Math.random() * 100 };
+  group.userData = { 
+    baseX: customX, 
+    baseY: customY, 
+    baseZ: customZ, 
+    randomOffset: Math.random() * 100 
+  };
   scene.add(group);
 
-  // 載入角色本體
   textureLoader.load(charUrl, (tex) => {
     tex.magFilter = THREE.NearestFilter;
     if (THREE.SRGBColorSpace) tex.colorSpace = THREE.SRGBColorSpace;
@@ -130,7 +153,6 @@ function spawnCharacter(charUrl, handUrl, customX = 0) {
     group.add(sprite);
   });
 
-  // 如果有選擇手勢，則載入雙手
   if (handUrl) {
     textureLoader.load(handUrl, (tex) => {
       tex.magFilter = THREE.NearestFilter;
@@ -170,7 +192,7 @@ const itemsGrid = document.getElementById('items-grid');
 const modalTitle = document.getElementById('modal-title');
 
 window.openModal = function(type) {
-  modalTitle.innerText = type === 'char' ? '選擇角色' : '選擇裝備';
+  modalTitle.innerText = type === 'char' ? '選擇頭像' : '選擇裝備';
   itemsGrid.innerHTML = ''; 
   const list = type === 'char' ? characterList : handList;
 
@@ -190,14 +212,13 @@ window.openModal = function(type) {
 
 window.closeModal = function() { modal.classList.add('hidden'); }
 
-// 從 Firebase 載入所有歷史成員，並自動在畫面上展開不重疊的角色
+// 從 Firebase 載入所有成員，並在草地上自由錯開位置（包含 X 與 Y 軸高低差）
 let isLoadedFromFirebase = false;
 function loadAllMembersFromFirebase() {
   dbRef.on('value', (snapshot) => {
     userSelect.innerHTML = '<option value="">+ 新成員</option>';
     const data = snapshot.val();
     
-    // 如果還沒載入過，先清空畫面上預設的角色群組
     if (!isLoadedFromFirebase) {
       allPlayerGroups.forEach(g => scene.remove(g));
       allPlayerGroups.length = 0;
@@ -206,17 +227,18 @@ function loadAllMembersFromFirebase() {
     if (data) {
       const names = Object.keys(data);
       names.forEach((name, index) => {
-        // 下拉選單加入選項
         const opt = document.createElement('option');
         opt.value = name;
         opt.innerText = name;
         userSelect.appendChild(opt);
 
-        // 如果是剛進網頁，把資料庫裡的所有成員依照順序散開排列在畫面上 (防重疊)
         if (!isLoadedFromFirebase && data[name].charUrl) {
-          // 透過 index 計算不同的 X 軸位置 (例如: -6, -2, 2, 6...)
-          const spreadX = (index - (names.length - 1) / 2) * 4.5;
-          spawnCharacter(data[name].charUrl, data[name].handUrl, spreadX);
+          // 利用數學公式讓每個人在 X 軸散開、Y 軸高低錯開、Z 軸前後錯開，達成完全不重疊且位置自由
+          const spreadX = (index % 5 - 2) * 4.5 + (Math.random() - 0.5) * 2; 
+          const spreadY = (index % 3) * 0.8 - 0.5; // Y 軸高低錯開
+          const spreadZ = -10 - (Math.floor(index / 5) * 4); // 遠近錯開
+          
+          spawnCharacter(data[name].charUrl, data[name].handUrl, spreadX, spreadY, spreadZ);
         }
       });
       isLoadedFromFirebase = true;
@@ -224,7 +246,6 @@ function loadAllMembersFromFirebase() {
   });
 }
 
-// 切換下拉選單時填入資料
 userSelect.onchange = (e) => {
   const selectedName = e.target.value;
   if (selectedName) {
@@ -234,16 +255,18 @@ userSelect.onchange = (e) => {
       if (val) {
         if (val.mins) document.getElementById('mins').value = val.mins;
         if (val.sportType) document.getElementById('sport-type').value = val.sportType;
-        if (val.charUrl) tempCharUrl = val.charUrl;
-        if (val.handUrl) tempHandUrl = val.handUrl;
+        if (val.charUrl) previewCharacter(val.charUrl);
+        if (val.handUrl) previewHand(val.handUrl);
       }
     });
   } else {
     newNameInput.value = '';
+    tempCharUrl = '';
+    tempHandUrl = '';
+    updatePreviewUI();
   }
 };
 
-// 確認送出：儲存並在畫面上新增一隻專屬角色（自動錯開位置）
 window.submitData = function() {
   const nameInput = newNameInput.value.trim();
   const selectUser = userSelect.value;
@@ -252,6 +275,7 @@ window.submitData = function() {
   const sportType = document.getElementById('sport-type').value;
 
   if(!finalName) { alert("請輸入或選擇成員名字！"); return; }
+  if(!tempCharUrl) { alert("請先挑選頭像！"); return; }
 
   const memberData = {
     name: finalName,
@@ -264,11 +288,13 @@ window.submitData = function() {
 
   dbRef.child(finalName).set(memberData)
     .then(() => {
-      // 算出一個新的不重疊位置並直接在畫面上生成
-      const newX = (allPlayerGroups.length * 4) - 2;
-      spawnCharacter(tempCharUrl, tempHandUrl, newX);
+      // 送出後在畫面上隨機錯開位置新增
+      const newX = (Math.random() - 0.5) * 10;
+      const newY = (Math.random() - 0.5) * 1.5;
+      const newZ = -10 - Math.random() * 5;
+      spawnCharacter(tempCharUrl, tempHandUrl, newX, newY, newZ);
 
-      alert(`成功儲存！${finalName} 已加入 2026 跑跑動動陣容。`);
+      alert(`成功儲存！${finalName} 已加入草地散步陣容。`);
       mainContent.classList.add('hidden');
       openPanelBtn.classList.remove('hidden');
     })
@@ -280,7 +306,7 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 // ==========================================
-// 6. 動畫迴圈 (讓所有角色各自走動、彈跳、手部擺動)
+// 6. 動畫迴圈 (獨立帶有 Y 軸高低差與自由漫步)
 // ==========================================
 let mouseX = 0, mouseY = 0;
 document.addEventListener('mousemove', (e) => {
@@ -292,23 +318,22 @@ function animate() {
   requestAnimationFrame(animate);
   const time = performance.now(); 
 
-  // 讓畫面上所有的角色各自獨立進行晃動與散步
-  allPlayerGroups.forEach((group, idx) => {
+  allPlayerGroups.forEach((group) => {
     const offset = group.userData.randomOffset || 0;
     const baseX = group.userData.baseX || 0;
+    const baseY = group.userData.baseY || 0;
+    const baseZ = group.userData.baseZ || -10;
 
-    // 每個角色有微微不同的移動頻率，看起來更生動自然
-    const walkX = baseX + Math.sin(time * 0.001 + offset) * 1.5;     
-    const bounceY = Math.abs(Math.sin(time * 0.004 + offset)) * 0.6; 
+    // 自由漫步與 Y 軸高低浮動
+    const walkX = baseX + Math.sin(time * 0.001 + offset) * 1.8;     
+    const bounceY = baseY + Math.abs(Math.sin(time * 0.004 + offset)) * 0.6; 
     const rotateZ = Math.sin(time * 0.003 + offset) * 0.1; 
 
-    group.position.set(walkX, bounceY, -10);
+    group.position.set(walkX, bounceY, baseZ);
 
-    // 角色本體旋轉
     const sprite = group.children[0];
     if (sprite) sprite.material.rotation = rotateZ;
 
-    // 如果有左右手，讓手勢跟著呼吸擺動
     if (group.userData.hasHands && group.children.length >= 3) {
       const leftHand = group.children[1];
       const rightHand = group.children[2];
@@ -322,7 +347,7 @@ function animate() {
     }
   });
 
-  // B. 地形前進
+  // 地形前進
   const pPos = pGeo.attributes.position;
   for (let i = 0; i < pPos.count; i++) {
     const x = pPos.getX(i), y = pPos.getY(i);
@@ -331,7 +356,7 @@ function animate() {
   }
   pPos.needsUpdate = true; pGeo.computeVertexNormals(); 
 
-  // C. 視角晃動
+  // 視角晃動
   camera.position.x += (mouseX * 6 - camera.position.x) * 0.03;
   camera.position.y += ((8 + mouseY * 2) - camera.position.y) * 0.03;
   camera.lookAt(0, 2, -10);
