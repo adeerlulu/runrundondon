@@ -32,7 +32,6 @@ const handList = [
   './character/hand/blue_hand_thumb.png'
 ];
 
-// 指定草叢範圍：grass_1 ~ grass_5 以及 grass_14 ~ grass_24
 const grassList = [];
 for (let i = 1; i <= 5; i++) {
   grassList.push(`./grass/grass_${i}.png`);
@@ -75,7 +74,7 @@ dirLight.position.set(0, 20, -30);
 scene.add(dirLight);
 
 // ==========================================
-// 3. 地形、山脈與草叢滿版隨機散佈系統
+// 3. 地形、山脈與草叢滿版散佈
 // ==========================================
 function createNoiseTexture() {
   const size = 256; const data = new Uint8Array(size * size * 4);
@@ -108,40 +107,31 @@ const terrain = new THREE.Mesh(pGeo, pMat);
 terrain.rotation.x = -Math.PI/2; terrain.position.set(0, -2, -30);
 scene.add(terrain);
 
-// 生成滿版、互相重疊、無馬賽克的隨機草叢
 const textureLoader = new THREE.TextureLoader();
 const grassGroup = new THREE.Group();
 scene.add(grassGroup);
 
 function spawnFullGrassField() {
-  const totalGrassCount = 35; // 增加數量至 35 組達到滿版重疊感
+  const totalGrassCount = 35;
   for (let i = 0; i < totalGrassCount; i++) {
     const randomGrassUrl = grassList[Math.floor(Math.random() * grassList.length)];
     
     textureLoader.load(randomGrassUrl, (tex) => {
-      // 關鍵：使用 LinearFilter 消除馬賽克顆粒感，確保邊緣平滑
       tex.magFilter = THREE.LinearFilter;
       tex.minFilter = THREE.LinearFilter;
       if (THREE.SRGBColorSpace) tex.colorSpace = THREE.SRGBColorSpace;
 
-      // 隨機大小與自然透明度
       const scale = 2.5 + Math.random() * 3.5; 
       const grassMat = new THREE.SpriteMaterial({ 
-        map: tex, 
-        transparent: true, 
-        opacity: 0.8 + Math.random() * 0.2, 
-        alphaTest: 0.1, 
-        depthWrite: false 
+        map: tex, transparent: true, opacity: 0.8 + Math.random() * 0.2, alphaTest: 0.1, depthWrite: false 
       });
 
       const grassSprite = new THREE.Sprite(grassMat);
       grassSprite.scale.set(scale, scale, 1);
 
-      // 滿版散佈在草地各處（X 軸寬幅展開，Z 軸前後深遠交疊）
       const rx = (Math.random() - 0.5) * 80;
       const rz = -2 - Math.random() * 50;
       grassSprite.position.set(rx, -0.8, rz);
-
       grassGroup.add(grassSprite);
     });
   }
@@ -149,7 +139,7 @@ function spawnFullGrassField() {
 spawnFullGrassField();
 
 // ==========================================
-// 4. 多角色系統 (無馬賽克設定)
+// 4. 多角色系統與拖曳互動 (Drag & Drop)
 // ==========================================
 const allPlayerGroups = []; 
 let allMembersData = {}; 
@@ -193,7 +183,8 @@ function spawnCharacter(charUrl, handUrl, memberName = '成員', sportType = '�
     baseX: customX, 
     baseY: customY, 
     baseZ: customZ, 
-    randomOffset: Math.random() * 100 
+    randomOffset: Math.random() * 100,
+    isDragging: false
   };
   scene.add(group);
 
@@ -252,19 +243,22 @@ function spawnCharacter(charUrl, handUrl, memberName = '成員', sportType = '�
 }
 
 // ==========================================
-// 5. 點擊角色互動彈窗
+// 5. 滑鼠拖曳 (Drag & Drop) 與點擊彈窗系統
 // ==========================================
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
+let draggedGroup = null; // 當前被拖曳的角色群組
+const dragPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 10); // 拖曳對齊的隱形平面
+const planeIntersectPoint = new THREE.Vector3();
+let isClickAction = true; // 用來區分是「點擊」還是「拖曳」
 
-window.addEventListener('click', (event) => {
+window.addEventListener('mousedown', (event) => {
   if (event.target.closest('.main-container') || event.target.closest('.modal') || event.target.closest('.floating-btn')) return;
 
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
   raycaster.setFromCamera(mouse, camera);
-  
+
   const sprites = [];
   allPlayerGroups.forEach(g => {
     if (g.userData.sprite) sprites.push(g.userData.sprite);
@@ -272,14 +266,42 @@ window.addEventListener('click', (event) => {
 
   const intersects = raycaster.intersectObjects(sprites);
   if (intersects.length > 0) {
-    const clickedSprite = intersects[0].object;
-    const group = clickedSprite.parent;
-    const name = group.userData.name;
-    const data = allMembersData[name];
+    draggedGroup = intersects[0].object.parent;
+    draggedGroup.userData.isDragging = true;
+    isClickAction = true; // 預設為點擊，若有移動會改成 false
 
-    if (data) {
-      showRecordModal(data);
+    // 設定拖曳平面對應當前角色的 Z 深度
+    dragPlane.setFromNormalAndCoplanarPoint(new THREE.Vector3(0, 0, 1), draggedGroup.position);
+  }
+});
+
+window.addEventListener('mousemove', (event) => {
+  if (!draggedGroup) return;
+  isClickAction = false; // 只要有移動滑鼠，就不是點擊彈窗
+
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+  raycaster.setFromCamera(mouse, camera);
+
+  raycaster.ray.intersectPlane(dragPlane, planeIntersectPoint);
+  
+  // 更新角色的基準位置，讓牠跟著游標跑，放開後會以新位置繼續跳動
+  draggedGroup.userData.baseX = planeIntersectPoint.x;
+  draggedGroup.userData.baseY = Math.max(-1, planeIntersectPoint.y); // 限制不要陷入地下太深
+});
+
+window.addEventListener('mouseup', (event) => {
+  if (draggedGroup) {
+    draggedGroup.userData.isDragging = false;
+
+    // 如果沒有移動過滑鼠，則判定為「點擊角色」開啟運動紀錄彈窗
+    if (isClickAction) {
+      const name = draggedGroup.userData.name;
+      const data = allMembersData[name];
+      if (data) showRecordModal(data);
     }
+
+    draggedGroup = null;
   }
 });
 
@@ -465,7 +487,7 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 // ==========================================
-// 7. 動畫迴圈
+// 7. 動畫迴圈 (支援拖曳更新與持續跳動)
 // ==========================================
 let mouseX = 0, mouseY = 0;
 document.addEventListener('mousemove', (e) => {
@@ -483,14 +505,21 @@ function animate() {
     const baseY = group.userData.baseY || 0; 
     const baseZ = group.userData.baseZ || -10;
 
-    const walkX = baseX + Math.sin(time * 0.001 + offset) * 1.2;     
-    const bounceY = baseY + Math.abs(Math.sin(time * 0.004 + offset)) * 0.4; 
-    const rotateZ = Math.sin(time * 0.003 + offset) * 0.1; 
+    let walkX = baseX;
+    let bounceY = baseY;
+
+    // 如果正在被拖曳，直接跟隨滑鼠位置；否則繼續進行原本的散步與上下彈跳
+    if (!group.userData.isDragging) {
+      walkX = baseX + Math.sin(time * 0.001 + offset) * 1.2;     
+      bounceY = baseY + Math.abs(Math.sin(time * 0.004 + offset)) * 0.4; 
+    }
 
     group.position.set(walkX, bounceY, baseZ);
 
     const sprite = group.children[2];
-    if (sprite) sprite.material.rotation = rotateZ;
+    if (sprite) {
+      sprite.material.rotation = group.userData.isDragging ? 0 : Math.sin(time * 0.003 + offset) * 0.1;
+    }
 
     if (group.userData.hasHands && group.children.length >= 5) {
       const leftHand = group.children[3];
