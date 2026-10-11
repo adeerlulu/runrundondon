@@ -1,8 +1,8 @@
-// 1. 設定色彩參數 (精準校正：溫暖米黃天空 + 莫蘭迪橄欖綠草地)
+// 1. 設定色彩參數 (溫暖米黃天空 + 莫蘭迪橄欖綠草地)
 const config = {
   bgColor: 0xe6d5b8,      // 溫暖的米黃/卡其色天空
   fogColor: 0xe6d5b8,     // 霧氣與天空同色，製造無邊際感
-  terrainColor: 0x828a5c, // 莫蘭迪橄欖綠 (帶有灰調的枯草綠)
+  terrainColor: 0x828a5c, // 莫蘭迪橄欖綠
   lightColor: 0xfff9e6,   // 柔和微暖的日光
   ambientColor: 0x5d604b  // 灰綠色的陰影暗部，讓草皮立體但不突兀
 };
@@ -36,26 +36,31 @@ const planeGeometry = new THREE.PlaneGeometry(terrainWidth, terrainLength, 80, 1
 
 const planeMaterial = new THREE.MeshStandardMaterial({ 
   color: config.terrainColor,
-  roughness: 1.0, // 粗糙的草皮質感
+  roughness: 1.0, 
   metalness: 0.0
 });
 
-// 【修正版】透過 Shader 注入噪點 (Noise) 提升質感
+// 【安全修復版】透過 Shader 注入噪點 (Noise) 提升質感
 planeMaterial.onBeforeCompile = (shader) => {
-  // 將 random 函數加在 fragment shader 的最外層（避免編譯錯誤）
-  shader.fragmentShader = `
+  // 安全插入點 1：將 random 函式安插在共用函式庫區塊之後，避開頂端標頭
+  shader.fragmentShader = shader.fragmentShader.replace(
+    '#include <common>',
+    `
+    #include <common>
     float randomNoise(vec2 st) {
         return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);
     }
-  ` + shader.fragmentShader;
+    `
+  );
 
-  // 將噪點疊加在最終輸出的顏色上 (數字 0.06 為噪點強度，可自行微調)
+  // 安全插入點 2：將噪點疊加在最終輸出的顏色上
+  // 數字 0.06 為噪點強度，數值越大顆粒越明顯
   shader.fragmentShader = shader.fragmentShader.replace(
     '#include <dithering_fragment>',
     `
     #include <dithering_fragment>
     float noise = (randomNoise(gl_FragCoord.xy) - 0.5) * 0.06; 
-    gl_FragColor.rgb += noise;
+    gl_FragColor.rgb += vec3(noise);
     `
   );
 };
@@ -111,4 +116,7 @@ animate();
 
 // 7. 響應式調整
 window.addEventListener('resize', () => {
-  camera.aspect = window.innerWidth / window.
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
