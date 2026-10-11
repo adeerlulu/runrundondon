@@ -16,7 +16,7 @@ firebase.initializeApp(firebaseConfig);
 const dbRef = firebase.database().ref('2026_records'); 
 
 // ==========================================
-// 1. 圖庫資料設定 (包含角色、手勢與草地素材)
+// 1. 圖庫資料設定
 // ==========================================
 const characterList = [
   './character/ani/ani_1.png',
@@ -32,14 +32,17 @@ const handList = [
   './character/hand/blue_hand_thumb.png'
 ];
 
-// 自動產生 grass_1.png ~ grass_24.png 路徑陣列
+// 指定草叢範圍：grass_1 ~ grass_5 以及 grass_14 ~ grass_24
 const grassList = [];
-for (let i = 1; i <= 24; i++) {
+for (let i = 1; i <= 5; i++) {
+  grassList.push(`./grass/grass_${i}.png`);
+}
+for (let i = 14; i <= 24; i++) {
   grassList.push(`./grass/grass_${i}.png`);
 }
 
 // ==========================================
-// 2. 場景與 CSS2D 渲染器初始化
+// 2. 場景與渲染器初始化
 // ==========================================
 const config = {
   bgColor: 0xe6d5b8, fogColor: 0xe6d5b8, terrainColor: 0x828a5c,  
@@ -72,7 +75,7 @@ dirLight.position.set(0, 20, -30);
 scene.add(dirLight);
 
 // ==========================================
-// 3. 地形、山脈與隨機草叢系統 (最多 5 組)
+// 3. 地形、山脈與草叢滿版隨機散佈系統
 // ==========================================
 function createNoiseTexture() {
   const size = 256; const data = new Uint8Array(size * size * 4);
@@ -105,27 +108,28 @@ const terrain = new THREE.Mesh(pGeo, pMat);
 terrain.rotation.x = -Math.PI/2; terrain.position.set(0, -2, -30);
 scene.add(terrain);
 
-// 隨機在草地上生成草叢裝飾（最多 5 組）
+// 生成滿版、互相重疊、無馬賽克的隨機草叢
 const textureLoader = new THREE.TextureLoader();
 const grassGroup = new THREE.Group();
 scene.add(grassGroup);
 
-function spawnRandomGrassClusters() {
-  const maxGroups = 5; // 限制畫面最多出現 5 組
-  for (let i = 0; i < maxGroups; i++) {
-    // 隨機挑選一張草的圖片
+function spawnFullGrassField() {
+  const totalGrassCount = 35; // 增加數量至 35 組達到滿版重疊感
+  for (let i = 0; i < totalGrassCount; i++) {
     const randomGrassUrl = grassList[Math.floor(Math.random() * grassList.length)];
     
     textureLoader.load(randomGrassUrl, (tex) => {
-      tex.magFilter = THREE.NearestFilter;
+      // 關鍵：使用 LinearFilter 消除馬賽克顆粒感，確保邊緣平滑
+      tex.magFilter = THREE.LinearFilter;
+      tex.minFilter = THREE.LinearFilter;
       if (THREE.SRGBColorSpace) tex.colorSpace = THREE.SRGBColorSpace;
 
-      // 隨機大小與微透明度
-      const scale = 2.0 + Math.random() * 2.5; 
+      // 隨機大小與自然透明度
+      const scale = 2.5 + Math.random() * 3.5; 
       const grassMat = new THREE.SpriteMaterial({ 
         map: tex, 
         transparent: true, 
-        opacity: 0.85 + Math.random() * 0.15, // 帶點自然的透明度
+        opacity: 0.8 + Math.random() * 0.2, 
         alphaTest: 0.1, 
         depthWrite: false 
       });
@@ -133,19 +137,19 @@ function spawnRandomGrassClusters() {
       const grassSprite = new THREE.Sprite(grassMat);
       grassSprite.scale.set(scale, scale, 1);
 
-      // 隨機散佈在草地各處（X 軸左右分散，Z 軸前後錯開，貼齊地面 Y 軸）
-      const rx = (Math.random() - 0.5) * 50;
-      const rz = -5 - Math.random() * 35;
-      grassSprite.position.set(rx, -0.5, rz);
+      // 滿版散佈在草地各處（X 軸寬幅展開，Z 軸前後深遠交疊）
+      const rx = (Math.random() - 0.5) * 80;
+      const rz = -2 - Math.random() * 50;
+      grassSprite.position.set(rx, -0.8, rz);
 
       grassGroup.add(grassSprite);
     });
   }
 }
-spawnRandomGrassClusters();
+spawnFullGrassField();
 
 // ==========================================
-// 4. 多角色、裝備縮小(70%)、對話泡泡與點擊事件
+// 4. 多角色系統 (無馬賽克設定)
 // ==========================================
 const allPlayerGroups = []; 
 let allMembersData = {}; 
@@ -193,7 +197,6 @@ function spawnCharacter(charUrl, handUrl, memberName = '成員', sportType = '�
   };
   scene.add(group);
 
-  // 1. 名字標籤 (下方)
   const nameDiv = document.createElement('div');
   nameDiv.className = 'player-name-tag';
   nameDiv.textContent = memberName;
@@ -201,7 +204,6 @@ function spawnCharacter(charUrl, handUrl, memberName = '成員', sportType = '�
   nameLabel.position.set(0, -1.8 * scaleMultiplier, 0);
   group.add(nameLabel);
 
-  // 2. 對話泡泡 (上方)
   const bubbleDiv = document.createElement('div');
   bubbleDiv.className = 'player-speech-bubble';
   bubbleDiv.textContent = `${sportType} ${mins}分`;
@@ -209,9 +211,9 @@ function spawnCharacter(charUrl, handUrl, memberName = '成員', sportType = '�
   bubbleLabel.position.set(0, 2.2 * scaleMultiplier, 0);
   group.add(bubbleLabel);
 
-  // 3. 角色本體
   textureLoader.load(charUrl, (tex) => {
-    tex.magFilter = THREE.NearestFilter;
+    tex.magFilter = THREE.LinearFilter;
+    tex.minFilter = THREE.LinearFilter;
     if (THREE.SRGBColorSpace) tex.colorSpace = THREE.SRGBColorSpace;
     
     const spriteMaterial = new THREE.SpriteMaterial({ 
@@ -224,10 +226,10 @@ function spawnCharacter(charUrl, handUrl, memberName = '成員', sportType = '�
     group.userData.sprite = sprite; 
   });
 
-  // 4. 裝備 (縮小至 70%)
   if (handUrl) {
     textureLoader.load(handUrl, (tex) => {
-      tex.magFilter = THREE.NearestFilter;
+      tex.magFilter = THREE.LinearFilter;
+      tex.minFilter = THREE.LinearFilter;
       if (THREE.SRGBColorSpace) tex.colorSpace = THREE.SRGBColorSpace;
 
       const handScale = 1.5 * scaleMultiplier * 0.7; 
@@ -250,7 +252,7 @@ function spawnCharacter(charUrl, handUrl, memberName = '成員', sportType = '�
 }
 
 // ==========================================
-// 5. 點擊角色彈窗互動
+// 5. 點擊角色互動彈窗
 // ==========================================
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
@@ -302,7 +304,7 @@ window.closeRecordModal = function() {
 }
 
 // ==========================================
-// 6. UI 與 Firebase 資料讀寫、留言輪播
+// 6. UI、Firebase 與留言輪播
 // ==========================================
 const mainContent = document.getElementById('main-content');
 const openPanelBtn = document.getElementById('open-panel-btn');
