@@ -2,7 +2,7 @@
 // 0. 圖庫資料設定
 // ==========================================
 const characterList = [
-  './character/walk01/slime_walk_1.png'
+  './character/ani/ani_1.svg'
 ];
 
 const handList = [
