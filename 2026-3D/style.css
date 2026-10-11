@@ -4,6 +4,20 @@ body, html {
 
 #bg-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; }
 
+/* 角色 ID 標籤樣式：半透明毛玻璃背景、白色文字、置於角色下方 */
+.player-name-tag {
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  transform: translateY(15px); /* 讓標籤顯示在角色腳底下 */
+}
+
 .floating-btn {
   position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
   background: #2c5282; color: white; border: none; padding: 12px 30px;
@@ -28,18 +42,13 @@ body, html {
 .section-header { margin-bottom: 10px; border-bottom: 2px solid #2c5282; padding-bottom: 5px; }
 .section-title { font-size: 18px; font-weight: bold; color: #2c5282; }
 
-/* 獨立預覽區樣式 */
-.preview-container {
-  display: flex; justify-content: center; margin-bottom: 15px;
-}
+.preview-container { display: flex; justify-content: center; margin-bottom: 15px; }
 .preview-box {
   width: 100px; height: 100px; background: #edf2f7; border-radius: 15px;
   border: 2px dashed #cbd5e0; display: flex; justify-content: center; align-items: center;
   position: relative; overflow: hidden;
 }
-.preview-box img {
-  position: absolute; max-width: 80%; max-height: 80%; object-fit: contain;
-}
+.preview-box img { position: absolute; max-width: 80%; max-height: 80%; object-fit: contain; }
 #preview-placeholder { font-size: 12px; color: #a0aec0; text-align: center; }
 
 .control-row { display: flex; gap: 15px; align-items: flex-end; }
