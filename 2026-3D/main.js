@@ -1,5 +1,5 @@
 // ==========================================
-// 0. 圖庫資料設定 (對齊你 GitHub 的名稱)
+// 0. 圖庫資料設定
 // ==========================================
 const characterList = [
   './character/ani/ani_1.svg'
@@ -75,7 +75,7 @@ terrain.rotation.x = -Math.PI/2; terrain.position.set(0, -2, -30);
 scene.add(terrain);
 
 // ==========================================
-// 3. 角色與手勢系統
+// 3. 角色與手勢系統 (已修復黑塊問題)
 // ==========================================
 const playerGroup = new THREE.Group();
 playerGroup.position.set(0, 0, -10); 
@@ -92,17 +92,18 @@ function loadCharacter(url) {
   const tex = textureLoader.load(url);
   tex.magFilter = THREE.NearestFilter; 
   
-  // 修正黑色問題：指定色為白，並啟用 alphaTest
+  // 【關鍵修正】加入 depthWrite: false 與色調修正，徹底解決黑塊問題
   charSprite = new THREE.Sprite(new THREE.SpriteMaterial({ 
     map: tex, 
-    color: 0xffffff,
-    transparent: true,
-    alphaTest: 0.1 
+    color: 0xffffff, 
+    transparent: true, 
+    alphaTest: 0.1,
+    depthWrite: false 
   }));
   charSprite.scale.set(4, 4, 1);
   playerGroup.add(charSprite);
 
-  document.getElementById('hand-box').style.display = 'block'; // 顯示選裝備按鈕
+  document.getElementById('hand-box').style.display = 'flex'; 
 }
 
 function loadHand(url) {
@@ -112,10 +113,14 @@ function loadHand(url) {
   const tex = textureLoader.load(url);
   tex.magFilter = THREE.NearestFilter;
 
-  leftHand = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, alphaTest: 0.1 }));
+  leftHand = new THREE.Sprite(new THREE.SpriteMaterial({ 
+    map: tex, color: 0xffffff, transparent: true, alphaTest: 0.1, depthWrite: false 
+  }));
   leftHand.scale.set(1.5, 1.5, 1);
 
-  rightHand = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, alphaTest: 0.1 }));
+  rightHand = new THREE.Sprite(new THREE.SpriteMaterial({ 
+    map: tex, color: 0xffffff, transparent: true, alphaTest: 0.1, depthWrite: false 
+  }));
   rightHand.scale.set(1.5, 1.5, 1);
 
   playerGroup.add(leftHand);
@@ -123,8 +128,21 @@ function loadHand(url) {
 }
 
 // ==========================================
-// 4. UI 彈出選單事件
+// 4. UI 介面與表單送出邏輯
 // ==========================================
+const mainContent = document.getElementById('main-content');
+const openPanelBtn = document.getElementById('open-panel-btn');
+const closePanelBtn = document.getElementById('close-panel-btn');
+
+openPanelBtn.onclick = () => {
+  mainContent.classList.remove('hidden');
+  openPanelBtn.classList.add('hidden');
+};
+closePanelBtn.onclick = () => {
+  mainContent.classList.add('hidden');
+  openPanelBtn.classList.remove('hidden');
+};
+
 const modal = document.getElementById('selector-modal');
 const itemsGrid = document.getElementById('items-grid');
 const modalTitle = document.getElementById('modal-title');
@@ -152,6 +170,23 @@ window.closeModal = function() {
   modal.classList.add('hidden');
 }
 
+window.submitData = function() {
+  const name = document.getElementById('new-name').value;
+  const mins = document.getElementById('mins').value;
+  const sportType = document.getElementById('sport-type').value;
+
+  if(!charSprite) {
+    alert("請先選擇一位角色！");
+    return;
+  }
+
+  console.log("送出成功！", { name, mins, sportType });
+  
+  // 關閉面板，保留角色在畫面上走動
+  mainContent.classList.add('hidden');
+  openPanelBtn.classList.remove('hidden');
+}
+
 // ==========================================
 // 5. 動畫與滑鼠互動
 // ==========================================
@@ -165,23 +200,20 @@ function animate() {
   requestAnimationFrame(animate);
   const time = performance.now(); 
 
-  // A. 角色動態：左右巡邏、微微彈跳與小小轉動
+  // A. 角色動態
   if (charSprite) {
-    const walkX = Math.sin(time * 0.001) * 3;     // 在草地上左右移動
-    const bounceY = Math.abs(Math.sin(time * 0.004)) * 0.6; // 上下彈跳感
-    const rotateZ = Math.sin(time * 0.003) * 0.1; // 小小轉動
+    const walkX = Math.sin(time * 0.001) * 3;     
+    const bounceY = Math.abs(Math.sin(time * 0.004)) * 0.6; 
+    const rotateZ = Math.sin(time * 0.003) * 0.1; 
 
     charSprite.position.set(walkX, bounceY, 0);
     charSprite.material.rotation = rotateZ;
 
-    // 手勢跟隨在角色兩側
     if (leftHand && rightHand) {
       const sway = Math.sin(time * 0.003); 
       const swayFast = Math.cos(time * 0.005);
-
       leftHand.position.set(walkX - 2.5, bounceY + swayFast * 0.2, 0.1);
       leftHand.material.rotation = sway * 0.3;
-
       rightHand.position.set(walkX + 2.5, bounceY - swayFast * 0.2, 0.1);
       rightHand.material.rotation = -sway * 0.3;
     }
