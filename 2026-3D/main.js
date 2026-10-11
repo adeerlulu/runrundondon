@@ -101,7 +101,6 @@ const allPlayerGroups = [];
 let tempCharUrl = '';
 let tempHandUrl = '';
 
-// 更新面板中的獨立預覽區
 function updatePreviewUI() {
   const avatarImg = document.getElementById('preview-avatar');
   const handImg = document.getElementById('preview-hand');
@@ -131,8 +130,8 @@ function previewHand(url) {
   updatePreviewUI();
 }
 
-// 在草地上生成角色（加入 X、Y、Z 軸差異，讓位置與高度錯開，絕不重疊）
-function spawnCharacter(charUrl, handUrl, customX = 0, customY = 0, customZ = -10) {
+// 建立角色（強制加入明顯的 X、Y、Z 軸差異與縮放比例，製造遠近層次感）
+function spawnCharacter(charUrl, handUrl, customX = 0, customY = 0, customZ = -10, scaleMultiplier = 1) {
   const group = new THREE.Group();
   group.userData = { 
     baseX: customX, 
@@ -149,7 +148,9 @@ function spawnCharacter(charUrl, handUrl, customX = 0, customY = 0, customZ = -1
     const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ 
       map: tex, transparent: true, alphaTest: 0.1, depthWrite: false 
     }));
-    sprite.scale.set(4, 4, 1);
+    // 依據遠近縮放大小 (Z 越遠看起來越小，解決平行重疊感)
+    const finalScale = 4 * scaleMultiplier;
+    sprite.scale.set(finalScale, finalScale, 1);
     group.add(sprite);
   });
 
@@ -159,13 +160,13 @@ function spawnCharacter(charUrl, handUrl, customX = 0, customY = 0, customZ = -1
       if (THREE.SRGBColorSpace) tex.colorSpace = THREE.SRGBColorSpace;
 
       const leftHand = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, alphaTest: 0.1, depthWrite: false }));
-      leftHand.scale.set(1.5, 1.5, 1);
-      leftHand.position.set(-2.5, 0, 0.1);
+      leftHand.scale.set(1.5 * scaleMultiplier, 1.5 * scaleMultiplier, 1);
+      leftHand.position.set(-2.2 * scaleMultiplier, 0, 0.1);
       group.add(leftHand);
 
       const rightHand = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, alphaTest: 0.1, depthWrite: false }));
-      rightHand.scale.set(1.5, 1.5, 1);
-      rightHand.position.set(2.5, 0, 0.1);
+      rightHand.scale.set(1.5 * scaleMultiplier, 1.5 * scaleMultiplier, 1);
+      rightHand.position.set(2.2 * scaleMultiplier, 0, 0.1);
       group.add(rightHand);
       
       group.userData.hasHands = true;
@@ -212,7 +213,6 @@ window.openModal = function(type) {
 
 window.closeModal = function() { modal.classList.add('hidden'); }
 
-// 從 Firebase 載入所有成員，並在草地上自由錯開位置（包含 X 與 Y 軸高低差）
 let isLoadedFromFirebase = false;
 function loadAllMembersFromFirebase() {
   dbRef.on('value', (snapshot) => {
@@ -233,12 +233,13 @@ function loadAllMembersFromFirebase() {
         userSelect.appendChild(opt);
 
         if (!isLoadedFromFirebase && data[name].charUrl) {
-          // 利用數學公式讓每個人在 X 軸散開、Y 軸高低錯開、Z 軸前後錯開，達成完全不重疊且位置自由
-          const spreadX = (index % 5 - 2) * 4.5 + (Math.random() - 0.5) * 2; 
-          const spreadY = (index % 3) * 0.8 - 0.5; // Y 軸高低錯開
-          const spreadZ = -10 - (Math.floor(index / 5) * 4); // 遠近錯開
-          
-          spawnCharacter(data[name].charUrl, data[name].handUrl, spreadX, spreadY, spreadZ);
+          // 強制錯開 X 軸、Y 軸高低差、以及 Z 軸遠近與大小比例
+          const spreadX = (index % 4 - 1.5) * 5.0 + (Math.random() - 0.5) * 1.5; 
+          const spreadY = (index % 3) * 1.2 - 1.0; // 明顯的 Y 軸上下高低差
+          const spreadZ = -8 - (index * 3); // 依序往遠處排開
+          const scaleFactor = Math.max(0.6, 1.2 - (index * 0.15)); // 越遠越小
+
+          spawnCharacter(data[name].charUrl, data[name].handUrl, spreadX, spreadY, spreadZ, scaleFactor);
         }
       });
       isLoadedFromFirebase = true;
@@ -288,11 +289,11 @@ window.submitData = function() {
 
   dbRef.child(finalName).set(memberData)
     .then(() => {
-      // 送出後在畫面上隨機錯開位置新增
+      // 新送出的角色隨機給予位置與高低差
       const newX = (Math.random() - 0.5) * 10;
       const newY = (Math.random() - 0.5) * 1.5;
-      const newZ = -10 - Math.random() * 5;
-      spawnCharacter(tempCharUrl, tempHandUrl, newX, newY, newZ);
+      const newZ = -10 - Math.random() * 6;
+      spawnCharacter(tempCharUrl, tempHandUrl, newX, newY, newZ, 1.0);
 
       alert(`成功儲存！${finalName} 已加入草地散步陣容。`);
       mainContent.classList.add('hidden');
@@ -306,7 +307,7 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 // ==========================================
-// 6. 動畫迴圈 (獨立帶有 Y 軸高低差與自由漫步)
+// 6. 動畫迴圈 (確實套用 baseY 高低差)
 // ==========================================
 let mouseX = 0, mouseY = 0;
 document.addEventListener('mousemove', (e) => {
@@ -321,12 +322,12 @@ function animate() {
   allPlayerGroups.forEach((group) => {
     const offset = group.userData.randomOffset || 0;
     const baseX = group.userData.baseX || 0;
-    const baseY = group.userData.baseY || 0;
+    const baseY = group.userData.baseY || 0; // 取得我們設定的高低差
     const baseZ = group.userData.baseZ || -10;
 
-    // 自由漫步與 Y 軸高低浮動
-    const walkX = baseX + Math.sin(time * 0.001 + offset) * 1.8;     
-    const bounceY = baseY + Math.abs(Math.sin(time * 0.004 + offset)) * 0.6; 
+    // 自由漫步，並以 baseY 為基準上下浮動（絕不重疊）
+    const walkX = baseX + Math.sin(time * 0.001 + offset) * 1.2;     
+    const bounceY = baseY + Math.abs(Math.sin(time * 0.004 + offset)) * 0.4; 
     const rotateZ = Math.sin(time * 0.003 + offset) * 0.1; 
 
     group.position.set(walkX, bounceY, baseZ);
@@ -340,9 +341,9 @@ function animate() {
       const sway = Math.sin(time * 0.003 + offset); 
       const swayFast = Math.cos(time * 0.005 + offset);
 
-      leftHand.position.set(-2.5, swayFast * 0.2, 0.1);
+      leftHand.position.set(-2.2, swayFast * 0.15, 0.1);
       leftHand.material.rotation = sway * 0.3;
-      rightHand.position.set(2.5, -swayFast * 0.2, 0.1);
+      rightHand.position.set(2.2, -swayFast * 0.15, 0.1);
       rightHand.material.rotation = -sway * 0.3;
     }
   });
