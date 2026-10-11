@@ -4,20 +4,80 @@ body, html {
 
 #bg-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; }
 
-/* 角色 ID 標籤樣式：半透明毛玻璃背景、白色文字、置於角色下方 */
+/* 角色 ID 標籤：往下調整，絕對不擋在方框內 */
 .player-name-tag {
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.7);
   color: white;
   padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: bold;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  transform: translateY(28px); /* 往下推，露出角色全身 */
+}
+
+/* 角色上方對話泡泡 */
+.player-speech-bubble {
+  background: white;
+  color: #2d3748;
+  padding: 6px 12px;
   border-radius: 12px;
   font-size: 12px;
   font-weight: bold;
   white-space: nowrap;
   pointer-events: none;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-  transform: translateY(15px); /* 讓標籤顯示在角色腳底下 */
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  border: 2px solid #cbd5e0;
+  transform: translateY(-45px); /* 浮在頭頂上方 */
+  position: relative;
+  animation: floatBubble 2s ease-in-out infinite;
+}
+.player-speech-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 6px 6px 0;
+  border-style: solid;
+  border-color: #cbd5e0 transparent;
+  display: block;
+  width: 0;
 }
 
+@keyframes floatBubble {
+  0%, 100% { transform: translateY(-45px); }
+  50% { transform: translateY(-49px); }
+}
+
+/* 草地正下方的留言輪播 Bar */
+.ticker-bar {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255, 255, 255, 0.9);
+  padding: 8px 25px;
+  border-radius: 20px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+  z-index: 4;
+  max-width: 80%;
+  width: 450px;
+  text-align: center;
+  border: 1px solid #e2e8f0;
+}
+.ticker-text {
+  font-size: 14px;
+  color: #2c5282;
+  font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 初始懸浮按鈕 */
 .floating-btn {
   position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
   background: #2c5282; color: white; border: none; padding: 12px 30px;
@@ -42,13 +102,15 @@ body, html {
 .section-header { margin-bottom: 10px; border-bottom: 2px solid #2c5282; padding-bottom: 5px; }
 .section-title { font-size: 18px; font-weight: bold; color: #2c5282; }
 
+/* 預覽區調整：頭像置中，裝備縮小在角落不覆蓋 */
 .preview-container { display: flex; justify-content: center; margin-bottom: 15px; }
 .preview-box {
   width: 100px; height: 100px; background: #edf2f7; border-radius: 15px;
   border: 2px dashed #cbd5e0; display: flex; justify-content: center; align-items: center;
   position: relative; overflow: hidden;
 }
-.preview-box img { position: absolute; max-width: 80%; max-height: 80%; object-fit: contain; }
+#preview-avatar { width: 60px; height: 60px; object-fit: contain; z-index: 1; }
+#preview-hand { position: absolute; right: 10px; bottom: 10px; width: 30px; height: 30px; object-fit: contain; z-index: 2; }
 #preview-placeholder { font-size: 12px; color: #a0aec0; text-align: center; }
 
 .control-row { display: flex; gap: 15px; align-items: flex-end; }
@@ -71,8 +133,8 @@ body, html {
 .hidden { display: none !important; }
 
 .modal-content {
-  background: rgba(255, 255, 255, 0.95); padding: 20px; border-radius: 15px;
-  width: 80%; max-width: 400px; text-align: center;
+  background: rgba(255, 255, 255, 0.95); padding: 25px; border-radius: 15px;
+  width: 80%; max-width: 400px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.3);
 }
 
 .grid-container { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 20px 0; }
@@ -81,4 +143,4 @@ body, html {
   object-fit: contain; border: 3px solid transparent; transition: 0.2s; padding: 5px;
 }
 .grid-item:hover { border-color: #2c5282; transform: scale(1.1); }
-.close-btn { background: #ccc; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: bold; }
+.close-btn { background: #ccc; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: bold; margin-top: 15px;}
