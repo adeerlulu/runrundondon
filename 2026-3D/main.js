@@ -1,14 +1,27 @@
-// 1. 設定色彩參數 (溫暖米黃天空 + 莫蘭迪橄欖綠草地與山脈)
+// ==========================================
+// 0. 你的圖庫資料設定 (請替換為真實檔名)
+// ==========================================
+const characterList = [
+  './character/ani/ani_1.svg' // 替換成你 GitHub /ani 裡的圖檔名
+];
+
+const handList = [
+  './character/hand/blue_hand_closed.png',
+  './character/hand/blue_hand_open.png',
+  './character/hand/blue_hand_peace.png',
+  './character/hand/blue_hand_point.png',
+  './character/hand/blue_hand_rock.png',
+  './character/hand/blue_hand_thumb.png'
+];
+
+
+// 1. 設定色彩參數
 const config = {
-  bgColor: 0xe6d5b8,       
-  fogColor: 0xe6d5b8,      
-  terrainColor: 0x828a5c,  
-  mountainColor: 0x6e7855, 
-  lightColor: 0xfff9e6,    
-  ambientColor: 0x5d604b   
+  bgColor: 0xe6d5b8, fogColor: 0xe6d5b8, terrainColor: 0x828a5c,  
+  mountainColor: 0x6e7855, lightColor: 0xfff9e6, ambientColor: 0x5d604b   
 };
 
-// 2. 場景、霧氣、攝影機初始化
+// 2. 初始化場景
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(config.bgColor);
 scene.fog = new THREE.Fog(config.fogColor, 10, 120);
@@ -17,173 +30,179 @@ const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerH
 camera.position.set(0, 8, 25);
 camera.lookAt(0, 2, -10);
 
-const canvas = document.querySelector('#bg-canvas');
-const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+const renderer = new THREE.WebGLRenderer({ canvas: document.querySelector('#bg-canvas'), antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-// 3. 建立光源
-const ambientLight = new THREE.AmbientLight(config.ambientColor, 1.8);
-scene.add(ambientLight);
-
+// 3. 光源
+scene.add(new THREE.AmbientLight(config.ambientColor, 1.8));
 const dirLight = new THREE.DirectionalLight(config.lightColor, 2.0);
 dirLight.position.set(0, 20, -30);
 scene.add(dirLight);
 
-// 4. 【100%安全】使用 JavaScript 生成噪點材質
+// 4. 背景與地形 (保持上一版的噪點設定)
 function createNoiseTexture() {
-  const size = 256;
-  const data = new Uint8Array(size * size * 4);
+  const size = 256; const data = new Uint8Array(size * size * 4);
   for (let i = 0; i < data.length; i += 4) {
       const noise = Math.floor(Math.random() * 40) + 215; 
-      data[i] = noise;     // R
-      data[i+1] = noise;   // G
-      data[i+2] = noise;   // B
-      data[i+3] = 255;     // Alpha
+      data[i] = data[i+1] = data[i+2] = noise; data[i+3] = 255;
   }
-  const texture = new THREE.DataTexture(data, size, size, THREE.RGBAFormat);
-  texture.wrapS = THREE.RepeatWrapping;
-  texture.wrapT = THREE.RepeatWrapping;
-  texture.repeat.set(20, 20); 
-  texture.needsUpdate = true;
-  return texture;
+  const tex = new THREE.DataTexture(data, size, size, THREE.RGBAFormat);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping; tex.repeat.set(20, 20); tex.needsUpdate = true;
+  return tex;
 }
-
 const noiseMap = createNoiseTexture();
 
-// 5. 創建「遠方山脈」 
-const mountainGeometry = new THREE.PlaneGeometry(300, 100, 60, 20);
-const mountainMaterial = new THREE.MeshStandardMaterial({
-  color: config.mountainColor,
-  roughness: 1.0,
-  metalness: 0.0,
-  flatShading: true, 
-  map: noiseMap      
-});
-
-const mountainPos = mountainGeometry.attributes.position;
-for (let i = 0; i < mountainPos.count; i++) {
-  const x = mountainPos.getX(i);
-  const y = mountainPos.getY(i);
-  if (y > 0) {
-      const height = Math.sin(x * 0.02) * 15 + Math.sin(x * 0.05) * 8 + Math.sin(x * 0.1) * 3;
-      mountainPos.setZ(i, height * (y / 50)); 
-  }
+const mGeo = new THREE.PlaneGeometry(300, 100, 60, 20);
+const mMat = new THREE.MeshStandardMaterial({ color: config.mountainColor, flatShading: true, map: noiseMap });
+const mPos = mGeo.attributes.position;
+for (let i = 0; i < mPos.count; i++) {
+  const x = mPos.getX(i), y = mPos.getY(i);
+  if (y > 0) mPos.setZ(i, (Math.sin(x*0.02)*15 + Math.sin(x*0.05)*8 + Math.sin(x*0.1)*3) * (y/50)); 
 }
-mountainGeometry.computeVertexNormals();
-
-const mountains = new THREE.Mesh(mountainGeometry, mountainMaterial);
-mountains.rotation.x = -Math.PI / 2;
-mountains.position.set(0, -6, -80); 
+mGeo.computeVertexNormals();
+const mountains = new THREE.Mesh(mGeo, mMat);
+mountains.rotation.x = -Math.PI/2; mountains.position.set(0, -6, -80);
 scene.add(mountains);
 
-// 6. 創建「近處平滑草皮」 
-const terrainWidth = 140;
-const terrainLength = 200;
-const planeGeometry = new THREE.PlaneGeometry(terrainWidth, terrainLength, 80, 100);
-
-const planeMaterial = new THREE.MeshStandardMaterial({ 
-  color: config.terrainColor,
-  roughness: 1.0, 
-  metalness: 0.0,
-  map: noiseMap      
-});
-
-const terrain = new THREE.Mesh(planeGeometry, planeMaterial);
-terrain.rotation.x = -Math.PI / 2;
-terrain.position.set(0, -2, -30);
+const tWidth = 140, tLength = 200;
+const pGeo = new THREE.PlaneGeometry(tWidth, tLength, 80, 100);
+const pMat = new THREE.MeshStandardMaterial({ color: config.terrainColor, roughness: 1.0, map: noiseMap });
+const terrain = new THREE.Mesh(pGeo, pMat);
+terrain.rotation.x = -Math.PI/2; terrain.position.set(0, -2, -30);
 scene.add(terrain);
 
-// ==========================================
-// 7. 載入角色圖片與設定 2D 精靈 (Sprite) 動畫
-// ==========================================
-const textureLoader = new THREE.TextureLoader();
-const walkFrames = [];
-const totalFrames = 3; // 總共有 3 張圖片
 
-// 載入 slime_walk_1.png 到 slime_walk_3.png
-for (let i = 1; i <= totalFrames; i++) {
-  const texture = textureLoader.load(`./character/walk01/slime_walk_${i}.png`);
-  // 讓像素圖片保持清晰，不模糊 (如果你是用像素畫的話這行很有用)
-  texture.magFilter = THREE.NearestFilter; 
-  walkFrames.push(texture);
+// ==========================================
+// 5. 角色與手勢系統
+// ==========================================
+// 建立一個群組統一管理角色與手勢
+const playerGroup = new THREE.Group();
+playerGroup.position.set(0, 0, -10); // 放在畫面正中央前方
+scene.add(playerGroup);
+
+let charSprite = null;
+let leftHand = null;
+let rightHand = null;
+const textureLoader = new THREE.TextureLoader();
+
+// 載入角色
+function loadCharacter(url) {
+  if (charSprite) playerGroup.remove(charSprite); // 移除舊角色
+  
+  const tex = textureLoader.load(url);
+  tex.magFilter = THREE.NearestFilter; // 保持像素清晰
+  charSprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true }));
+  charSprite.scale.set(4, 4, 1);
+  charSprite.position.set(0, 0, 0); // 相對於群組置中
+  playerGroup.add(charSprite);
+
+  // 解鎖手勢按鈕
+  document.getElementById('btn-hand').style.display = 'inline-block';
 }
 
-// 建立 Sprite 材質並將第一張圖設定為初始圖
-const spriteMaterial = new THREE.SpriteMaterial({ 
-  map: walkFrames[0], 
-  transparent: true 
+// 載入手勢 (雙手)
+function loadHand(url) {
+  if (leftHand) playerGroup.remove(leftHand);
+  if (rightHand) playerGroup.remove(rightHand);
+
+  const tex = textureLoader.load(url);
+  tex.magFilter = THREE.NearestFilter;
+
+  // 左手
+  leftHand = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true }));
+  leftHand.scale.set(1.5, 1.5, 1);
+  leftHand.position.set(-2.5, 0, 0.1); // 定位在角色左側外圍，Z稍微靠前避免被吃掉
+
+  // 右手 (如果需要左右鏡像，可獨立設定，這裡先用同一張圖)
+  rightHand = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true }));
+  rightHand.scale.set(1.5, 1.5, 1);
+  rightHand.position.set(2.5, 0, 0.1); // 定位在角色右側外圍
+
+  playerGroup.add(leftHand);
+  playerGroup.add(rightHand);
+}
+
+
+// ==========================================
+// 6. UI 事件與 Modal 控制
+// ==========================================
+const modal = document.getElementById('selector-modal');
+const modalTitle = document.getElementById('modal-title');
+const itemsGrid = document.getElementById('items-grid');
+let currentSelectionType = '';
+
+// 打開選單並產生縮圖
+function openModal(type, list) {
+  currentSelectionType = type;
+  modalTitle.innerText = type === 'char' ? '選擇角色' : '選擇手勢';
+  itemsGrid.innerHTML = ''; // 清空舊圖
+
+  list.forEach(url => {
+    const img = document.createElement('img');
+    img.src = url;
+    img.className = 'grid-item';
+    img.onclick = () => {
+      if (type === 'char') loadCharacter(url);
+      if (type === 'hand') loadHand(url);
+      modal.classList.add('hidden'); // 選完後自動關閉
+    };
+    itemsGrid.appendChild(img);
+  });
+  
+  modal.classList.remove('hidden');
+}
+
+document.getElementById('btn-char').onclick = () => openModal('char', characterList);
+document.getElementById('btn-hand').onclick = () => openModal('hand', handList);
+document.getElementById('btn-close').onclick = () => modal.classList.add('hidden');
+
+
+// ==========================================
+// 7. 動畫與滑鼠互動
+// ==========================================
+let mouseX = 0, mouseY = 0;
+document.addEventListener('mousemove', (e) => {
+  mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+  mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
 });
 
-const characterSprite = new THREE.Sprite(spriteMaterial);
-// 設定角色大小 (依據你圖片的比例可自行修改 scale，例如 4, 4, 1)
-characterSprite.scale.set(4, 4, 1);
-// 將角色放在畫面中央，草地前方
-characterSprite.position.set(0, 0, -10); 
-scene.add(characterSprite);
-
-// 動畫控制變數
-let currentFrame = 0;
-let lastFrameTime = 0;
-const frameDuration = 150; // 每一幀停留的時間 (毫秒)。越小走越快，越大走越慢。
-
-// ==========================================
-// 8. 監聽滑鼠移動 (視角晃動目標運算)
-// ==========================================
-let mouseX = 0;
-let mouseY = 0;
-
-document.addEventListener('mousemove', (event) => {
-  mouseX = (event.clientX / window.innerWidth) * 2 - 1;
-  mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
-});
-
-// ==========================================
-// 9. 動畫迴圈 
-// ==========================================
 function animate() {
   requestAnimationFrame(animate);
-
   const time = performance.now(); 
-  
-  // A. 角色逐格走路動畫切換
-  if (time - lastFrameTime > frameDuration) {
-    currentFrame = (currentFrame + 1) % totalFrames; // 0, 1, 2 循環
-    characterSprite.material.map = walkFrames[currentFrame];
-    lastFrameTime = time;
+
+  // A. 地形前進
+  const pPos = pGeo.attributes.position;
+  for (let i = 0; i < pPos.count; i++) {
+    const x = pPos.getX(i), y = pPos.getY(i);
+    const yOff = y + time * 0.018;
+    pPos.setZ(i, Math.sin(x*0.04)*Math.cos(yOff*0.04)*3 + Math.sin(x*0.08)*Math.sin(yOff*0.02)*1.5 + Math.pow(Math.abs(x)/(tWidth/2),2)*5 - 2);
   }
+  pPos.needsUpdate = true; pGeo.computeVertexNormals(); 
 
-  // B. 草地波浪前進動畫
-  const timeSec = time * 0.0015;
-  const positionAttribute = planeGeometry.attributes.position;
-  for (let i = 0; i < positionAttribute.count; i++) {
-    const x = positionAttribute.getX(i);
-    const y = positionAttribute.getY(i);
-    const yOffset = y + timeSec * 12;
-
-    const wave1 = Math.sin(x * 0.04) * Math.cos(yOffset * 0.04) * 3;
-    const wave2 = Math.sin(x * 0.08) * Math.sin(yOffset * 0.02) * 1.5;
-    const edgeFactor = Math.pow(Math.abs(x) / (terrainWidth / 2), 2) * 5;
-    
-    positionAttribute.setZ(i, wave1 + wave2 + edgeFactor - 2);
-  }
-  
-  positionAttribute.needsUpdate = true;
-  planeGeometry.computeVertexNormals(); 
-
-  // C. 攝影機跟隨滑鼠平滑移動 (Sway Effect)
-  const targetCamX = mouseX * 6; 
-  const targetCamY = 8 + mouseY * 2; 
-
-  camera.position.x += (targetCamX - camera.position.x) * 0.03;
-  camera.position.y += (targetCamY - camera.position.y) * 0.03;
+  // B. 視角晃動
+  camera.position.x += (mouseX * 6 - camera.position.x) * 0.03;
+  camera.position.y += ((8 + mouseY * 2) - camera.position.y) * 0.03;
   camera.lookAt(0, 2, -10);
+
+  // C. 【手勢隨機小轉動】利用 Sine 波製造像呼吸一樣的上下浮動與旋轉
+  if (leftHand && rightHand) {
+    // 取得緩慢變化的數值
+    const sway = Math.sin(time * 0.003); 
+    const swayFast = Math.cos(time * 0.005);
+
+    // 左右手稍微錯開相位 (phase)，看起來更生動
+    leftHand.material.rotation = sway * 0.3;          // 左手輕微旋轉
+    leftHand.position.y = swayFast * 0.2;             // 左手輕微上下浮動
+
+    rightHand.material.rotation = -sway * 0.3;        // 右手反方向旋轉
+    rightHand.position.y = -swayFast * 0.2;           // 右手反向浮動
+  }
 
   renderer.render(scene, camera);
 }
 animate();
 
-// 10. 響應式調整
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
