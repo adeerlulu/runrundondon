@@ -1,16 +1,16 @@
-// 1. 設定白天色彩參數 (修正對比，天空更暖黃，草地更深沉的橄欖綠)
+// 1. 設定色彩參數 (精準校正：溫暖米黃天空 + 莫蘭迪橄欖綠草地)
 const config = {
-  bgColor: 0xe8dbb6,      // 帶有一點暖陽的米黃卡其色天空
-  fogColor: 0xe8dbb6,     // 霧氣與天空同色
-  terrainColor: 0x6e7855, // 莫蘭迪橄欖綠 (降低明度與彩度)
-  lightColor: 0xfffaed,   // 日光
-  ambientColor: 0x4a4e3c  // 偏暗綠的環境光，加深立體感
+  bgColor: 0xe6d5b8,      // 溫暖的米黃/卡其色天空
+  fogColor: 0xe6d5b8,     // 霧氣與天空同色，製造無邊際感
+  terrainColor: 0x828a5c, // 莫蘭迪橄欖綠 (帶有灰調的枯草綠)
+  lightColor: 0xfff9e6,   // 柔和微暖的日光
+  ambientColor: 0x5d604b  // 灰綠色的陰影暗部，讓草皮立體但不突兀
 };
 
 // 2. 場景、霧氣、攝影機初始化
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(config.bgColor);
-scene.fog = new THREE.Fog(config.fogColor, 15, 100);
+scene.fog = new THREE.Fog(config.fogColor, 10, 100);
 
 const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.set(0, 8, 25);
@@ -36,30 +36,25 @@ const planeGeometry = new THREE.PlaneGeometry(terrainWidth, terrainLength, 80, 1
 
 const planeMaterial = new THREE.MeshStandardMaterial({ 
   color: config.terrainColor,
-  roughness: 1.0,
+  roughness: 1.0, // 粗糙的草皮質感
   metalness: 0.0
 });
 
-// 【關鍵魔法】透過 Shader 注入噪點 (Noise) 提升質感
+// 【修正版】透過 Shader 注入噪點 (Noise) 提升質感
 planeMaterial.onBeforeCompile = (shader) => {
-  // 將自訂的時間變數傳入 shader
-  shader.uniforms.time = { value: 0 };
-  planeMaterial.userData.shader = shader;
+  // 將 random 函數加在 fragment shader 的最外層（避免編譯錯誤）
+  shader.fragmentShader = `
+    float randomNoise(vec2 st) {
+        return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);
+    }
+  ` + shader.fragmentShader;
 
-  // 在 fragment shader 的最後，把計算出的光影顏色加上隨機噪點
+  // 將噪點疊加在最終輸出的顏色上 (數字 0.06 為噪點強度，可自行微調)
   shader.fragmentShader = shader.fragmentShader.replace(
     '#include <dithering_fragment>',
     `
     #include <dithering_fragment>
-    
-    // 簡單的偽隨機雜訊產生器
-    float random(vec2 st) {
-        return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);
-    }
-    
-    // 將噪點疊加在最終輸出的顏色上
-    // 強度設為 0.08 (可依喜好調整，數字越大顆粒越明顯)
-    float noise = (random(gl_FragCoord.xy) - 0.5) * 0.08; 
+    float noise = (randomNoise(gl_FragCoord.xy) - 0.5) * 0.06; 
     gl_FragColor.rgb += noise;
     `
   );
@@ -116,7 +111,4 @@ animate();
 
 // 7. 響應式調整
 window.addEventListener('resize', () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-});
+  camera.aspect = window.innerWidth / window.
