@@ -16,7 +16,7 @@ firebase.initializeApp(firebaseConfig);
 const dbRef = firebase.database().ref('2026_records'); 
 
 // ==========================================
-// 1. 圖庫資料設定
+// 1. 圖庫資料設定 (包含角色、手勢與草地素材)
 // ==========================================
 const characterList = [
   './character/ani/ani_1.png',
@@ -31,6 +31,12 @@ const handList = [
   './character/hand/blue_hand_rock.png',
   './character/hand/blue_hand_thumb.png'
 ];
+
+// 自動產生 grass_1.png ~ grass_24.png 路徑陣列
+const grassList = [];
+for (let i = 1; i <= 24; i++) {
+  grassList.push(`./grass/grass_${i}.png`);
+}
 
 // ==========================================
 // 2. 場景與 CSS2D 渲染器初始化
@@ -66,7 +72,7 @@ dirLight.position.set(0, 20, -30);
 scene.add(dirLight);
 
 // ==========================================
-// 3. 地形與山脈
+// 3. 地形、山脈與隨機草叢系統 (最多 5 組)
 // ==========================================
 function createNoiseTexture() {
   const size = 256; const data = new Uint8Array(size * size * 4);
@@ -99,12 +105,50 @@ const terrain = new THREE.Mesh(pGeo, pMat);
 terrain.rotation.x = -Math.PI/2; terrain.position.set(0, -2, -30);
 scene.add(terrain);
 
+// 隨機在草地上生成草叢裝飾（最多 5 組）
+const textureLoader = new THREE.TextureLoader();
+const grassGroup = new THREE.Group();
+scene.add(grassGroup);
+
+function spawnRandomGrassClusters() {
+  const maxGroups = 5; // 限制畫面最多出現 5 組
+  for (let i = 0; i < maxGroups; i++) {
+    // 隨機挑選一張草的圖片
+    const randomGrassUrl = grassList[Math.floor(Math.random() * grassList.length)];
+    
+    textureLoader.load(randomGrassUrl, (tex) => {
+      tex.magFilter = THREE.NearestFilter;
+      if (THREE.SRGBColorSpace) tex.colorSpace = THREE.SRGBColorSpace;
+
+      // 隨機大小與微透明度
+      const scale = 2.0 + Math.random() * 2.5; 
+      const grassMat = new THREE.SpriteMaterial({ 
+        map: tex, 
+        transparent: true, 
+        opacity: 0.85 + Math.random() * 0.15, // 帶點自然的透明度
+        alphaTest: 0.1, 
+        depthWrite: false 
+      });
+
+      const grassSprite = new THREE.Sprite(grassMat);
+      grassSprite.scale.set(scale, scale, 1);
+
+      // 隨機散佈在草地各處（X 軸左右分散，Z 軸前後錯開，貼齊地面 Y 軸）
+      const rx = (Math.random() - 0.5) * 50;
+      const rz = -5 - Math.random() * 35;
+      grassSprite.position.set(rx, -0.5, rz);
+
+      grassGroup.add(grassSprite);
+    });
+  }
+}
+spawnRandomGrassClusters();
+
 // ==========================================
 // 4. 多角色、裝備縮小(70%)、對話泡泡與點擊事件
 // ==========================================
-const textureLoader = new THREE.TextureLoader();
 const allPlayerGroups = []; 
-let allMembersData = {}; // 儲存所有成員的詳細紀錄供彈窗使用
+let allMembersData = {}; 
 
 let tempCharUrl = '';
 let tempHandUrl = '';
@@ -138,7 +182,6 @@ function previewHand(url) {
   updatePreviewUI();
 }
 
-// 建立角色（裝備比例縮小至 70%、加入對話泡泡與點擊事件）
 function spawnCharacter(charUrl, handUrl, memberName = '成員', sportType = '健走', mins = '0', customX = 0, customY = 0, customZ = -10, scaleMultiplier = 1) {
   const group = new THREE.Group();
   group.userData = { 
@@ -158,7 +201,7 @@ function spawnCharacter(charUrl, handUrl, memberName = '成員', sportType = '�
   nameLabel.position.set(0, -1.8 * scaleMultiplier, 0);
   group.add(nameLabel);
 
-  // 2. 對話泡泡 (上方顯示最後一次運動與分鐘數)
+  // 2. 對話泡泡 (上方)
   const bubbleDiv = document.createElement('div');
   bubbleDiv.className = 'player-speech-bubble';
   bubbleDiv.textContent = `${sportType} ${mins}分`;
@@ -166,7 +209,7 @@ function spawnCharacter(charUrl, handUrl, memberName = '成員', sportType = '�
   bubbleLabel.position.set(0, 2.2 * scaleMultiplier, 0);
   group.add(bubbleLabel);
 
-  // 3. 載入角色本體 (帶有互動點擊判定)
+  // 3. 角色本體
   textureLoader.load(charUrl, (tex) => {
     tex.magFilter = THREE.NearestFilter;
     if (THREE.SRGBColorSpace) tex.colorSpace = THREE.SRGBColorSpace;
@@ -178,16 +221,16 @@ function spawnCharacter(charUrl, handUrl, memberName = '成員', sportType = '�
     const finalScale = 4 * scaleMultiplier;
     sprite.scale.set(finalScale, finalScale, 1);
     group.add(sprite);
-    group.userData.sprite = sprite; // 供 Raycaster 點擊偵測
+    group.userData.sprite = sprite; 
   });
 
-  // 4. 載入裝備/手勢 (比例縮小至 70%)
+  // 4. 裝備 (縮小至 70%)
   if (handUrl) {
     textureLoader.load(handUrl, (tex) => {
       tex.magFilter = THREE.NearestFilter;
       if (THREE.SRGBColorSpace) tex.colorSpace = THREE.SRGBColorSpace;
 
-      const handScale = 1.5 * scaleMultiplier * 0.7; // 嚴格縮小至 70%
+      const handScale = 1.5 * scaleMultiplier * 0.7; 
 
       const leftHand = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, alphaTest: 0.1, depthWrite: false }));
       leftHand.scale.set(handScale, handScale, 1);
@@ -207,13 +250,12 @@ function spawnCharacter(charUrl, handUrl, memberName = '成員', sportType = '�
 }
 
 // ==========================================
-// 5. 點擊角色跳出今年運動紀錄彈窗
+// 5. 點擊角色彈窗互動
 // ==========================================
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 
 window.addEventListener('click', (event) => {
-  // 排除點擊 UI 介面的情況
   if (event.target.closest('.main-container') || event.target.closest('.modal') || event.target.closest('.floating-btn')) return;
 
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -221,7 +263,6 @@ window.addEventListener('click', (event) => {
 
   raycaster.setFromCamera(mouse, camera);
   
-  // 收集所有角色的 sprite 進行點擊檢測
   const sprites = [];
   allPlayerGroups.forEach(g => {
     if (g.userData.sprite) sprites.push(g.userData.sprite);
@@ -230,7 +271,6 @@ window.addEventListener('click', (event) => {
   const intersects = raycaster.intersectObjects(sprites);
   if (intersects.length > 0) {
     const clickedSprite = intersects[0].object;
-    // 找出所屬的 group
     const group = clickedSprite.parent;
     const name = group.userData.name;
     const data = allMembersData[name];
@@ -262,7 +302,7 @@ window.closeRecordModal = function() {
 }
 
 // ==========================================
-// 6. UI 與 Firebase 資料讀寫、留言輪播功能
+// 6. UI 與 Firebase 資料讀寫、留言輪播
 // ==========================================
 const mainContent = document.getElementById('main-content');
 const openPanelBtn = document.getElementById('open-panel-btn');
@@ -298,7 +338,6 @@ window.openModal = function(type) {
 
 window.closeModal = function() { modal.classList.add('hidden'); }
 
-// 留言輪播系統
 let murmurList = [];
 let currentMurmurIndex = 0;
 function startMurmurTicker() {
@@ -310,7 +349,7 @@ function startMurmurTicker() {
       currentMurmurIndex = (currentMurmurIndex + 1) % murmurList.length;
       tickerEl.innerText = murmurList[currentMurmurIndex];
     }
-  }, 4000); // 每 4 秒切換一則留言
+  }, 4000); 
 }
 
 let isLoadedFromFirebase = false;
@@ -339,7 +378,6 @@ function loadAllMembersFromFirebase() {
         opt.innerText = name;
         userSelect.appendChild(opt);
 
-        // 收集所有人的 Murmur 供輪播用
         if (data[name].murmur) {
           murmurList.push(`💬 ${name}: ${data[name].murmur}`);
         }
@@ -449,7 +487,6 @@ function animate() {
 
     group.position.set(walkX, bounceY, baseZ);
 
-    // 找到 sprite (索引 2 是因為 0是名字標籤, 1是泡泡, 2是角色本體)
     const sprite = group.children[2];
     if (sprite) sprite.material.rotation = rotateZ;
 
