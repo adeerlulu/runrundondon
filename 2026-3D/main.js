@@ -1,8 +1,8 @@
 // ==========================================
-// 0. 你的圖庫資料設定 (請替換為真實檔名)
+// 0. 圖庫資料設定 (對齊你 GitHub 的名稱)
 // ==========================================
 const characterList = [
-  './character/ani/ani_1.svg' // 替換成你 GitHub /ani 裡的圖檔名
+  './character/ani/char_01.png'
 ];
 
 const handList = [
@@ -14,14 +14,14 @@ const handList = [
   './character/hand/blue_hand_thumb.png'
 ];
 
-
-// 1. 設定色彩參數
+// ==========================================
+// 1. 場景、霧氣、攝影機初始化
+// ==========================================
 const config = {
   bgColor: 0xe6d5b8, fogColor: 0xe6d5b8, terrainColor: 0x828a5c,  
   mountainColor: 0x6e7855, lightColor: 0xfff9e6, ambientColor: 0x5d604b   
 };
 
-// 2. 初始化場景
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(config.bgColor);
 scene.fog = new THREE.Fog(config.fogColor, 10, 120);
@@ -30,17 +30,19 @@ const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerH
 camera.position.set(0, 8, 25);
 camera.lookAt(0, 2, -10);
 
-const renderer = new THREE.WebGLRenderer({ canvas: document.querySelector('#bg-canvas'), antialias: true });
+const canvas = document.querySelector('#bg-canvas');
+const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-// 3. 光源
 scene.add(new THREE.AmbientLight(config.ambientColor, 1.8));
 const dirLight = new THREE.DirectionalLight(config.lightColor, 2.0);
 dirLight.position.set(0, 20, -30);
 scene.add(dirLight);
 
-// 4. 背景與地形 (保持上一版的噪點設定)
+// ==========================================
+// 2. 地形與山脈 (噪點安全版)
+// ==========================================
 function createNoiseTexture() {
   const size = 256; const data = new Uint8Array(size * size * 4);
   for (let i = 0; i < data.length; i += 4) {
@@ -72,13 +74,11 @@ const terrain = new THREE.Mesh(pGeo, pMat);
 terrain.rotation.x = -Math.PI/2; terrain.position.set(0, -2, -30);
 scene.add(terrain);
 
-
 // ==========================================
-// 5. 角色與手勢系統
+// 3. 角色與手勢系統
 // ==========================================
-// 建立一個群組統一管理角色與手勢
 const playerGroup = new THREE.Group();
-playerGroup.position.set(0, 0, -10); // 放在畫面正中央前方
+playerGroup.position.set(0, 0, -10); 
 scene.add(playerGroup);
 
 let charSprite = null;
@@ -86,22 +86,25 @@ let leftHand = null;
 let rightHand = null;
 const textureLoader = new THREE.TextureLoader();
 
-// 載入角色
 function loadCharacter(url) {
-  if (charSprite) playerGroup.remove(charSprite); // 移除舊角色
+  if (charSprite) playerGroup.remove(charSprite);
   
   const tex = textureLoader.load(url);
-  tex.magFilter = THREE.NearestFilter; // 保持像素清晰
-  charSprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true }));
+  tex.magFilter = THREE.NearestFilter; 
+  
+  // 修正黑色問題：指定色為白，並啟用 alphaTest
+  charSprite = new THREE.Sprite(new THREE.SpriteMaterial({ 
+    map: tex, 
+    color: 0xffffff,
+    transparent: true,
+    alphaTest: 0.1 
+  }));
   charSprite.scale.set(4, 4, 1);
-  charSprite.position.set(0, 0, 0); // 相對於群組置中
   playerGroup.add(charSprite);
 
-  // 解鎖手勢按鈕
-  document.getElementById('btn-hand').style.display = 'inline-block';
+  document.getElementById('hand-box').style.display = 'block'; // 顯示選裝備按鈕
 }
 
-// 載入手勢 (雙手)
 function loadHand(url) {
   if (leftHand) playerGroup.remove(leftHand);
   if (rightHand) playerGroup.remove(rightHand);
@@ -109,34 +112,27 @@ function loadHand(url) {
   const tex = textureLoader.load(url);
   tex.magFilter = THREE.NearestFilter;
 
-  // 左手
-  leftHand = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true }));
+  leftHand = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, alphaTest: 0.1 }));
   leftHand.scale.set(1.5, 1.5, 1);
-  leftHand.position.set(-2.5, 0, 0.1); // 定位在角色左側外圍，Z稍微靠前避免被吃掉
 
-  // 右手 (如果需要左右鏡像，可獨立設定，這裡先用同一張圖)
-  rightHand = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true }));
+  rightHand = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, alphaTest: 0.1 }));
   rightHand.scale.set(1.5, 1.5, 1);
-  rightHand.position.set(2.5, 0, 0.1); // 定位在角色右側外圍
 
   playerGroup.add(leftHand);
   playerGroup.add(rightHand);
 }
 
-
 // ==========================================
-// 6. UI 事件與 Modal 控制
+// 4. UI 彈出選單事件
 // ==========================================
 const modal = document.getElementById('selector-modal');
-const modalTitle = document.getElementById('modal-title');
 const itemsGrid = document.getElementById('items-grid');
-let currentSelectionType = '';
+const modalTitle = document.getElementById('modal-title');
 
-// 打開選單並產生縮圖
-function openModal(type, list) {
-  currentSelectionType = type;
-  modalTitle.innerText = type === 'char' ? '選擇角色' : '選擇手勢';
-  itemsGrid.innerHTML = ''; // 清空舊圖
+window.openModal = function(type) {
+  modalTitle.innerText = type === 'char' ? '選擇角色' : '選擇裝備';
+  itemsGrid.innerHTML = ''; 
+  const list = type === 'char' ? characterList : handList;
 
   list.forEach(url => {
     const img = document.createElement('img');
@@ -145,21 +141,19 @@ function openModal(type, list) {
     img.onclick = () => {
       if (type === 'char') loadCharacter(url);
       if (type === 'hand') loadHand(url);
-      modal.classList.add('hidden'); // 選完後自動關閉
+      closeModal();
     };
     itemsGrid.appendChild(img);
   });
-  
   modal.classList.remove('hidden');
 }
 
-document.getElementById('btn-char').onclick = () => openModal('char', characterList);
-document.getElementById('btn-hand').onclick = () => openModal('hand', handList);
-document.getElementById('btn-close').onclick = () => modal.classList.add('hidden');
-
+window.closeModal = function() {
+  modal.classList.add('hidden');
+}
 
 // ==========================================
-// 7. 動畫與滑鼠互動
+// 5. 動畫與滑鼠互動
 // ==========================================
 let mouseX = 0, mouseY = 0;
 document.addEventListener('mousemove', (e) => {
@@ -171,7 +165,29 @@ function animate() {
   requestAnimationFrame(animate);
   const time = performance.now(); 
 
-  // A. 地形前進
+  // A. 角色動態：左右巡邏、微微彈跳與小小轉動
+  if (charSprite) {
+    const walkX = Math.sin(time * 0.001) * 3;     // 在草地上左右移動
+    const bounceY = Math.abs(Math.sin(time * 0.004)) * 0.6; // 上下彈跳感
+    const rotateZ = Math.sin(time * 0.003) * 0.1; // 小小轉動
+
+    charSprite.position.set(walkX, bounceY, 0);
+    charSprite.material.rotation = rotateZ;
+
+    // 手勢跟隨在角色兩側
+    if (leftHand && rightHand) {
+      const sway = Math.sin(time * 0.003); 
+      const swayFast = Math.cos(time * 0.005);
+
+      leftHand.position.set(walkX - 2.5, bounceY + swayFast * 0.2, 0.1);
+      leftHand.material.rotation = sway * 0.3;
+
+      rightHand.position.set(walkX + 2.5, bounceY - swayFast * 0.2, 0.1);
+      rightHand.material.rotation = -sway * 0.3;
+    }
+  }
+
+  // B. 地形前進
   const pPos = pGeo.attributes.position;
   for (let i = 0; i < pPos.count; i++) {
     const x = pPos.getX(i), y = pPos.getY(i);
@@ -180,24 +196,10 @@ function animate() {
   }
   pPos.needsUpdate = true; pGeo.computeVertexNormals(); 
 
-  // B. 視角晃動
+  // C. 視角晃動
   camera.position.x += (mouseX * 6 - camera.position.x) * 0.03;
   camera.position.y += ((8 + mouseY * 2) - camera.position.y) * 0.03;
   camera.lookAt(0, 2, -10);
-
-  // C. 【手勢隨機小轉動】利用 Sine 波製造像呼吸一樣的上下浮動與旋轉
-  if (leftHand && rightHand) {
-    // 取得緩慢變化的數值
-    const sway = Math.sin(time * 0.003); 
-    const swayFast = Math.cos(time * 0.005);
-
-    // 左右手稍微錯開相位 (phase)，看起來更生動
-    leftHand.material.rotation = sway * 0.3;          // 左手輕微旋轉
-    leftHand.position.y = swayFast * 0.2;             // 左手輕微上下浮動
-
-    rightHand.material.rotation = -sway * 0.3;        // 右手反方向旋轉
-    rightHand.position.y = -swayFast * 0.2;           // 右手反向浮動
-  }
 
   renderer.render(scene, camera);
 }
