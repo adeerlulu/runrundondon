@@ -11,11 +11,13 @@
   <!-- 3D 滿版背景 -->
   <canvas id="bg-canvas"></canvas>
 
-  <!-- 你的選單 UI -->
-  <div class="main-container" id="main-content">
-      <div class="logo-container">
-          <img src="https://raw.githubusercontent.com/adeerlulu/runrundondon/main/links/LOGO.png" class="main-logo" alt="LOGO">
-      </div>
+  <!-- 初始懸浮按鈕 -->
+  <button id="open-panel-btn" class="floating-btn">今日工事</button>
+
+  <!-- 你的選單 UI (預設隱藏) -->
+  <div class="main-container hidden" id="main-content">
+      <!-- 面板關閉按鈕 -->
+      <button id="close-panel-btn" class="close-x">×</button>
 
       <div class="section-header"><div class="section-title">今日工事</div></div>
       
@@ -32,23 +34,23 @@
               <div class="input-box">
                   <div style="height:19px"></div>
                   <!-- 呼叫開啟選角 Modal -->
-                  <button id="avatar-btn" style="background:#2c5282; color:white; border:none; padding:12px; border-radius:12px; cursor:pointer; width:100%; font-weight:bold; height:48px;" onclick="openModal('char')">挑選頭像</button>
+                  <button id="avatar-btn" class="action-btn primary-btn" onclick="openModal('char')">挑選頭像</button>
               </div>
               <div class="input-box" id="hand-box" style="display: none;">
                   <div style="height:19px"></div>
                   <!-- 呼叫開啟手勢 Modal -->
-                  <button id="hand-btn" style="background:#2b6cb0; color:white; border:none; padding:12px; border-radius:12px; cursor:pointer; width:100%; font-weight:bold; height:48px;" onclick="openModal('hand')">挑選裝備</button>
+                  <button id="hand-btn" class="action-btn secondary-btn" onclick="openModal('hand')">挑選裝備</button>
               </div>
           </div>
           
           <div class="control-row" style="margin-top: 15px;">
               <div class="input-box" style="flex:0.6">
                   <label>今日運動時數</label>
-                  <input type="number" id="mins" placeholder="分鐘" style="width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #ccc;">
+                  <input type="number" id="mins" placeholder="分鐘" class="form-input">
               </div>
               <div class="input-box">
                   <label>運動類型</label>
-                  <select id="sport-type" style="width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #ccc;">
+                  <select id="sport-type" class="form-input">
                       <option value="健走">健走</option>
                       <option value="跑步">跑步</option>
                       <option value="登山">登山</option>
@@ -65,6 +67,11 @@
                       <option value="其他">其他可請管理員新增</option>
                   </select>
               </div>
+          </div>
+
+          <!-- 新增：確認送出按鈕 -->
+          <div class="control-row" style="margin-top: 20px;">
+              <button id="submit-btn" class="action-btn submit-btn" onclick="submitData()">確認送出</button>
           </div>
       </div>
   </div>
