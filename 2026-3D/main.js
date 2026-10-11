@@ -33,7 +33,7 @@ const handList = [
 ];
 
 // ==========================================
-// 2. 場景、霧氣、攝影機與 2D 標籤渲染器初始化
+// 2. 場景與 CSS2D 渲染器初始化
 // ==========================================
 const config = {
   bgColor: 0xe6d5b8, fogColor: 0xe6d5b8, terrainColor: 0x828a5c,  
@@ -53,12 +53,11 @@ const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-// 初始化 CSS2D 標籤渲染器
 const labelRenderer = new THREE.CSS2DRenderer();
 labelRenderer.setSize(window.innerWidth, window.innerHeight);
 labelRenderer.domElement.style.position = 'absolute';
 labelRenderer.domElement.style.top = '0px';
-labelRenderer.domElement.style.pointerEvents = 'none'; // 讓滑鼠穿透標籤，不影響 3D 互動
+labelRenderer.domElement.style.pointerEvents = 'none'; 
 document.body.appendChild(labelRenderer.domElement);
 
 scene.add(new THREE.AmbientLight(config.ambientColor, 1.8));
@@ -101,10 +100,11 @@ terrain.rotation.x = -Math.PI/2; terrain.position.set(0, -2, -30);
 scene.add(terrain);
 
 // ==========================================
-// 4. 多角色與 ID 標籤生成系統
+// 4. 多角色、裝備縮小(70%)、對話泡泡與點擊事件
 // ==========================================
 const textureLoader = new THREE.TextureLoader();
 const allPlayerGroups = []; 
+let allMembersData = {}; // 儲存所有成員的詳細紀錄供彈窗使用
 
 let tempCharUrl = '';
 let tempHandUrl = '';
@@ -138,10 +138,11 @@ function previewHand(url) {
   updatePreviewUI();
 }
 
-// 建立角色並附加下方 ID 標籤
-function spawnCharacter(charUrl, handUrl, memberName = '成員', customX = 0, customY = 0, customZ = -10, scaleMultiplier = 1) {
+// 建立角色（裝備比例縮小至 70%、加入對話泡泡與點擊事件）
+function spawnCharacter(charUrl, handUrl, memberName = '成員', sportType = '健走', mins = '0', customX = 0, customY = 0, customZ = -10, scaleMultiplier = 1) {
   const group = new THREE.Group();
   group.userData = { 
+    name: memberName,
     baseX: customX, 
     baseY: customY, 
     baseZ: customZ, 
@@ -149,41 +150,53 @@ function spawnCharacter(charUrl, handUrl, memberName = '成員', customX = 0, cu
   };
   scene.add(group);
 
-  // 建立 HTML 標籤顯示 ID
+  // 1. 名字標籤 (下方)
   const nameDiv = document.createElement('div');
   nameDiv.className = 'player-name-tag';
   nameDiv.textContent = memberName;
   const nameLabel = new THREE.CSS2DObject(nameDiv);
-  nameLabel.position.set(0, -1.8 * scaleMultiplier, 0); // 放在角色腳下方
+  nameLabel.position.set(0, -1.8 * scaleMultiplier, 0);
   group.add(nameLabel);
 
-  // 載入角色本體
+  // 2. 對話泡泡 (上方顯示最後一次運動與分鐘數)
+  const bubbleDiv = document.createElement('div');
+  bubbleDiv.className = 'player-speech-bubble';
+  bubbleDiv.textContent = `${sportType} ${mins}分`;
+  const bubbleLabel = new THREE.CSS2DObject(bubbleDiv);
+  bubbleLabel.position.set(0, 2.2 * scaleMultiplier, 0);
+  group.add(bubbleLabel);
+
+  // 3. 載入角色本體 (帶有互動點擊判定)
   textureLoader.load(charUrl, (tex) => {
     tex.magFilter = THREE.NearestFilter;
     if (THREE.SRGBColorSpace) tex.colorSpace = THREE.SRGBColorSpace;
     
-    const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ 
+    const spriteMaterial = new THREE.SpriteMaterial({ 
       map: tex, transparent: true, alphaTest: 0.1, depthWrite: false 
-    }));
+    });
+    const sprite = new THREE.Sprite(spriteMaterial);
     const finalScale = 4 * scaleMultiplier;
     sprite.scale.set(finalScale, finalScale, 1);
     group.add(sprite);
+    group.userData.sprite = sprite; // 供 Raycaster 點擊偵測
   });
 
-  // 載入裝備/手勢
+  // 4. 載入裝備/手勢 (比例縮小至 70%)
   if (handUrl) {
     textureLoader.load(handUrl, (tex) => {
       tex.magFilter = THREE.NearestFilter;
       if (THREE.SRGBColorSpace) tex.colorSpace = THREE.SRGBColorSpace;
 
+      const handScale = 1.5 * scaleMultiplier * 0.7; // 嚴格縮小至 70%
+
       const leftHand = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, alphaTest: 0.1, depthWrite: false }));
-      leftHand.scale.set(1.5 * scaleMultiplier, 1.5 * scaleMultiplier, 1);
-      leftHand.position.set(-2.2 * scaleMultiplier, 0, 0.1);
+      leftHand.scale.set(handScale, handScale, 1);
+      leftHand.position.set(-2.0 * scaleMultiplier, 0, 0.1);
       group.add(leftHand);
 
       const rightHand = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, alphaTest: 0.1, depthWrite: false }));
-      rightHand.scale.set(1.5 * scaleMultiplier, 1.5 * scaleMultiplier, 1);
-      rightHand.position.set(2.2 * scaleMultiplier, 0, 0.1);
+      rightHand.scale.set(handScale, handScale, 1);
+      rightHand.position.set(2.0 * scaleMultiplier, 0, 0.1);
       group.add(rightHand);
       
       group.userData.hasHands = true;
@@ -194,7 +207,62 @@ function spawnCharacter(charUrl, handUrl, memberName = '成員', customX = 0, cu
 }
 
 // ==========================================
-// 5. UI 與 Firebase 資料讀寫
+// 5. 點擊角色跳出今年運動紀錄彈窗
+// ==========================================
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+
+window.addEventListener('click', (event) => {
+  // 排除點擊 UI 介面的情況
+  if (event.target.closest('.main-container') || event.target.closest('.modal') || event.target.closest('.floating-btn')) return;
+
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+  raycaster.setFromCamera(mouse, camera);
+  
+  // 收集所有角色的 sprite 進行點擊檢測
+  const sprites = [];
+  allPlayerGroups.forEach(g => {
+    if (g.userData.sprite) sprites.push(g.userData.sprite);
+  });
+
+  const intersects = raycaster.intersectObjects(sprites);
+  if (intersects.length > 0) {
+    const clickedSprite = intersects[0].object;
+    // 找出所屬的 group
+    const group = clickedSprite.parent;
+    const name = group.userData.name;
+    const data = allMembersData[name];
+
+    if (data) {
+      showRecordModal(data);
+    }
+  }
+});
+
+function showRecordModal(data) {
+  const modal = document.getElementById('record-modal');
+  const title = document.getElementById('record-title');
+  const body = document.getElementById('record-body');
+
+  title.innerText = `🏅 ${data.name} 的 2026 運動紀錄`;
+  body.innerHTML = `
+    <b>最近運動項目：</b> ${data.sportType || '無'}<br>
+    <b>最近運動時數：</b> ${data.mins || '0'} 分鐘<br>
+    <b>今日 Murmur：</b> ${data.murmur || '今天也是充滿活力的一天！'}<br>
+    <hr style="border:0; border-top:1px solid #eee; margin:10px 0;">
+    <span style="font-size: 12px; color: #718096;">更新時間：${new Date(data.updatedAt).toLocaleString()}</span>
+  `;
+  modal.classList.remove('hidden');
+}
+
+window.closeRecordModal = function() {
+  document.getElementById('record-modal').classList.add('hidden');
+}
+
+// ==========================================
+// 6. UI 與 Firebase 資料讀寫、留言輪播功能
 // ==========================================
 const mainContent = document.getElementById('main-content');
 const openPanelBtn = document.getElementById('open-panel-btn');
@@ -230,25 +298,39 @@ window.openModal = function(type) {
 
 window.closeModal = function() { modal.classList.add('hidden'); }
 
+// 留言輪播系統
+let murmurList = [];
+let currentMurmurIndex = 0;
+function startMurmurTicker() {
+  const tickerEl = document.getElementById('ticker-content');
+  if (murmurList.length === 0) return;
+  
+  setInterval(() => {
+    if (murmurList.length > 0) {
+      currentMurmurIndex = (currentMurmurIndex + 1) % murmurList.length;
+      tickerEl.innerText = murmurList[currentMurmurIndex];
+    }
+  }, 4000); // 每 4 秒切換一則留言
+}
+
 let isLoadedFromFirebase = false;
 function loadAllMembersFromFirebase() {
   dbRef.on('value', (snapshot) => {
     userSelect.innerHTML = '<option value="">+ 新成員</option>';
     const data = snapshot.val();
+    allMembersData = data || {};
     
     if (!isLoadedFromFirebase) {
       allPlayerGroups.forEach(g => {
         scene.remove(g);
-        // 同時移除對應的 DOM 標籤
         g.children.forEach(child => {
-          if (child instanceof THREE.CSS2DObject) {
-            child.element.remove();
-          }
+          if (child instanceof THREE.CSS2DObject) child.element.remove();
         });
       });
       allPlayerGroups.length = 0;
     }
 
+    murmurList = [];
     if (data) {
       const names = Object.keys(data);
       names.forEach((name, index) => {
@@ -257,15 +339,23 @@ function loadAllMembersFromFirebase() {
         opt.innerText = name;
         userSelect.appendChild(opt);
 
+        // 收集所有人的 Murmur 供輪播用
+        if (data[name].murmur) {
+          murmurList.push(`💬 ${name}: ${data[name].murmur}`);
+        }
+
         if (!isLoadedFromFirebase && data[name].charUrl) {
           const spreadX = (index % 4 - 1.5) * 5.0 + (Math.random() - 0.5) * 1.5; 
           const spreadY = (index % 3) * 1.2 - 1.0; 
           const spreadZ = -8 - (index * 3); 
           const scaleFactor = Math.max(0.6, 1.2 - (index * 0.15)); 
 
-          spawnCharacter(data[name].charUrl, data[name].handUrl, name, spreadX, spreadY, spreadZ, scaleFactor);
+          spawnCharacter(data[name].charUrl, data[name].handUrl, name, data[name].sportType, data[name].mins, spreadX, spreadY, spreadZ, scaleFactor);
         }
       });
+      if (murmurList.length > 0) {
+        document.getElementById('ticker-content').innerText = murmurList[0];
+      }
       isLoadedFromFirebase = true;
     }
   });
@@ -280,6 +370,7 @@ userSelect.onchange = (e) => {
       if (val) {
         if (val.mins) document.getElementById('mins').value = val.mins;
         if (val.sportType) document.getElementById('sport-type').value = val.sportType;
+        if (val.murmur) document.getElementById('murmur-input').value = val.murmur;
         if (val.charUrl) previewCharacter(val.charUrl);
         if (val.handUrl) previewHand(val.handUrl);
       }
@@ -288,6 +379,7 @@ userSelect.onchange = (e) => {
     newNameInput.value = '';
     tempCharUrl = '';
     tempHandUrl = '';
+    document.getElementById('murmur-input').value = '';
     updatePreviewUI();
   }
 };
@@ -298,6 +390,7 @@ window.submitData = function() {
   const finalName = nameInput || selectUser;
   const mins = document.getElementById('mins').value;
   const sportType = document.getElementById('sport-type').value;
+  const murmur = document.getElementById('murmur-input').value.trim();
 
   if(!finalName) { alert("請輸入或選擇成員名字！"); return; }
   if(!tempCharUrl) { alert("請先挑選頭像！"); return; }
@@ -306,6 +399,7 @@ window.submitData = function() {
     name: finalName,
     mins: mins || '0',
     sportType: sportType,
+    murmur: murmur || '今天也有好好運動！',
     charUrl: tempCharUrl,
     handUrl: tempHandUrl,
     updatedAt: Date.now()
@@ -316,9 +410,9 @@ window.submitData = function() {
       const newX = (Math.random() - 0.5) * 10;
       const newY = (Math.random() - 0.5) * 1.5;
       const newZ = -10 - Math.random() * 6;
-      spawnCharacter(tempCharUrl, tempHandUrl, finalName, newX, newY, newZ, 1.0);
+      spawnCharacter(tempCharUrl, tempHandUrl, finalName, sportType, mins || '0', newX, newY, newZ, 1.0);
 
-      alert(`成功儲存！${finalName} 已加入草地散步陣容。`);
+      alert(`成功儲存！${finalName} 的 2026 今日工事已更新。`);
       mainContent.classList.add('hidden');
       openPanelBtn.classList.remove('hidden');
     })
@@ -327,10 +421,11 @@ window.submitData = function() {
 
 window.addEventListener('DOMContentLoaded', () => {
   loadAllMembersFromFirebase();
+  startMurmurTicker();
 });
 
 // ==========================================
-// 6. 動畫迴圈 (同步更新 3D 畫面與 CSS2D 標籤)
+// 7. 動畫迴圈
 // ==========================================
 let mouseX = 0, mouseY = 0;
 document.addEventListener('mousemove', (e) => {
@@ -354,24 +449,23 @@ function animate() {
 
     group.position.set(walkX, bounceY, baseZ);
 
-    // 找到 sprite (索引 1 是因為索引 0 是 CSS2DObject 標籤)
-    const sprite = group.children[1];
+    // 找到 sprite (索引 2 是因為 0是名字標籤, 1是泡泡, 2是角色本體)
+    const sprite = group.children[2];
     if (sprite) sprite.material.rotation = rotateZ;
 
-    if (group.userData.hasHands && group.children.length >= 4) {
-      const leftHand = group.children[2];
-      const rightHand = group.children[3];
+    if (group.userData.hasHands && group.children.length >= 5) {
+      const leftHand = group.children[3];
+      const rightHand = group.children[4];
       const sway = Math.sin(time * 0.003 + offset); 
       const swayFast = Math.cos(time * 0.005 + offset);
 
-      leftHand.position.set(-2.2, swayFast * 0.15, 0.1);
+      leftHand.position.set(-1.8, swayFast * 0.15, 0.1);
       leftHand.material.rotation = sway * 0.3;
-      rightHand.position.set(2.2, -swayFast * 0.15, 0.1);
+      rightHand.position.set(1.8, -swayFast * 0.15, 0.1);
       rightHand.material.rotation = -sway * 0.3;
     }
   });
 
-  // 地形前進
   const pPos = pGeo.attributes.position;
   for (let i = 0; i < pPos.count; i++) {
     const x = pPos.getX(i), y = pPos.getY(i);
@@ -380,12 +474,10 @@ function animate() {
   }
   pPos.needsUpdate = true; pGeo.computeVertexNormals(); 
 
-  // 視角晃動
   camera.position.x += (mouseX * 6 - camera.position.x) * 0.03;
   camera.position.y += ((8 + mouseY * 2) - camera.position.y) * 0.03;
   camera.lookAt(0, 2, -10);
 
-  // 同時渲染 3D 畫面與 2D 名字標籤
   renderer.render(scene, camera);
   labelRenderer.render(scene, camera);
 }
