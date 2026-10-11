@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>2026 跑跑動動 - 開發測試版</title>
+  <title>2026 跑跑動動 - 角色選擇</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,15 +11,29 @@
   <!-- Three.js 畫布 -->
   <canvas id="bg-canvas"></canvas>
 
-  <!-- 網站前端內容 -->
+  <!-- 網站前端 UI -->
   <div class="content">
     <h1>2026 跑跑動動</h1>
-    <p>日出 3D 視覺開發中...</p>
+    
+    <!-- 操作按鈕區 -->
+    <div class="ui-panel">
+      <button id="btn-char" class="action-btn">選擇角色</button>
+      <!-- 選擇角色後才會顯示手勢按鈕 -->
+      <button id="btn-hand" class="action-btn" style="display: none;">選擇手勢</button>
+    </div>
   </div>
 
-  <!-- 引入 Three.js (使用 CDN) -->
+  <!-- 選擇列表彈出視窗 -->
+  <div id="selector-modal" class="modal hidden">
+    <div class="modal-content">
+      <h2 id="modal-title">請選擇</h2>
+      <div id="items-grid" class="grid-container"></div>
+      <button id="btn-close" class="close-btn">關閉</button>
+    </div>
+  </div>
+
+  <!-- 引入 Three.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <!-- 引入你的 3D 邏輯腳本 -->
   <script src="main.js"></script>
 </body>
 </html>
