@@ -16,7 +16,7 @@ firebase.initializeApp(firebaseConfig);
 const dbRef = firebase.database().ref('2026_records'); 
 
 // ==========================================
-// 1. 圖庫資料設定
+// 1. 圖庫資料設定 (包含草叢 6~13 漸變群組)
 // ==========================================
 const characterList = [
   './character/ani/ani_1.png',
@@ -32,17 +32,18 @@ const handList = [
   './character/hand/blue_hand_thumb.png'
 ];
 
+// 草叢總圖庫 (包含 1~5, 6~13, 14~24)
 const grassList = [];
 for (let i = 1; i <= 5; i++) grassList.push(`./grass/grass_${i}.png`);
-for (let i = 6; i <= 13; i++) grassList.push(`./grass/grass_${i}.png`);
+for (let i = 6; i <= 13; i++) grassList.push(`./grass/grass_${i}.png`); // 新增 6~13
 for (let i = 14; i <= 24; i++) grassList.push(`./grass/grass_${i}.png`);
 
 // ==========================================
-// 2. 場景與渲染器初始化 (加強環境光，消除陰影斑塊)
+// 2. 場景與渲染器初始化
 // ==========================================
 const config = {
   bgColor: 0xe6d5b8, fogColor: 0xe6d5b8, terrainColor: 0x828a5c,  
-  mountainColor: 0x6e7855, lightColor: 0xfff9e6, ambientColor: 0x7a7e65   
+  mountainColor: 0x6e7855, lightColor: 0xfff9e6, ambientColor: 0x5d604b   
 };
 
 const scene = new THREE.Scene();
@@ -65,19 +66,18 @@ labelRenderer.domElement.style.top = '0px';
 labelRenderer.domElement.style.pointerEvents = 'none'; 
 document.body.appendChild(labelRenderer.domElement);
 
-// 提高環境光強度，並讓方向光柔和均勻，消除黑影跑過的問題
-scene.add(new THREE.AmbientLight(0xffffff, 2.2));
-const dirLight = new THREE.DirectionalLight(0xfffaee, 1.2);
-dirLight.position.set(0, 40, 20);
+scene.add(new THREE.AmbientLight(config.ambientColor, 1.8));
+const dirLight = new THREE.DirectionalLight(config.lightColor, 2.0);
+dirLight.position.set(0, 20, -30);
 scene.add(dirLight);
 
 // ==========================================
-// 3. 地形與草叢系統
+// 3. 地形與草叢動態漸變散佈系統 (grass_6~13 支援隨機漸變出現)
 // ==========================================
 function createNoiseTexture() {
   const size = 256; const data = new Uint8Array(size * size * 4);
   for (let i = 0; i < data.length; i += 4) {
-      const noise = Math.floor(Math.random() * 30) + 225; 
+      const noise = Math.floor(Math.random() * 40) + 215; 
       data[i] = data[i+1] = data[i+2] = noise; data[i+3] = 255;
   }
   const tex = new THREE.DataTexture(data, size, size, THREE.RGBAFormat);
@@ -87,7 +87,7 @@ function createNoiseTexture() {
 const noiseMap = createNoiseTexture();
 
 const mGeo = new THREE.PlaneGeometry(300, 100, 60, 20);
-const mMat = new THREE.MeshStandardMaterial({ color: config.mountainColor, flatShading: true, map: noiseMap, roughness: 0.9 });
+const mMat = new THREE.MeshStandardMaterial({ color: config.mountainColor, flatShading: true, map: noiseMap });
 const mPos = mGeo.attributes.position;
 for (let i = 0; i < mPos.count; i++) {
   const x = mPos.getX(i), y = mPos.getY(i);
@@ -100,7 +100,7 @@ scene.add(mountains);
 
 const tWidth = 140, tLength = 200;
 const pGeo = new THREE.PlaneGeometry(tWidth, tLength, 80, 100);
-const pMat = new THREE.MeshStandardMaterial({ color: config.terrainColor, roughness: 1.0, map: noiseMap, flatShading: true });
+const pMat = new THREE.MeshStandardMaterial({ color: config.terrainColor, roughness: 1.0, map: noiseMap });
 const terrain = new THREE.Mesh(pGeo, pMat);
 terrain.rotation.x = -Math.PI/2; terrain.position.set(0, -2, -30);
 scene.add(terrain);
@@ -109,6 +109,7 @@ const textureLoader = new THREE.TextureLoader();
 const grassGroup = new THREE.Group();
 scene.add(grassGroup);
 
+// 生成基礎滿版草叢
 function spawnFullGrassField() {
   for (let i = 0; i < 35; i++) {
     const randomGrassUrl = grassList[Math.floor(Math.random() * grassList.length)];
@@ -119,7 +120,7 @@ function spawnFullGrassField() {
 
       const scale = 2.5 + Math.random() * 3.5; 
       const grassMat = new THREE.SpriteMaterial({ 
-        map: tex, transparent: true, opacity: 0.85 + Math.random() * 0.15, alphaTest: 0.1, depthWrite: false 
+        map: tex, transparent: true, opacity: 0.8 + Math.random() * 0.2, alphaTest: 0.1, depthWrite: false 
       });
 
       const grassSprite = new THREE.Sprite(grassMat);
@@ -131,12 +132,16 @@ function spawnFullGrassField() {
 }
 spawnFullGrassField();
 
+// 特殊動態漸變草叢群組 (grass_6 ~ grass_13，隨角度與時間漸變出現，每次至多三組)
 const dynamicGrassGroup = new THREE.Group();
 scene.add(dynamicGrassGroup);
 const dynamicGrassList = [];
-for (let i = 6; i <= 13; i++) dynamicGrassList.push(`./grass/grass_${i}.png`);
+for (let i = 6; i <= 13; i++) {
+  dynamicGrassList.push(`./grass/grass_${i}.png`);
+}
 
 function updateDynamicGrass() {
+  // 每隔一段時間隨機替換或漸變顯示至多三組 grass_6~13
   if (dynamicGrassGroup.children.length < 3) {
     const url = dynamicGrassList[Math.floor(Math.random() * dynamicGrassList.length)];
     textureLoader.load(url, (tex) => {
@@ -156,19 +161,22 @@ function updateDynamicGrass() {
     });
   }
 
-  dynamicGrassGroup.children.forEach((sprite) => {
+  // 漸變淡入淡出效果
+  dynamicGrassGroup.children.forEach((sprite, index) => {
     if (sprite.userData.fadeIn) {
       sprite.material.opacity += sprite.userData.opacitySpeed;
       if (sprite.material.opacity >= 0.9) sprite.userData.fadeIn = false;
     } else {
       sprite.material.opacity -= sprite.userData.opacitySpeed * 0.5;
-      if (sprite.material.opacity <= 0.05) dynamicGrassGroup.remove(sprite);
+      if (sprite.material.opacity <= 0.05) {
+        dynamicGrassGroup.remove(sprite);
+      }
     }
   });
 }
 
 // ==========================================
-// 4. 多角色系統
+// 4. 多角色系統 (左右手正確分開、掉回草皮效果)
 // ==========================================
 const allPlayerGroups = []; 
 let allMembersData = {}; 
@@ -233,7 +241,7 @@ function spawnOrUpdateCharacter(charUrl, handUrl, memberName = '成員', mins = 
     baseX: customX, 
     baseY: customY, 
     baseZ: customZ, 
-    targetBaseY: customY, 
+    targetBaseY: customY, // 掉回草皮用的目標高度
     randomOffset: Math.random() * 100,
     isDragging: false,
     isDropping: false
@@ -277,6 +285,7 @@ function spawnOrUpdateCharacter(charUrl, handUrl, memberName = '成員', mins = 
 
       const handScale = 1.5 * scaleMultiplier * 0.7; 
 
+      // 左右手精準分開於身體兩側
       const leftHand = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, alphaTest: 0.1, depthWrite: false }));
       leftHand.scale.set(handScale, handScale, 1);
       leftHand.position.set(-2.2 * scaleMultiplier, 0, 0.1);
@@ -295,7 +304,7 @@ function spawnOrUpdateCharacter(charUrl, handUrl, memberName = '成員', mins = 
 }
 
 // ==========================================
-// 5. 滑鼠拖曳與點擊彈窗系統
+// 5. 滑鼠拖曳與放開後掉回草皮系統
 // ==========================================
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
@@ -342,6 +351,7 @@ window.addEventListener('mousemove', (event) => {
 window.addEventListener('mouseup', (event) => {
   if (draggedGroup) {
     draggedGroup.userData.isDragging = false;
+    // 放開後啟動掉回草皮效果 (目標 baseY 設為草皮基準 -0.5)
     draggedGroup.userData.targetBaseY = -0.5;
     draggedGroup.userData.isDropping = true;
 
@@ -375,7 +385,7 @@ window.closeRecordModal = function() {
 }
 
 // ==========================================
-// 6. UI、Firebase 與碎碎念輪播
+// 6. UI、Firebase 與碎碎念卡片輪播
 // ==========================================
 const mainContent = document.getElementById('main-content');
 const openPanelBtn = document.getElementById('open-panel-btn');
@@ -583,7 +593,7 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 // ==========================================
-// 7. 動畫迴圈
+// 7. 動畫迴圈 (支援掉回草皮與動態草叢刷新)
 // ==========================================
 let mouseX = 0, mouseY = 0;
 document.addEventListener('mousemove', (e) => {
@@ -595,6 +605,7 @@ function animate() {
   requestAnimationFrame(animate);
   const time = performance.now(); 
 
+  // 更新動態漸變草叢
   updateDynamicGrass();
 
   allPlayerGroups.forEach((group) => {
@@ -603,6 +614,7 @@ function animate() {
     let baseY = group.userData.baseY || 0; 
     const baseZ = group.userData.baseZ || -10;
 
+    // 如果放開滑鼠，執行掉回草皮的平滑下落效果
     if (group.userData.isDropping) {
       baseY += (group.userData.targetBaseY - baseY) * 0.1;
       group.userData.baseY = baseY;
@@ -626,6 +638,7 @@ function animate() {
       sprite.material.rotation = group.userData.isDragging ? 0 : Math.sin(time * 0.003 + offset) * 0.1;
     }
 
+    // 左右手精準分開在兩側
     if (group.userData.hasHands && group.children.length >= 5) {
       const leftHand = group.children[3];
       const rightHand = group.children[4];
