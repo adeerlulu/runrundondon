@@ -27,18 +27,18 @@ const grassList = [];
 for (let i = 1; i <= 24; i++) grassList.push(`./grass/grass_${i}.png`);
 
 // ==========================================
-// 2. 場景與渲染器初始化 (還原良好光照與透明背景)
+// 2. 場景與渲染器初始化 (設定透明背景以透出 CSS 天空)
 // ==========================================
 const config = {
   bgColor: 0xf2eae9, 
-  fogColor: 0xf2eae9, // 霧氣配合天空底部顏色
+  fogColor: 0xf2eae9, 
   terrainColor: 0x828a5c,  
   mountainColor: 0x6e7855, 
   lightColor: 0xfff9e6, 
-  ambientColor: 0x5d604b // 還原為你原本設定的沉穩環境光，防止草皮被漂白
+  ambientColor: 0x5d604b   
 };
 const scene = new THREE.Scene();
-scene.background = null; 
+scene.background = null; // 讓場景背景完全透明
 scene.fog = new THREE.Fog(config.fogColor, 10, 120);
 
 const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -46,10 +46,11 @@ camera.position.set(0, 8, 25);
 camera.lookAt(0, 2, -10);
 
 const canvas = document.querySelector('#bg-canvas');
+// 確保 alpha: true，才能透出 CSS 的漸層背景
 const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-renderer.setClearColor(0x000000, 0); // 確保 3D 畫布完全透明，透出 CSS 漸層天空
+renderer.setClearColor(0x000000, 0); // 確保 WebGL 畫布背景為全透明
 
 const labelRenderer = new THREE.CSS2DRenderer();
 labelRenderer.setSize(window.innerWidth, window.innerHeight);
@@ -58,14 +59,13 @@ labelRenderer.domElement.style.top = '0px';
 labelRenderer.domElement.style.pointerEvents = 'none'; 
 document.body.appendChild(labelRenderer.domElement);
 
-// 還原為原本的光照強度與角度
 scene.add(new THREE.AmbientLight(config.ambientColor, 1.8));
 const dirLight = new THREE.DirectionalLight(config.lightColor, 2.0);
 dirLight.position.set(0, 20, -30);
 scene.add(dirLight);
 
 // ==========================================
-// 3. 地形與草叢系統 (完全還原你的波浪雜訊地形)
+// 3. 地形與草叢系統
 // ==========================================
 function createNoiseTexture() {
   const size = 256; const data = new Uint8Array(size * size * 4);
@@ -152,7 +152,7 @@ function updateDynamicGrass() {
 }
 
 // ==========================================
-// 4. 多角色系統
+// 4. 多角色系統 (絕對綁定對齊)
 // ==========================================
 const allPlayerGroups = []; 
 let allMembersData = {}; 
@@ -293,7 +293,7 @@ function showRecordModal(data) {
 window.closeRecordModal = function() { document.getElementById('record-modal').classList.add('hidden'); }
 
 // ==========================================
-// 6. UI、Firebase
+// 6. UI、Firebase 與左至右排序漸變輪播
 // ==========================================
 const mainContent = document.getElementById('main-content');
 const openPanelBtn = document.getElementById('open-panel-btn');
@@ -464,6 +464,7 @@ function animate() {
     if (body) body.material.rotation = group.userData.isDragging ? 0 : Math.sin(time * 0.003 + offset) * 0.1;
 
     const bubble = group.getObjectByName('bubbleLabel');
+    // 使用 DOM CSS 加上 3D 運算，確保對話泡泡也會跟著人物自然上下浮動
     if (bubble) bubble.position.y = 2.6 * sc + Math.sin(time * 0.003 + offset) * 0.15;
 
     if (group.userData.hasHands) {
