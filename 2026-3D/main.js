@@ -38,16 +38,16 @@ for (let i = 6; i <= 13; i++) grassList.push(`./grass/grass_${i}.png`);
 for (let i = 14; i <= 24; i++) grassList.push(`./grass/grass_${i}.png`);
 
 // ==========================================
-// 2. 場景與渲染器初始化 (修復草皮顏色與穩定光照)
+// 2. 場景與渲染器初始化 (加強環境光，消除陰影斑塊)
 // ==========================================
 const config = {
   bgColor: 0xe6d5b8, fogColor: 0xe6d5b8, terrainColor: 0x828a5c,  
-  mountainColor: 0x6e7855, lightColor: 0xfffde6, ambientColor: 0x7a7e65   
+  mountainColor: 0x6e7855, lightColor: 0xfff9e6, ambientColor: 0x7a7e65   
 };
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(config.bgColor);
-scene.fog = new THREE.Fog(config.fogColor, 15, 130);
+scene.fog = new THREE.Fog(config.fogColor, 10, 120);
 
 const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.set(0, 8, 25);
@@ -65,68 +65,72 @@ labelRenderer.domElement.style.top = '0px';
 labelRenderer.domElement.style.pointerEvents = 'none'; 
 document.body.appendChild(labelRenderer.domElement);
 
-// 均勻柔和的光照，徹底消除陰影斑塊滾動問題
-scene.add(new THREE.AmbientLight(0xffffff, 1.8));
-const dirLight = new THREE.DirectionalLight(0xfffaee, 0.8);
-dirLight.position.set(0, 50, 30);
+// 提高環境光強度，並讓方向光柔和均勻，消除黑影跑過的問題
+scene.add(new THREE.AmbientLight(0xffffff, 2.2));
+const dirLight = new THREE.DirectionalLight(0xfffaee, 1.2);
+dirLight.position.set(0, 40, 20);
 scene.add(dirLight);
 
 // ==========================================
-// 3. 地形與全屏草叢系統 (固定草地顏色，移除波動陰影)
+// 3. 地形與草叢系統
 // ==========================================
-const tWidth = 140, tLength = 200;
-const pGeo = new THREE.PlaneGeometry(tWidth, tLength, 30, 30);
-// 使用平滑材質並固定色彩，不使用會造成躁點的動態 noise texture
-const pMat = new THREE.MeshStandardMaterial({ 
-  color: config.terrainColor, 
-  roughness: 1.0, 
-  metalness: 0.0
-});
-const terrain = new THREE.Mesh(pGeo, pMat);
-terrain.rotation.x = -Math.PI/2; terrain.position.set(0, -2, -30);
-scene.add(terrain);
+function createNoiseTexture() {
+  const size = 256; const data = new Uint8Array(size * size * 4);
+  for (let i = 0; i < data.length; i += 4) {
+      const noise = Math.floor(Math.random() * 30) + 225; 
+      data[i] = data[i+1] = data[i+2] = noise; data[i+3] = 255;
+  }
+  const tex = new THREE.DataTexture(data, size, size, THREE.RGBAFormat);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping; tex.repeat.set(20, 20); tex.needsUpdate = true;
+  return tex;
+}
+const noiseMap = createNoiseTexture();
 
-const mGeo = new THREE.PlaneGeometry(300, 100, 30, 10);
-const mMat = new THREE.MeshStandardMaterial({ color: config.mountainColor, roughness: 1.0 });
+const mGeo = new THREE.PlaneGeometry(300, 100, 60, 20);
+const mMat = new THREE.MeshStandardMaterial({ color: config.mountainColor, flatShading: true, map: noiseMap, roughness: 0.9 });
+const mPos = mGeo.attributes.position;
+for (let i = 0; i < mPos.count; i++) {
+  const x = mPos.getX(i), y = mPos.getY(i);
+  if (y > 0) mPos.setZ(i, (Math.sin(x*0.02)*15 + Math.sin(x*0.05)*8 + Math.sin(x*0.1)*3) * (y/50)); 
+}
+mGeo.computeVertexNormals();
 const mountains = new THREE.Mesh(mGeo, mMat);
 mountains.rotation.x = -Math.PI/2; mountains.position.set(0, -6, -80);
 scene.add(mountains);
+
+const tWidth = 140, tLength = 200;
+const pGeo = new THREE.PlaneGeometry(tWidth, tLength, 80, 100);
+const pMat = new THREE.MeshStandardMaterial({ color: config.terrainColor, roughness: 1.0, map: noiseMap, flatShading: true });
+const terrain = new THREE.Mesh(pGeo, pMat);
+terrain.rotation.x = -Math.PI/2; terrain.position.set(0, -2, -30);
+scene.add(terrain);
 
 const textureLoader = new THREE.TextureLoader();
 const grassGroup = new THREE.Group();
 scene.add(grassGroup);
 
-// 全屏散佈草叢（無馬賽克、涵蓋近景到遠景）
 function spawnFullGrassField() {
-  for (let i = 0; i < 65; i++) {
+  for (let i = 0; i < 35; i++) {
     const randomGrassUrl = grassList[Math.floor(Math.random() * grassList.length)];
     textureLoader.load(randomGrassUrl, (tex) => {
       tex.magFilter = THREE.LinearFilter;
       tex.minFilter = THREE.LinearFilter;
-      tex.generateMipmaps = true;
       if (THREE.SRGBColorSpace) tex.colorSpace = THREE.SRGBColorSpace;
 
-      const zDepth = -2 - Math.random() * 63;
-      const scaleFactor = (zDepth > -15) ? (4.5 + Math.random() * 2.5) : (2.0 + Math.random() * 2.5);
-
+      const scale = 2.5 + Math.random() * 3.5; 
       const grassMat = new THREE.SpriteMaterial({ 
-        map: tex, transparent: true, opacity: 0.9 + Math.random() * 0.1, alphaTest: 0.1, depthWrite: false 
+        map: tex, transparent: true, opacity: 0.85 + Math.random() * 0.15, alphaTest: 0.1, depthWrite: false 
       });
 
       const grassSprite = new THREE.Sprite(grassMat);
-      grassSprite.scale.set(scaleFactor, scaleFactor, 1);
-
-      const rx = (Math.random() - 0.5) * 110;
-      const ry = -1.5 - (zDepth / 25);
-      grassSprite.position.set(rx, ry, zDepth);
-
+      grassSprite.scale.set(scale, scale, 1);
+      grassSprite.position.set((Math.random() - 0.5) * 80, -0.8, -2 - Math.random() * 50);
       grassGroup.add(grassSprite);
     });
   }
 }
 spawnFullGrassField();
 
-// 動態漸變草叢 (grass_6 ~ grass_13)
 const dynamicGrassGroup = new THREE.Group();
 scene.add(dynamicGrassGroup);
 const dynamicGrassList = [];
@@ -138,15 +142,14 @@ function updateDynamicGrass() {
     textureLoader.load(url, (tex) => {
       tex.magFilter = THREE.LinearFilter;
       tex.minFilter = THREE.LinearFilter;
-      tex.generateMipmaps = true;
       if (THREE.SRGBColorSpace) tex.colorSpace = THREE.SRGBColorSpace;
 
       const mat = new THREE.SpriteMaterial({ 
         map: tex, transparent: true, opacity: 0, alphaTest: 0.1, depthWrite: false 
       });
       const sprite = new THREE.Sprite(mat);
-      sprite.scale.set(3.5, 3.5, 1);
-      sprite.position.set((Math.random() - 0.5) * 80, -1.0 - Math.random() * 1.5, -5 - Math.random() * 40);
+      sprite.scale.set(3.0, 3.0, 1);
+      sprite.position.set((Math.random() - 0.5) * 50, -0.6, -5 - Math.random() * 30);
       sprite.userData = { fadeIn: true, opacitySpeed: 0.01 + Math.random() * 0.01 };
       
       dynamicGrassGroup.add(sprite);
@@ -254,7 +257,6 @@ function spawnOrUpdateCharacter(charUrl, handUrl, memberName = '成員', mins = 
   textureLoader.load(charUrl, (tex) => {
     tex.magFilter = THREE.LinearFilter;
     tex.minFilter = THREE.LinearFilter;
-    tex.generateMipmaps = true;
     if (THREE.SRGBColorSpace) tex.colorSpace = THREE.SRGBColorSpace;
     
     const spriteMaterial = new THREE.SpriteMaterial({ 
@@ -271,7 +273,6 @@ function spawnOrUpdateCharacter(charUrl, handUrl, memberName = '成員', mins = 
     textureLoader.load(handUrl, (tex) => {
       tex.magFilter = THREE.LinearFilter;
       tex.minFilter = THREE.LinearFilter;
-      tex.generateMipmaps = true;
       if (THREE.SRGBColorSpace) tex.colorSpace = THREE.SRGBColorSpace;
 
       const handScale = 1.5 * scaleMultiplier * 0.7; 
@@ -637,6 +638,14 @@ function animate() {
       rightHand.material.rotation = -sway * 0.3;
     }
   });
+
+  const pPos = pGeo.attributes.position;
+  for (let i = 0; i < pPos.count; i++) {
+    const x = pPos.getX(i), y = pPos.getY(i);
+    const yOff = y + time * 0.018;
+    pPos.setZ(i, Math.sin(x*0.04)*Math.cos(yOff*0.04)*3 + Math.sin(x*0.08)*Math.sin(yOff*0.02)*1.5 + Math.pow(Math.abs(x)/(tWidth/2),2)*5 - 2);
+  }
+  pPos.needsUpdate = true; pGeo.computeVertexNormals(); 
 
   camera.position.x += (mouseX * 6 - camera.position.x) * 0.03;
   camera.position.y += ((8 + mouseY * 2) - camera.position.y) * 0.03;
