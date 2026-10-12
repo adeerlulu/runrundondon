@@ -16,7 +16,7 @@ firebase.initializeApp(firebaseConfig);
 const dbRef = firebase.database().ref('2026_records'); 
 
 // ==========================================
-// 1. 圖庫資料設定
+// 1. 圖庫資料設定 (包含草叢 6~13 漸變群組)
 // ==========================================
 const characterList = [
   './character/ani/ani_1.png',
@@ -32,13 +32,11 @@ const handList = [
   './character/hand/blue_hand_thumb.png'
 ];
 
+// 草叢總圖庫 (包含 1~5, 6~13, 14~24)
 const grassList = [];
-for (let i = 1; i <= 5; i++) {
-  grassList.push(`./grass/grass_${i}.png`);
-}
-for (let i = 14; i <= 24; i++) {
-  grassList.push(`./grass/grass_${i}.png`);
-}
+for (let i = 1; i <= 5; i++) grassList.push(`./grass/grass_${i}.png`);
+for (let i = 6; i <= 13; i++) grassList.push(`./grass/grass_${i}.png`); // 新增 6~13
+for (let i = 14; i <= 24; i++) grassList.push(`./grass/grass_${i}.png`);
 
 // ==========================================
 // 2. 場景與渲染器初始化
@@ -74,7 +72,7 @@ dirLight.position.set(0, 20, -30);
 scene.add(dirLight);
 
 // ==========================================
-// 3. 地形與草叢滿版散佈
+// 3. 地形與草叢動態漸變散佈系統 (grass_6~13 支援隨機漸變出現)
 // ==========================================
 function createNoiseTexture() {
   const size = 256; const data = new Uint8Array(size * size * 4);
@@ -111,11 +109,10 @@ const textureLoader = new THREE.TextureLoader();
 const grassGroup = new THREE.Group();
 scene.add(grassGroup);
 
+// 生成基礎滿版草叢
 function spawnFullGrassField() {
-  const totalGrassCount = 35;
-  for (let i = 0; i < totalGrassCount; i++) {
+  for (let i = 0; i < 35; i++) {
     const randomGrassUrl = grassList[Math.floor(Math.random() * grassList.length)];
-    
     textureLoader.load(randomGrassUrl, (tex) => {
       tex.magFilter = THREE.LinearFilter;
       tex.minFilter = THREE.LinearFilter;
@@ -128,18 +125,58 @@ function spawnFullGrassField() {
 
       const grassSprite = new THREE.Sprite(grassMat);
       grassSprite.scale.set(scale, scale, 1);
-
-      const rx = (Math.random() - 0.5) * 80;
-      const rz = -2 - Math.random() * 50;
-      grassSprite.position.set(rx, -0.8, rz);
+      grassSprite.position.set((Math.random() - 0.5) * 80, -0.8, -2 - Math.random() * 50);
       grassGroup.add(grassSprite);
     });
   }
 }
 spawnFullGrassField();
 
+// 特殊動態漸變草叢群組 (grass_6 ~ grass_13，隨角度與時間漸變出現，每次至多三組)
+const dynamicGrassGroup = new THREE.Group();
+scene.add(dynamicGrassGroup);
+const dynamicGrassList = [];
+for (let i = 6; i <= 13; i++) {
+  dynamicGrassList.push(`./grass/grass_${i}.png`);
+}
+
+function updateDynamicGrass() {
+  // 每隔一段時間隨機替換或漸變顯示至多三組 grass_6~13
+  if (dynamicGrassGroup.children.length < 3) {
+    const url = dynamicGrassList[Math.floor(Math.random() * dynamicGrassList.length)];
+    textureLoader.load(url, (tex) => {
+      tex.magFilter = THREE.LinearFilter;
+      tex.minFilter = THREE.LinearFilter;
+      if (THREE.SRGBColorSpace) tex.colorSpace = THREE.SRGBColorSpace;
+
+      const mat = new THREE.SpriteMaterial({ 
+        map: tex, transparent: true, opacity: 0, alphaTest: 0.1, depthWrite: false 
+      });
+      const sprite = new THREE.Sprite(mat);
+      sprite.scale.set(3.0, 3.0, 1);
+      sprite.position.set((Math.random() - 0.5) * 50, -0.6, -5 - Math.random() * 30);
+      sprite.userData = { fadeIn: true, opacitySpeed: 0.01 + Math.random() * 0.01 };
+      
+      dynamicGrassGroup.add(sprite);
+    });
+  }
+
+  // 漸變淡入淡出效果
+  dynamicGrassGroup.children.forEach((sprite, index) => {
+    if (sprite.userData.fadeIn) {
+      sprite.material.opacity += sprite.userData.opacitySpeed;
+      if (sprite.material.opacity >= 0.9) sprite.userData.fadeIn = false;
+    } else {
+      sprite.material.opacity -= sprite.userData.opacitySpeed * 0.5;
+      if (sprite.material.opacity <= 0.05) {
+        dynamicGrassGroup.remove(sprite);
+      }
+    }
+  });
+}
+
 // ==========================================
-// 4. 多角色系統 (左右手分開、3900 目標倒數計算)
+// 4. 多角色系統 (左右手正確分開、掉回草皮效果)
 // ==========================================
 const allPlayerGroups = []; 
 let allMembersData = {}; 
@@ -176,19 +213,14 @@ function previewHand(url) {
   updatePreviewUI();
 }
 
-// 計算 3900 分鐘目標與顯示文字
 function getGoalText(minsInput) {
   const totalMins = parseInt(minsInput) || 0;
   const target = 3900;
   const diff = target - totalMins;
 
-  if (diff > 0) {
-    return `還要動 ${diff} 分鐘`;
-  } else if (diff === 0) {
-    return `剛好達成 3900 分鐘！`;
-  } else {
-    return `多動了 ${Math.abs(diff)} 分鐘`;
-  }
+  if (diff > 0) return `還要動 ${diff} 分鐘`;
+  else if (diff === 0) return `剛好達成 3900 分鐘！`;
+  else return `多動了 ${Math.abs(diff)} 分鐘`;
 }
 
 function spawnOrUpdateCharacter(charUrl, handUrl, memberName = '成員', mins = '0', customX = 0, customY = 0, customZ = -10, scaleMultiplier = 1) {
@@ -209,8 +241,10 @@ function spawnOrUpdateCharacter(charUrl, handUrl, memberName = '成員', mins = 
     baseX: customX, 
     baseY: customY, 
     baseZ: customZ, 
+    targetBaseY: customY, // 掉回草皮用的目標高度
     randomOffset: Math.random() * 100,
-    isDragging: false
+    isDragging: false,
+    isDropping: false
   };
   scene.add(group);
 
@@ -251,15 +285,15 @@ function spawnOrUpdateCharacter(charUrl, handUrl, memberName = '成員', mins = 
 
       const handScale = 1.5 * scaleMultiplier * 0.7; 
 
-      // 修正：左右手 X 軸分開（左手負值，右手正值）
+      // 左右手精準分開於身體兩側
       const leftHand = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, alphaTest: 0.1, depthWrite: false }));
       leftHand.scale.set(handScale, handScale, 1);
-      leftHand.position.set(-1.8 * scaleMultiplier, 0, 0.1);
+      leftHand.position.set(-2.2 * scaleMultiplier, 0, 0.1);
       group.add(leftHand);
 
       const rightHand = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, alphaTest: 0.1, depthWrite: false }));
       rightHand.scale.set(handScale, handScale, 1);
-      rightHand.position.set(1.8 * scaleMultiplier, 0, 0.1);
+      rightHand.position.set(2.2 * scaleMultiplier, 0, 0.1);
       group.add(rightHand);
       
       group.userData.hasHands = true;
@@ -270,7 +304,7 @@ function spawnOrUpdateCharacter(charUrl, handUrl, memberName = '成員', mins = 
 }
 
 // ==========================================
-// 5. 滑鼠拖曳與點擊彈窗系統
+// 5. 滑鼠拖曳與放開後掉回草皮系統
 // ==========================================
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
@@ -295,6 +329,7 @@ window.addEventListener('mousedown', (event) => {
   if (intersects.length > 0) {
     draggedGroup = intersects[0].object.parent;
     draggedGroup.userData.isDragging = true;
+    draggedGroup.userData.isDropping = false;
     isClickAction = true; 
     dragPlane.setFromNormalAndCoplanarPoint(new THREE.Vector3(0, 0, 1), draggedGroup.position);
   }
@@ -310,12 +345,16 @@ window.addEventListener('mousemove', (event) => {
 
   raycaster.ray.intersectPlane(dragPlane, planeIntersectPoint);
   draggedGroup.userData.baseX = planeIntersectPoint.x;
-  draggedGroup.userData.baseY = Math.max(-1, planeIntersectPoint.y); 
+  draggedGroup.userData.baseY = Math.max(-0.5, planeIntersectPoint.y); 
 });
 
 window.addEventListener('mouseup', (event) => {
   if (draggedGroup) {
     draggedGroup.userData.isDragging = false;
+    // 放開後啟動掉回草皮效果 (目標 baseY 設為草皮基準 -0.5)
+    draggedGroup.userData.targetBaseY = -0.5;
+    draggedGroup.userData.isDropping = true;
+
     if (isClickAction) {
       const name = draggedGroup.userData.name;
       const data = allMembersData[name];
@@ -554,7 +593,7 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 // ==========================================
-// 7. 動畫迴圈
+// 7. 動畫迴圈 (支援掉回草皮與動態草叢刷新)
 // ==========================================
 let mouseX = 0, mouseY = 0;
 document.addEventListener('mousemove', (e) => {
@@ -566,16 +605,28 @@ function animate() {
   requestAnimationFrame(animate);
   const time = performance.now(); 
 
+  // 更新動態漸變草叢
+  updateDynamicGrass();
+
   allPlayerGroups.forEach((group) => {
     const offset = group.userData.randomOffset || 0;
     const baseX = group.userData.baseX || 0;
-    const baseY = group.userData.baseY || 0; 
+    let baseY = group.userData.baseY || 0; 
     const baseZ = group.userData.baseZ || -10;
+
+    // 如果放開滑鼠，執行掉回草皮的平滑下落效果
+    if (group.userData.isDropping) {
+      baseY += (group.userData.targetBaseY - baseY) * 0.1;
+      group.userData.baseY = baseY;
+      if (Math.abs(baseY - group.userData.targetBaseY) < 0.05) {
+        group.userData.isDropping = false;
+      }
+    }
 
     let walkX = baseX;
     let bounceY = baseY;
 
-    if (!group.userData.isDragging) {
+    if (!group.userData.isDragging && !group.userData.isDropping) {
       walkX = baseX + Math.sin(time * 0.001 + offset) * 1.2;     
       bounceY = baseY + Math.abs(Math.sin(time * 0.004 + offset)) * 0.4; 
     }
@@ -587,15 +638,16 @@ function animate() {
       sprite.material.rotation = group.userData.isDragging ? 0 : Math.sin(time * 0.003 + offset) * 0.1;
     }
 
+    // 左右手精準分開在兩側
     if (group.userData.hasHands && group.children.length >= 5) {
       const leftHand = group.children[3];
       const rightHand = group.children[4];
       const sway = Math.sin(time * 0.003 + offset); 
       const swayFast = Math.cos(time * 0.005 + offset);
 
-      leftHand.position.set(-1.5, swayFast * 0.15, 0.1);
+      leftHand.position.set(-2.0, swayFast * 0.15, 0.1);
       leftHand.material.rotation = sway * 0.3;
-      rightHand.position.set(1.5, -swayFast * 0.15, 0.1);
+      rightHand.position.set(2.0, -swayFast * 0.15, 0.1);
       rightHand.material.rotation = -sway * 0.3;
     }
   });
