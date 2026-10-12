@@ -4,12 +4,12 @@ body, html {
 
 #bg-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; }
 
-/* 角色名字完美置中對齊頭像 */
+/* 角色 ID 標籤：完美水平置中，固定在頭像下方第一排 */
 .player-name-tag {
   position: absolute;
   left: 50%;
-  transform: translateX(-50%) translateY(58px);
-  background: rgba(0, 0, 0, 0.7);
+  transform: translateX(-50%) translateY(52px);
+  background: rgba(0, 0, 0, 0.75);
   color: white;
   padding: 3px 10px;
   border-radius: 12px;
@@ -20,12 +20,12 @@ body, html {
   box-shadow: 0 2px 6px rgba(0,0,0,0.3);
 }
 
-/* ID 下方的運動倒數計時標籤 */
+/* 運動倒數計時標籤：完美水平置中，位於 ID 下方的第二排（上下排不重疊） */
 .player-countdown-tag {
   position: absolute;
   left: 50%;
-  transform: translateX(-50%) translateY(80px);
-  background: rgba(44, 82, 130, 0.85);
+  transform: translateX(-50%) translateY(77px);
+  background: rgba(44, 82, 130, 0.9);
   color: white;
   padding: 2px 8px;
   border-radius: 10px;
@@ -36,12 +36,12 @@ body, html {
   box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
-/* 角色頭上的白色對話框泡泡 */
+/* 角色頭上的白色對話框泡泡 (完美水平置中) */
 .player-speech-bubble {
   position: absolute;
   left: 50%;
-  transform: translateX(-50%) translateY(-45px);
-  background: rgba(255, 255, 255, 0.85);
+  transform: translateX(-50%) translateY(-48px);
+  background: rgba(255, 255, 255, 0.9);
   color: #2d3748;
   padding: 6px 12px;
   border-radius: 12px;
@@ -67,8 +67,8 @@ body, html {
 }
 
 @keyframes floatBubble {
-  0%, 100% { transform: translateX(-50%) translateY(-45px); }
-  50% { transform: translateX(-50%) translateY(-49px); }
+  0%, 100% { transform: translateX(-50%) translateY(-48px); }
+  50% { transform: translateX(-50%) translateY(-52px); }
 }
 
 /* 動動碎碎念卡片輪播 Bar */
@@ -252,5 +252,3 @@ body, html {
 }
 .grid-item:hover { border-color: #2c5282; transform: scale(1.1); }
 .close-btn { background: rgba(204, 204, 204, 0.8); border: none; padding: 8px 16px; border-radius: 10px; cursor: pointer; font-weight: bold; margin-top: 10px;}
-
-```
