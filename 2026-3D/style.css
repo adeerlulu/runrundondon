@@ -4,8 +4,12 @@ body, html {
 
 #bg-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; }
 
+/* 2. 角色名字完美置中對齊頭像 */
 .player-name-tag {
-  background: rgba(0, 0, 0, 0.7);
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%) translateY(55px);
+  background: rgba(0, 0, 0, 0.75);
   color: white;
   padding: 3px 10px;
   border-radius: 12px;
@@ -14,11 +18,30 @@ body, html {
   white-space: nowrap;
   pointer-events: none;
   box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-  transform: translate(-50%, 58px); 
 }
 
+/* 4. ID 下方的運動倒數計時標籤 */
+.player-countdown-tag {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%) translateY(78px);
+  background: rgba(44, 82, 130, 0.85);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: bold;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+/* 3. 角色頭上的白色對話框泡泡 */
 .player-speech-bubble {
-  background: rgba(255, 255, 255, 0.85);
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%) translateY(-48px);
+  background: white;
   color: #2d3748;
   padding: 6px 12px;
   border-radius: 12px;
@@ -28,8 +51,6 @@ body, html {
   pointer-events: none;
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   border: 2px solid #cbd5e0;
-  transform: translate(-50%, -45px); 
-  position: relative;
   animation: floatBubble 2s ease-in-out infinite;
 }
 .player-speech-bubble::after {
@@ -46,10 +67,11 @@ body, html {
 }
 
 @keyframes floatBubble {
-  0%, 100% { transform: translate(-50%, -45px); }
-  50% { transform: translate(-50%, -49px); }
+  0%, 100% { transform: translateX(-50%) translateY(-48px); }
+  50% { transform: translateX(-50%) translateY(-52px); }
 }
 
+/* 動動碎碎念卡片輪播 Bar */
 .ticker-container-card {
   position: fixed;
   bottom: 15px;
