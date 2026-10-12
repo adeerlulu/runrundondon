@@ -14,10 +14,13 @@
   <!-- 初始懸浮按鈕 -->
   <button id="open-panel-btn" class="floating-btn">今日工事</button>
 
-<!-- 草地正下方的動動碎碎念輪播 Bar -->
-  <div id="ticker-container" class="ticker-bar">
-    <div class="ticker-title">💬 動動碎碎念</div>
-    <div id="ticker-content" class="ticker-text">歡迎來到 2026 跑跑動動！大家一起動起來！🏃‍♂️</div>
+<!-- 草地正下方的動動碎碎念卡片輪播 Bar -->
+  <div class="ticker-container-card">
+    <button class="ticker-nav-btn" onclick="slideMurmur(-1)">❮</button>
+    <div id="ticker-cards-wrapper" class="ticker-cards-wrapper">
+      <!-- 這裡會透過 JS 動態帶入最多 3 張獨立泡泡卡片 -->
+    </div>
+    <button class="ticker-nav-btn" onclick="slideMurmur(1)">❯</button>
   </div>
 
   <!-- 今日工事選單 UI (預設隱藏) -->
