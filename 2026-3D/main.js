@@ -388,7 +388,7 @@ window.closeRecordModal = function() {
 }
 
 // ==========================================
-// 6. UI、Firebase 與動態選單控制
+// 6. UI、Firebase 與圖片選單互動綁定
 // ==========================================
 const mainContent = document.getElementById('main-content');
 const openPanelBtn = document.getElementById('open-panel-btn');
@@ -404,6 +404,7 @@ const modal = document.getElementById('selector-modal');
 const itemsGrid = document.getElementById('items-grid');
 const modalTitle = document.getElementById('modal-title');
 
+// 確保 openModal 與 closeModal 掛載在 window 底下供 HTML 按鈕呼叫
 window.openModal = function(type) {
   modalTitle.innerText = type === 'char' ? '選擇頭像' : '選擇裝備';
   itemsGrid.innerHTML = ''; 
@@ -416,14 +417,16 @@ window.openModal = function(type) {
     img.onclick = () => {
       if (type === 'char') previewCharacter(url);
       if (type === 'hand') previewHand(url);
-      closeModal();
+      window.closeModal();
     };
     itemsGrid.appendChild(img);
   });
-  modal.classList.add('hidden');
+  modal.classList.remove('hidden');
 }
 
-window.closeModal = function() { modal.classList.add('hidden'); }
+window.closeModal = function() {
+  modal.classList.add('hidden');
+}
 
 let murmurList = [];
 let currentMurmurStartIndex = 0;
@@ -606,7 +609,7 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 // ==========================================
-// 7. 動畫迴圈 (完整恢復地形滾動與角色跳動渲染)
+// 7. 動畫迴圈
 // ==========================================
 let mouseX = 0, mouseY = 0;
 document.addEventListener('mousemove', (e) => {
@@ -644,12 +647,11 @@ function animate() {
 
     group.position.set(walkX, bounceY, baseZ);
 
-    const sprite = group.children[3]; // 角色本體 sprite 索引
+    const sprite = group.children[3];
     if (sprite) {
       sprite.material.rotation = group.userData.isDragging ? 0 : Math.sin(time * 0.003 + offset) * 0.1;
     }
 
-    // 左右手精準分開在兩側
     if (group.userData.hasHands && group.children.length >= 6) {
       const leftHand = group.children[4];
       const rightHand = group.children[5];
@@ -663,7 +665,6 @@ function animate() {
     }
   });
 
-  // 恢復草地滾動波浪效果
   const pPos = pGeo.attributes.position;
   for (let i = 0; i < pPos.count; i++) {
     const x = pPos.getX(i), y = pPos.getY(i);
