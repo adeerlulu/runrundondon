@@ -523,4 +523,159 @@ function loadAllMembersFromFirebase() {
         if (member.charUrl) {
           const spreadX = (index % 4 - 1.5) * 5.0 + (Math.random() - 0.5) * 1.5; 
           const spreadY = (index % 3) * 1.2 - 1.0; 
-          const spreadZ = -
+          const spreadZ = -8 - (index * 3); 
+          const scaleFactor = Math.max(0.6, 1.2 - (index * 0.15)); 
+
+          spawnOrUpdateCharacter(member.charUrl, member.handUrl, name, member.mins, spreadX, spreadY, spreadZ, scaleFactor);
+        }
+      });
+
+      renderMurmurCards();
+      isLoadedFromFirebase = true;
+    }
+  });
+}
+
+userSelect.onchange = (e) => {
+  const selectedName = e.target.value;
+  if (selectedName) {
+    newNameInput.value = selectedName;
+    dbRef.child(selectedName).once('value', (snapshot) => {
+      const val = snapshot.val();
+      if (val) {
+        if (val.mins) document.getElementById('mins').value = val.mins;
+        if (val.sportType) document.getElementById('sport-type').value = val.sportType;
+        if (val.murmur) document.getElementById('murmur-input').value = val.murmur;
+        if (val.charUrl) previewCharacter(val.charUrl);
+        if (val.handUrl) previewHand(val.handUrl);
+      }
+    });
+  } else {
+    newNameInput.value = '';
+    tempCharUrl = '';
+    tempHandUrl = '';
+    document.getElementById('murmur-input').value = '';
+    updatePreviewUI();
+  }
+};
+
+window.submitData = function() {
+  const nameInput = newNameInput.value.trim();
+  const selectUser = userSelect.value;
+  const finalName = nameInput || selectUser;
+  const mins = document.getElementById('mins').value;
+  const sportType = document.getElementById('sport-type').value;
+  const murmur = document.getElementById('murmur-input').value.trim();
+
+  if(!finalName) { alert("請輸入或選擇成員名字！"); return; }
+  if(!tempCharUrl) { alert("請先挑選頭像！"); return; }
+
+  const memberData = {
+    name: finalName,
+    mins: mins || '0',
+    sportType: sportType,
+    murmur: murmur || '今天也有好好運動！',
+    charUrl: tempCharUrl,
+    handUrl: tempHandUrl,
+    updatedAt: Date.now()
+  };
+
+  dbRef.child(finalName).set(memberData)
+    .then(() => {
+      const newX = (Math.random() - 0.5) * 10;
+      const newY = (Math.random() - 0.5) * 1.5;
+      const newZ = -10 - Math.random() * 6;
+      spawnOrUpdateCharacter(tempCharUrl, tempHandUrl, finalName, mins || '0', newX, newY, newZ, 1.0);
+
+      alert(`成功儲存！${finalName} 的 2026 今日工事已更新。`);
+      mainContent.classList.add('hidden');
+      openPanelBtn.classList.remove('hidden');
+    })
+    .catch((error) => { alert("儲存失敗：" + error.message); });
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  loadAllMembersFromFirebase();
+  startMurmurTicker();
+});
+
+// ==========================================
+// 7. 動畫迴圈
+// ==========================================
+let mouseX = 0, mouseY = 0;
+document.addEventListener('mousemove', (e) => {
+  mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+  mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+});
+
+function animate() {
+  requestAnimationFrame(animate);
+  const time = performance.now(); 
+
+  updateDynamicGrass();
+
+  allPlayerGroups.forEach((group) => {
+    const offset = group.userData.randomOffset || 0;
+    const baseX = group.userData.baseX || 0;
+    let baseY = group.userData.baseY || 0; 
+    const baseZ = group.userData.baseZ || -10;
+
+    if (group.userData.isDropping) {
+      baseY += (group.userData.targetBaseY - baseY) * 0.1;
+      group.userData.baseY = baseY;
+      if (Math.abs(baseY - group.userData.targetBaseY) < 0.05) {
+        group.userData.isDropping = false;
+      }
+    }
+
+    let walkX = baseX;
+    let bounceY = baseY;
+
+    if (!group.userData.isDragging && !group.userData.isDropping) {
+      walkX = baseX + Math.sin(time * 0.001 + offset) * 1.2;     
+      bounceY = baseY + Math.abs(Math.sin(time * 0.004 + offset)) * 0.4; 
+    }
+
+    group.position.set(walkX, bounceY, baseZ);
+
+    const sprite = group.children[2];
+    if (sprite) {
+      sprite.material.rotation = group.userData.isDragging ? 0 : Math.sin(time * 0.003 + offset) * 0.1;
+    }
+
+    if (group.userData.hasHands && group.children.length >= 5) {
+      const leftHand = group.children[3];
+      const rightHand = group.children[4];
+      const sway = Math.sin(time * 0.003 + offset); 
+      const swayFast = Math.cos(time * 0.005 + offset);
+
+      leftHand.position.set(-2.0, swayFast * 0.15, 0.1);
+      leftHand.material.rotation = sway * 0.3;
+      rightHand.position.set(2.0, -swayFast * 0.15, 0.1);
+      rightHand.material.rotation = -sway * 0.3;
+    }
+  });
+
+  const pPos = pGeo.attributes.position;
+  for (let i = 0; i < pPos.count; i++) {
+    const x = pPos.getX(i), y = pPos.getY(i);
+    const yOff = y + time * 0.018;
+    pPos.setZ(i, Math.sin(x*0.04)*Math.cos(yOff*0.04)*3 + Math.sin(x*0.08)*Math.sin(yOff*0.02)*1.5 + Math.pow(Math.abs(x)/(tWidth/2),2)*5 - 2);
+  }
+  pPos.needsUpdate = true; pGeo.computeVertexNormals(); 
+
+  camera.position.x += (mouseX * 6 - camera.position.x) * 0.03;
+  camera.position.y += ((8 + mouseY * 2) - camera.position.y) * 0.03;
+  camera.lookAt(0, 2, -10);
+
+  renderer.render(scene, camera);
+  labelRenderer.render(scene, camera);
+}
+animate();
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  labelRenderer.setSize(window.innerWidth, window.innerHeight);
+});
