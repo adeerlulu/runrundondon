@@ -16,7 +16,7 @@ firebase.initializeApp(firebaseConfig);
 const dbRef = firebase.database().ref('2026_records'); 
 
 // ==========================================
-// 1. 圖庫資料設定 (包含草叢 6~13 漸變群組)
+// 1. 圖庫資料設定
 // ==========================================
 const characterList = [
   './character/ani/ani_1.png',
@@ -32,10 +32,9 @@ const handList = [
   './character/hand/blue_hand_thumb.png'
 ];
 
-// 草叢總圖庫 (包含 1~5, 6~13, 14~24)
 const grassList = [];
 for (let i = 1; i <= 5; i++) grassList.push(`./grass/grass_${i}.png`);
-for (let i = 6; i <= 13; i++) grassList.push(`./grass/grass_${i}.png`); 
+for (let i = 6; i <= 13; i++) grassList.push(`./grass/grass_${i}.png`);
 for (let i = 14; i <= 24; i++) grassList.push(`./grass/grass_${i}.png`);
 
 // ==========================================
@@ -43,12 +42,12 @@ for (let i = 14; i <= 24; i++) grassList.push(`./grass/grass_${i}.png`);
 // ==========================================
 const config = {
   bgColor: 0xe6d5b8, fogColor: 0xe6d5b8, terrainColor: 0x828a5c,  
-  mountainColor: 0x6e7855, lightColor: 0xfff9e6, ambientColor: 0x5d604b   
+  mountainColor: 0x6e7855, lightColor: 0xfffde6, ambientColor: 0x7a7e65   
 };
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(config.bgColor);
-scene.fog = new THREE.Fog(config.fogColor, 10, 120);
+scene.fog = new THREE.Fog(config.fogColor, 15, 130);
 
 const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.set(0, 8, 25);
@@ -66,79 +65,61 @@ labelRenderer.domElement.style.top = '0px';
 labelRenderer.domElement.style.pointerEvents = 'none'; 
 document.body.appendChild(labelRenderer.domElement);
 
-scene.add(new THREE.AmbientLight(config.ambientColor, 1.8));
-const dirLight = new THREE.DirectionalLight(config.lightColor, 2.0);
-dirLight.position.set(0, 20, -30);
+scene.add(new THREE.AmbientLight(0xffffff, 1.8));
+const dirLight = new THREE.DirectionalLight(0xfffaee, 0.8);
+dirLight.position.set(0, 50, 30);
 scene.add(dirLight);
 
 // ==========================================
-// 3. 地形與草叢動態漸變散佈系統 (grass_6~13 支援隨機漸變出現)
+// 3. 地形與草叢系統
 // ==========================================
-function createNoiseTexture() {
-  const size = 256; const data = new Uint8Array(size * size * 4);
-  for (let i = 0; i < data.length; i += 4) {
-      const noise = Math.floor(Math.random() * 40) + 215; 
-      data[i] = data[i+1] = data[i+2] = noise; data[i+3] = 255;
-  }
-  const tex = new THREE.DataTexture(data, size, size, THREE.RGBAFormat);
-  tex.wrapS = tex.wrapT = THREE.RepeatWrapping; tex.repeat.set(20, 20); tex.needsUpdate = true;
-  return tex;
-}
-const noiseMap = createNoiseTexture();
-
-const mGeo = new THREE.PlaneGeometry(300, 100, 60, 20);
-const mMat = new THREE.MeshStandardMaterial({ color: config.mountainColor, flatShading: true, map: noiseMap });
-const mPos = mGeo.attributes.position;
-for (let i = 0; i < mPos.count; i++) {
-  const x = mPos.getX(i), y = mPos.getY(i);
-  if (y > 0) mPos.setZ(i, (Math.sin(x*0.02)*15 + Math.sin(x*0.05)*8 + Math.sin(x*0.1)*3) * (y/50)); 
-}
-mGeo.computeVertexNormals();
-const mountains = new THREE.Mesh(mGeo, mMat);
-mountains.rotation.x = -Math.PI/2; mountains.position.set(0, -6, -80);
-scene.add(mountains);
-
 const tWidth = 140, tLength = 200;
-const pGeo = new THREE.PlaneGeometry(tWidth, tLength, 80, 100);
-const pMat = new THREE.MeshStandardMaterial({ color: config.terrainColor, roughness: 1.0, map: noiseMap });
+const pGeo = new THREE.PlaneGeometry(tWidth, tLength, 30, 30);
+const pMat = new THREE.MeshStandardMaterial({ color: config.terrainColor, roughness: 1.0, metalness: 0.0 });
 const terrain = new THREE.Mesh(pGeo, pMat);
 terrain.rotation.x = -Math.PI/2; terrain.position.set(0, -2, -30);
 scene.add(terrain);
+
+const mGeo = new THREE.PlaneGeometry(300, 100, 30, 10);
+const mMat = new THREE.MeshStandardMaterial({ color: config.mountainColor, roughness: 1.0 });
+const mountains = new THREE.Mesh(mGeo, mMat);
+mountains.rotation.x = -Math.PI/2; mountains.position.set(0, -6, -80);
+scene.add(mountains);
 
 const textureLoader = new THREE.TextureLoader();
 const grassGroup = new THREE.Group();
 scene.add(grassGroup);
 
-// 生成基礎滿版草叢
 function spawnFullGrassField() {
-  for (let i = 0; i < 35; i++) {
+  for (let i = 0; i < 65; i++) {
     const randomGrassUrl = grassList[Math.floor(Math.random() * grassList.length)];
     textureLoader.load(randomGrassUrl, (tex) => {
       tex.magFilter = THREE.LinearFilter;
       tex.minFilter = THREE.LinearFilter;
+      tex.generateMipmaps = true;
       if (THREE.SRGBColorSpace) tex.colorSpace = THREE.SRGBColorSpace;
 
-      const scale = 2.5 + Math.random() * 3.5; 
+      const zDepth = -2 - Math.random() * 63;
+      const scaleFactor = (zDepth > -15) ? (4.5 + Math.random() * 2.5) : (2.0 + Math.random() * 2.5);
+
       const grassMat = new THREE.SpriteMaterial({ 
-        map: tex, transparent: true, opacity: 0.8 + Math.random() * 0.2, alphaTest: 0.1, depthWrite: false 
+        map: tex, transparent: true, opacity: 0.9 + Math.random() * 0.1, alphaTest: 0.1, depthWrite: false 
       });
 
       const grassSprite = new THREE.Sprite(grassMat);
-      grassSprite.scale.set(scale, scale, 1);
-      grassSprite.position.set((Math.random() - 0.5) * 80, -0.8, -2 - Math.random() * 50);
+      grassSprite.scale.set(scaleFactor, scaleFactor, 1);
+      grassSprite.position.set((Math.random() - 0.5) * 110, -1.5 - (zDepth / 25), zDepth);
+
       grassGroup.add(grassSprite);
     });
   }
 }
 spawnFullGrassField();
 
-// 特殊動態漸變草叢群組 (grass_6 ~ grass_13)
 const dynamicGrassGroup = new THREE.Group();
 scene.add(dynamicGrassGroup);
 const dynamicGrassList = [];
-for (let i = 6; i <= 13; i++) {
-  dynamicGrassList.push(`./grass/grass_${i}.png`);
-}
+for (let i = 6; i <= 13; i++) dynamicGrassList.push(`./grass/grass_${i}.png`);
 
 function updateDynamicGrass() {
   if (dynamicGrassGroup.children.length < 3) {
@@ -146,35 +127,34 @@ function updateDynamicGrass() {
     textureLoader.load(url, (tex) => {
       tex.magFilter = THREE.LinearFilter;
       tex.minFilter = THREE.LinearFilter;
+      tex.generateMipmaps = true;
       if (THREE.SRGBColorSpace) tex.colorSpace = THREE.SRGBColorSpace;
 
       const mat = new THREE.SpriteMaterial({ 
         map: tex, transparent: true, opacity: 0, alphaTest: 0.1, depthWrite: false 
       });
       const sprite = new THREE.Sprite(mat);
-      sprite.scale.set(3.0, 3.0, 1);
-      sprite.position.set((Math.random() - 0.5) * 50, -0.6, -5 - Math.random() * 30);
+      sprite.scale.set(3.5, 3.5, 1);
+      sprite.position.set((Math.random() - 0.5) * 80, -1.0 - Math.random() * 1.5, -5 - Math.random() * 40);
       sprite.userData = { fadeIn: true, opacitySpeed: 0.01 + Math.random() * 0.01 };
       
       dynamicGrassGroup.add(sprite);
     });
   }
 
-  dynamicGrassGroup.children.forEach((sprite, index) => {
+  dynamicGrassGroup.children.forEach((sprite) => {
     if (sprite.userData.fadeIn) {
       sprite.material.opacity += sprite.userData.opacitySpeed;
       if (sprite.material.opacity >= 0.9) sprite.userData.fadeIn = false;
     } else {
       sprite.material.opacity -= sprite.userData.opacitySpeed * 0.5;
-      if (sprite.material.opacity <= 0.05) {
-        dynamicGrassGroup.remove(sprite);
-      }
+      if (sprite.material.opacity <= 0.05) dynamicGrassGroup.remove(sprite);
     }
   });
 }
 
 // ==========================================
-// 4. 多角色系統 (起始 Y 軸向下調整 2.0 單位，約等於畫面 200px 視覺效果)
+// 4. 多角色系統
 // ==========================================
 const allPlayerGroups = []; 
 let allMembersData = {}; 
@@ -233,16 +213,14 @@ function spawnOrUpdateCharacter(charUrl, handUrl, memberName = '成員', mins = 
     return;
   }
 
-  // 將起始 Y 軸向下調整（原本的 baseY 再往下降低 2.0 單位，對應向下 200px 視覺）
   const adjustedY = customY - 2.0;
-
   const group = new THREE.Group();
   group.userData = { 
     name: memberName,
     baseX: customX, 
     baseY: adjustedY, 
     baseZ: customZ, 
-    targetBaseY: -2.5, // 掉回草皮時的基準高度（配合向下 200px）
+    targetBaseY: -2.5, 
     randomOffset: Math.random() * 100,
     isDragging: false,
     isDropping: false
@@ -266,6 +244,7 @@ function spawnOrUpdateCharacter(charUrl, handUrl, memberName = '成員', mins = 
   textureLoader.load(charUrl, (tex) => {
     tex.magFilter = THREE.LinearFilter;
     tex.minFilter = THREE.LinearFilter;
+    tex.generateMipmaps = true;
     if (THREE.SRGBColorSpace) tex.colorSpace = THREE.SRGBColorSpace;
     
     const spriteMaterial = new THREE.SpriteMaterial({ 
@@ -282,6 +261,7 @@ function spawnOrUpdateCharacter(charUrl, handUrl, memberName = '成員', mins = 
     textureLoader.load(handUrl, (tex) => {
       tex.magFilter = THREE.LinearFilter;
       tex.minFilter = THREE.LinearFilter;
+      tex.generateMipmaps = true;
       if (THREE.SRGBColorSpace) tex.colorSpace = THREE.SRGBColorSpace;
 
       const handScale = 1.5 * scaleMultiplier * 0.7; 
@@ -304,7 +284,7 @@ function spawnOrUpdateCharacter(charUrl, handUrl, memberName = '成員', mins = 
 }
 
 // ==========================================
-// 5. 滑鼠拖曳與放開後掉回草皮系統
+// 5. 滑鼠拖曳與點擊彈窗系統
 // ==========================================
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
@@ -384,12 +364,13 @@ window.closeRecordModal = function() {
 }
 
 // ==========================================
-// 6. UI、Firebase 與碎碎念卡片輪播
+// 6. UI、Firebase 與既有成員隱藏新名字欄位、按鈕變色與自動關閉
 // ==========================================
 const mainContent = document.getElementById('main-content');
 const openPanelBtn = document.getElementById('open-panel-btn');
 const closePanelBtn = document.getElementById('close-panel-btn');
 const userSelect = document.getElementById('user-select');
+const newNameBox = document.getElementById('new-name-box'); // 新成員輸入框容器
 const newNameInput = document.getElementById('new-name');
 
 openPanelBtn.onclick = () => { mainContent.classList.remove('hidden'); openPanelBtn.classList.add('hidden'); };
@@ -461,4 +442,218 @@ window.slideMurmur = function(direction) {
 };
 
 function startMurmurTicker() {
-  setInterval
+  setInterval(() => {
+    if (murmurList.length > 3) {
+      currentMurmurStartIndex = (currentMurmurStartIndex + 1) % murmurList.length;
+      renderMurmurCards();
+    }
+  }, 6000); 
+}
+
+let isLoadedFromFirebase = false;
+function loadAllMembersFromFirebase() {
+  dbRef.on('value', (snapshot) => {
+    userSelect.innerHTML = '<option value="">+ 新成員</option>';
+    const data = snapshot.val();
+    allMembersData = data || {};
+
+    if (!isLoadedFromFirebase) {
+      allPlayerGroups.forEach(g => {
+        scene.remove(g);
+        g.children.forEach(child => {
+          if (child instanceof THREE.CSS2DObject) child.element.remove();
+        });
+      });
+      allPlayerGroups.length = 0;
+    }
+
+    murmurList = [];
+    if (data) {
+      const names = Object.keys(data);
+      names.forEach((name, index) => {
+        const opt = document.createElement('option');
+        opt.value = name;
+        opt.innerText = name;
+        userSelect.appendChild(opt);
+
+        const member = data[name];
+        if (member.murmur) {
+          const dateObj = member.updatedAt ? new Date(member.updatedAt) : new Date();
+          const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+          const day = String(dateObj.getDate()).padStart(2, '0');
+          const hours = String(dateObj.getHours()).padStart(2, '0');
+          const mins = String(dateObj.getMinutes()).padStart(2, '0');
+          const dateStr = `${month}/${day} ${hours}:${mins}`;
+
+          murmurList.push({
+            name: name,
+            murmur: member.murmur,
+            charUrl: member.charUrl,
+            dateStr: dateStr
+          });
+        }
+
+        if (member.charUrl) {
+          const spreadX = (index % 4 - 1.5) * 5.0 + (Math.random() - 0.5) * 1.5; 
+          const spreadY = (index % 3) * 1.2 - 1.0; 
+          const spreadZ = -8 - (index * 3); 
+          const scaleFactor = Math.max(0.6, 1.2 - (index * 0.15)); 
+
+          spawnOrUpdateCharacter(member.charUrl, member.handUrl, name, member.mins, spreadX, spreadY, spreadZ, scaleFactor);
+        }
+      });
+
+      renderMurmurCards();
+      isLoadedFromFirebase = true;
+    }
+  });
+}
+
+// 下拉選單切換：選擇既有成員時隱藏新成員輸入框
+userSelect.onchange = (e) => {
+  const selectedName = e.target.value;
+  if (selectedName) {
+    newNameBox.style.display = 'none'; // 隱藏新成員名字欄位
+    newNameInput.value = selectedName;
+    dbRef.child(selectedName).once('value', (snapshot) => {
+      const val = snapshot.val();
+      if (val) {
+        if (val.mins) document.getElementById('mins').value = val.mins;
+        if (val.sportType) document.getElementById('sport-type').value = val.sportType;
+        if (val.murmur) document.getElementById('murmur-input').value = val.murmur;
+        if (val.charUrl) previewCharacter(val.charUrl);
+        if (val.handUrl) previewHand(val.handUrl);
+      }
+    });
+  } else {
+    newNameBox.style.display = 'flex'; // 顯示新成員名字欄位
+    newNameInput.value = '';
+    tempCharUrl = '';
+    tempHandUrl = '';
+    document.getElementById('murmur-input').value = '';
+    updatePreviewUI();
+  }
+};
+
+// 確認送出：無彈窗，按鈕變色「已送出！」並在 1 秒後自動關閉介面
+window.submitData = function() {
+  const nameInput = newNameInput.value.trim();
+  const selectUser = userSelect.value;
+  const finalName = nameInput || selectUser;
+  const mins = document.getElementById('mins').value;
+  const sportType = document.getElementById('sport-type').value;
+  const murmur = document.getElementById('murmur-input').value.trim();
+
+  if(!finalName) { alert("請輸入或選擇成員名字！"); return; }
+  if(!tempCharUrl) { alert("請先挑選頭像！"); return; }
+
+  const memberData = {
+    name: finalName,
+    mins: mins || '0',
+    sportType: sportType,
+    murmur: murmur || '今天也有好好運動！',
+    charUrl: tempCharUrl,
+    handUrl: tempHandUrl,
+    updatedAt: Date.now()
+  };
+
+  dbRef.child(finalName).set(memberData)
+    .then(() => {
+      const newX = (Math.random() - 0.5) * 10;
+      const newY = (Math.random() - 0.5) * 1.5;
+      const newZ = -10 - Math.random() * 6;
+      spawnOrUpdateCharacter(tempCharUrl, tempHandUrl, finalName, mins || '0', newX, newY, newZ, 1.0);
+
+      // 按鈕變色為已送出
+      const submitBtn = document.getElementById('submit-btn');
+      submitBtn.style.background = '#2b6cb0';
+      submitBtn.innerText = '已送出！';
+
+      // 1 秒後自動關閉介面並恢復按鈕狀態
+      setTimeout(() => {
+        mainContent.classList.add('hidden');
+        openPanelBtn.classList.remove('hidden');
+        submitBtn.style.background = '#38a169';
+        submitBtn.innerText = '確認送出';
+      }, 1000);
+    })
+    .catch((error) => { alert("儲存失敗：" + error.message); });
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  loadAllMembersFromFirebase();
+  startMurmurTicker();
+});
+
+// ==========================================
+// 7. 動畫迴圈
+// ==========================================
+let mouseX = 0, mouseY = 0;
+document.addEventListener('mousemove', (e) => {
+  mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+  mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+});
+
+function animate() {
+  requestAnimationFrame(animate);
+  const time = performance.now(); 
+
+  updateDynamicGrass();
+
+  allPlayerGroups.forEach((group) => {
+    const offset = group.userData.randomOffset || 0;
+    const baseX = group.userData.baseX || 0;
+    let baseY = group.userData.baseY || 0; 
+    const baseZ = group.userData.baseZ || -10;
+
+    if (group.userData.isDropping) {
+      baseY += (group.userData.targetBaseY - baseY) * 0.1;
+      group.userData.baseY = baseY;
+      if (Math.abs(baseY - group.userData.targetBaseY) < 0.05) {
+        group.userData.isDropping = false;
+      }
+    }
+
+    let walkX = baseX;
+    let bounceY = baseY;
+
+    if (!group.userData.isDragging && !group.userData.isDropping) {
+      walkX = baseX + Math.sin(time * 0.001 + offset) * 1.2;     
+      bounceY = baseY + Math.abs(Math.sin(time * 0.004 + offset)) * 0.4; 
+    }
+
+    group.position.set(walkX, bounceY, baseZ);
+
+    const sprite = group.children[2];
+    if (sprite) {
+      sprite.material.rotation = group.userData.isDragging ? 0 : Math.sin(time * 0.003 + offset) * 0.1;
+    }
+
+    if (group.userData.hasHands && group.children.length >= 5) {
+      const leftHand = group.children[3];
+      const rightHand = group.children[4];
+      const sway = Math.sin(time * 0.003 + offset); 
+      const swayFast = Math.cos(time * 0.005 + offset);
+
+      leftHand.position.set(-2.0, swayFast * 0.15, 0.1);
+      leftHand.material.rotation = sway * 0.3;
+      rightHand.position.set(2.0, -swayFast * 0.15, 0.1);
+      rightHand.material.rotation = -sway * 0.3;
+    }
+  });
+
+  camera.position.x += (mouseX * 6 - camera.position.x) * 0.03;
+  camera.position.y += ((8 + mouseY * 2) - camera.position.y) * 0.03;
+  camera.lookAt(0, 2, -10);
+
+  renderer.render(scene, camera);
+  labelRenderer.render(scene, camera);
+}
+animate();
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  labelRenderer.setSize(window.innerWidth, window.innerHeight);
+});
