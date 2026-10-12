@@ -4,7 +4,6 @@ body, html {
 
 #bg-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; }
 
-/* 角色 ID 標籤 */
 .player-name-tag {
   background: rgba(0, 0, 0, 0.7);
   color: white;
@@ -18,7 +17,6 @@ body, html {
   transform: translate(-50%, 58px); 
 }
 
-/* 角色上方對話泡泡 */
 .player-speech-bubble {
   background: rgba(255, 255, 255, 0.85);
   color: #2d3748;
@@ -52,7 +50,6 @@ body, html {
   50% { transform: translate(-50%, -49px); }
 }
 
-/* 動動碎碎念卡片輪播 Bar */
 .ticker-container-card {
   position: fixed;
   bottom: 15px;
@@ -157,7 +154,6 @@ body, html {
   overflow: hidden;
 }
 
-/* 1. 今日工事按鈕：改為透明底 70% */
 .floating-btn {
   position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
   background: rgba(44, 82, 130, 0.7); 
@@ -169,7 +165,6 @@ body, html {
 }
 .floating-btn:hover { background: rgba(26, 54, 93, 0.85); }
 
-/* 1. 主面板 (今日工事)：改為透明底 70% */
 .main-container {
   position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
   background: rgba(255, 255, 255, 0.7); 
@@ -219,7 +214,6 @@ body, html {
 }
 .hidden { display: none !important; }
 
-/* 1. 所有跳窗：改為透明底 70% */
 .modal-content {
   background: rgba(255, 255, 255, 0.7); 
   backdrop-filter: blur(10px);
