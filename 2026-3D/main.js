@@ -176,13 +176,10 @@ function previewHand(url) {
   updatePreviewUI();
 }
 
-// 建立角色或更新現有角色資料
 function spawnOrUpdateCharacter(charUrl, handUrl, memberName = '成員', sportType = '健走', mins = '0', customX = 0, customY = 0, customZ = -10, scaleMultiplier = 1) {
-  // 檢查畫面上是否已經有這位成員的群組
   let existingGroup = allPlayerGroups.find(g => g.userData.name === memberName);
 
   if (existingGroup) {
-    // 如果已經存在，直接更新對話泡泡文字內容，避免重複生出新角色
     const bubbleChild = existingGroup.children.find(child => child.element && child.element.classList.contains('player-speech-bubble'));
     if (bubbleChild) {
       bubbleChild.element.textContent = `${sportType} ${mins}分`;
@@ -190,7 +187,6 @@ function spawnOrUpdateCharacter(charUrl, handUrl, memberName = '成員', sportTy
     return;
   }
 
-  // 若不存在，才全新建立
   const group = new THREE.Group();
   group.userData = { 
     name: memberName,
@@ -333,7 +329,7 @@ window.closeRecordModal = function() {
 }
 
 // ==========================================
-// 6. UI、Firebase 與碎碎念輪播
+// 6. UI、Firebase 與動動碎碎念卡片輪播
 // ==========================================
 const mainContent = document.getElementById('main-content');
 const openPanelBtn = document.getElementById('open-panel-btn');
@@ -369,22 +365,54 @@ window.openModal = function(type) {
 
 window.closeModal = function() { modal.classList.add('hidden'); }
 
-// 碎碎念輪播系統
+// 動動碎碎念獨立卡片輪播系統
 let murmurList = [];
-let currentMurmurIndex = 0;
+let currentMurmurStartIndex = 0;
+
+function renderMurmurCards() {
+  const wrapper = document.getElementById('ticker-cards-wrapper');
+  if (!wrapper) return;
+  wrapper.innerHTML = '';
+
+  if (murmurList.length === 0) {
+    wrapper.innerHTML = '<div style="color:white; font-size:13px; text-align:center; padding:10px;">目前還沒有人留下碎碎念，快來填寫今日工事吧！</div>';
+    return;
+  }
+
+  const displayCount = Math.min(3, murmurList.length);
+  for (let i = 0; i < displayCount; i++) {
+    const itemIndex = (currentMurmurStartIndex + i) % murmurList.length;
+    const item = murmurList[itemIndex];
+
+    const card = document.createElement('div');
+    card.className = 'murmur-card';
+    card.innerHTML = `
+      <div class="murmur-header">
+        <img class="murmur-avatar" src="${item.charUrl || './character/ani/ani_1.png'}" alt="頭像">
+        <div class="murmur-user-info">
+          <span class="murmur-username">${item.name}</span>
+          <span class="murmur-date">${item.dateStr}</span>
+        </div>
+      </div>
+      <div class="murmur-body">${item.murmur}</div>
+    `;
+    wrapper.appendChild(card);
+  }
+}
+
+window.slideMurmur = function(direction) {
+  if (murmurList.length === 0) return;
+  currentMurmurStartIndex = (currentMurmurStartIndex + direction + murmurList.length) % murmurList.length;
+  renderMurmurCards();
+};
+
 function startMurmurTicker() {
-  const tickerEl = document.getElementById('ticker-content');
-  
   setInterval(() => {
-    if (murmurList.length > 0) {
-      currentMurmurIndex = (currentMurmurIndex + 1) % murmurList.length;
-      tickerEl.style.opacity = 0;
-      setTimeout(() => {
-        tickerEl.innerText = murmurList[currentMurmurIndex];
-        tickerEl.style.opacity = 1;
-      }, 300);
+    if (murmurList.length > 3) {
+      currentMurmurStartIndex = (currentMurmurStartIndex + 1) % murmurList.length;
+      renderMurmurCards();
     }
-  }, 4500); 
+  }, 6000); 
 }
 
 let isLoadedFromFirebase = false;
@@ -393,6 +421,16 @@ function loadAllMembersFromFirebase() {
     userSelect.innerHTML = '<option value="">+ 新成員</option>';
     const data = snapshot.val();
     allMembersData = data || {};
+
+    if (!isLoadedFromFirebase) {
+      allPlayerGroups.forEach(g => {
+        scene.remove(g);
+        g.children.forEach(child => {
+          if (child instanceof THREE.CSS2DObject) child.element.remove();
+        });
+      });
+      allPlayerGroups.length = 0;
+    }
 
     murmurList = [];
     if (data) {
@@ -403,22 +441,34 @@ function loadAllMembersFromFirebase() {
         opt.innerText = name;
         userSelect.appendChild(opt);
 
-        if (data[name].murmur) {
-          murmurList.push(`💬 ${name}: ${data[name].murmur}`);
+        const member = data[name];
+        if (member.murmur) {
+          const dateObj = member.updatedAt ? new Date(member.updatedAt) : new Date();
+          const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+          const day = String(dateObj.getDate()).padStart(2, '0');
+          const hours = String(dateObj.getHours()).padStart(2, '0');
+          const mins = String(dateObj.getMinutes()).padStart(2, '0');
+          const dateStr = `${month}/${day} ${hours}:${mins}`;
+
+          murmurList.push({
+            name: name,
+            murmur: member.murmur,
+            charUrl: member.charUrl,
+            dateStr: dateStr
+          });
         }
 
-        if (data[name].charUrl) {
+        if (member.charUrl) {
           const spreadX = (index % 4 - 1.5) * 5.0 + (Math.random() - 0.5) * 1.5; 
           const spreadY = (index % 3) * 1.2 - 1.0; 
           const spreadZ = -8 - (index * 3); 
           const scaleFactor = Math.max(0.6, 1.2 - (index * 0.15)); 
 
-          spawnOrUpdateCharacter(data[name].charUrl, data[name].handUrl, name, data[name].sportType, data[name].mins, spreadX, spreadY, spreadZ, scaleFactor);
+          spawnOrUpdateCharacter(member.charUrl, member.handUrl, name, member.sportType, member.mins, spreadX, spreadY, spreadZ, scaleFactor);
         }
       });
-      if (murmurList.length > 0) {
-        document.getElementById('ticker-content').innerText = murmurList[0];
-      }
+
+      renderMurmurCards();
       isLoadedFromFirebase = true;
     }
   });
