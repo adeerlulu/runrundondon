@@ -4,11 +4,12 @@ body, html {
 
 #bg-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; }
 
-/* 角色 ID 標籤：完美水平置中，固定在頭像下方第一排 */
+/* 角色 ID 標籤：使用絕對置中，固定在頭像下方第一排 */
 .player-name-tag {
   position: absolute;
   left: 50%;
-  transform: translateX(-50%) translateY(52px);
+  transform: translateX(-50%);
+  bottom: -32px; /* 距離頭像底部固定距離 */
   background: rgba(0, 0, 0, 0.75);
   color: white;
   padding: 3px 10px;
@@ -20,11 +21,12 @@ body, html {
   box-shadow: 0 2px 6px rgba(0,0,0,0.3);
 }
 
-/* 運動倒數計時標籤：完美水平置中，位於 ID 下方的第二排（上下排不重疊） */
+/* 運動倒數計時標籤：位於 ID 下方的第二排，絕對不重疊 */
 .player-countdown-tag {
   position: absolute;
   left: 50%;
-  transform: translateX(-50%) translateY(77px);
+  transform: translateX(-50%);
+  bottom: -54px; /* 位於 ID 下方，確保有足夠間距 */
   background: rgba(44, 82, 130, 0.9);
   color: white;
   padding: 2px 8px;
@@ -36,11 +38,12 @@ body, html {
   box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
-/* 角色頭上的白色對話框泡泡 (完美水平置中) */
+/* 角色頭上的白色對話框泡泡 (完美置中於頭頂) */
 .player-speech-bubble {
   position: absolute;
   left: 50%;
-  transform: translateX(-50%) translateY(-48px);
+  transform: translateX(-50%);
+  top: -55px; /* 位於頭像上方 */
   background: rgba(255, 255, 255, 0.9);
   color: #2d3748;
   padding: 6px 12px;
@@ -67,8 +70,8 @@ body, html {
 }
 
 @keyframes floatBubble {
-  0%, 100% { transform: translateX(-50%) translateY(-48px); }
-  50% { transform: translateX(-50%) translateY(-52px); }
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(-4px); }
 }
 
 /* 動動碎碎念卡片輪播 Bar */
