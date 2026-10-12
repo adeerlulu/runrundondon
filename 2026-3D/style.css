@@ -1,12 +1,17 @@
 body, html {
   margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; font-family: 'Helvetica Neue', Arial, sans-serif;
+  /* 移除這裡的 background，避免覆蓋 3D 畫布 */
+  background: transparent;
+}
+
+#bg-canvas { 
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; 
+  /* 將漸層天空直接設定為 3D 畫布的背景，完美透出且不遮擋草皮 */
   background: linear-gradient(to bottom, #7c93cb 0%, #a4b3d9 35%, #cbcded 65%, #f2eae9 100%);
 }
 
-#bg-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; }
-
 /* ==========================================
-   3D 標籤 UI (交由 JS 控制 3D 座標，不寫 position / transform)
+   3D 標籤 UI
    ========================================== */
 .player-name-tag {
   background: rgba(0, 0, 0, 0.75);
@@ -58,11 +63,11 @@ body, html {
 }
 
 /* ==========================================
-   動動碎碎念 輪播 Bar (往上 100px)
+   動動碎碎念 輪播 Bar
    ========================================== */
 .ticker-container-card {
   position: fixed;
-  bottom: 115px; /* 往上調整至少 100px */
+  bottom: 115px; 
   left: 50%;
   transform: translateX(-50%);
   z-index: 5;
@@ -104,9 +109,8 @@ body, html {
   pointer-events: auto;
 }
 
-/* 碎念卡片：60%白霧感與彩色/變淡層次 */
 .murmur-card {
-  background: rgba(255, 255, 255, 0.6); /* 60% 霧感白 */
+  background: rgba(255, 255, 255, 0.6); 
   backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.5);
   border-radius: 14px;
@@ -120,7 +124,6 @@ body, html {
   transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
-/* 最新/當前查看的留言 (彩色、放大) */
 .murmur-card.active {
   opacity: 1;
   transform: scale(1.05);
@@ -129,7 +132,6 @@ body, html {
   border-color: rgba(255, 255, 255, 0.9);
 }
 
-/* 其他舊留言 (變淡、縮小) */
 .murmur-card.inactive {
   opacity: 0.35;
   transform: scale(0.95);
@@ -146,17 +148,16 @@ body, html {
 .murmur-username { font-size: 12px; font-weight: bold; color: #2c5282; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .murmur-date { font-size: 9px; color: #4a5568; }
 
-/* 碎念內文高度加高，容納至少 30 字 */
 .murmur-body {
   font-size: 12px;
   color: #1a202c;
   line-height: 1.5;
   word-break: break-all;
   display: -webkit-box;
-  -webkit-line-clamp: 3; /* 最多顯示3行 */
+  -webkit-line-clamp: 3; 
   -webkit-box-orient: vertical;
   overflow: hidden;
-  min-height: 54px; /* 確保高度足夠 */
+  min-height: 54px; 
 }
 
 /* ==========================================
