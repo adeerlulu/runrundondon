@@ -27,7 +27,7 @@ const grassList = [];
 for (let i = 1; i <= 24; i++) grassList.push(`./grass/grass_${i}.png`);
 
 // ==========================================
-// 2. 場景與渲染器初始化 (設定透明背景以透出 CSS 天空)
+// 2. 場景與渲染器初始化
 // ==========================================
 const config = {
   bgColor: 0xf2eae9, 
@@ -38,7 +38,7 @@ const config = {
   ambientColor: 0x5d604b   
 };
 const scene = new THREE.Scene();
-scene.background = null; // 讓場景背景完全透明
+scene.background = null; 
 scene.fog = new THREE.Fog(config.fogColor, 10, 120);
 
 const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -46,11 +46,10 @@ camera.position.set(0, 8, 25);
 camera.lookAt(0, 2, -10);
 
 const canvas = document.querySelector('#bg-canvas');
-// 確保 alpha: true，才能透出 CSS 的漸層背景
 const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-renderer.setClearColor(0x000000, 0); // 確保 WebGL 畫布背景為全透明
+renderer.setClearColor(0x000000, 0); 
 
 const labelRenderer = new THREE.CSS2DRenderer();
 labelRenderer.setSize(window.innerWidth, window.innerHeight);
@@ -65,7 +64,7 @@ dirLight.position.set(0, 20, -30);
 scene.add(dirLight);
 
 // ==========================================
-// 3. 地形與草叢系統
+// 3. 地形與草叢系統 (草叢尺寸縮小 50%)
 // ==========================================
 function createNoiseTexture() {
   const size = 256; const data = new Uint8Array(size * size * 4);
@@ -109,7 +108,10 @@ function spawnFullGrassField() {
       tex.magFilter = THREE.LinearFilter; tex.minFilter = THREE.LinearFilter; tex.generateMipmaps = true;
       if (THREE.SRGBColorSpace) tex.colorSpace = THREE.SRGBColorSpace;
       const zDepth = -2 - Math.random() * 63;
-      const scaleFactor = (zDepth > -15) ? (4.5 + Math.random() * 2.5) : (2.0 + Math.random() * 2.5);
+      // 尺寸縮小 50%
+      const baseScale = (zDepth > -15) ? (4.5 + Math.random() * 2.5) : (2.0 + Math.random() * 2.5);
+      const scaleFactor = baseScale * 0.5; 
+      
       const grassMat = new THREE.SpriteMaterial({ map: tex, transparent: true, opacity: 0.9 + Math.random() * 0.1, depthWrite: false });
       const grassSprite = new THREE.Sprite(grassMat);
       grassSprite.scale.set(scaleFactor, scaleFactor, 1);
@@ -133,7 +135,8 @@ function updateDynamicGrass() {
       if (THREE.SRGBColorSpace) tex.colorSpace = THREE.SRGBColorSpace;
       const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, opacity: 0, alphaTest: 0.1, depthWrite: false });
       const sprite = new THREE.Sprite(mat);
-      sprite.scale.set(3.5, 3.5, 1);
+      // 動態漸變草叢也縮小 50%
+      sprite.scale.set(1.75, 1.75, 1);
       sprite.position.set((Math.random() - 0.5) * 80, -1.0 - Math.random() * 1.5, -5 - Math.random() * 40);
       sprite.userData = { fadeIn: true, opacitySpeed: 0.01 + Math.random() * 0.01 };
       dynamicGrassGroup.add(sprite);
@@ -152,7 +155,7 @@ function updateDynamicGrass() {
 }
 
 // ==========================================
-// 4. 多角色系統 (絕對綁定對齊)
+// 4. 多角色系統
 // ==========================================
 const allPlayerGroups = []; 
 let allMembersData = {}; 
@@ -464,7 +467,6 @@ function animate() {
     if (body) body.material.rotation = group.userData.isDragging ? 0 : Math.sin(time * 0.003 + offset) * 0.1;
 
     const bubble = group.getObjectByName('bubbleLabel');
-    // 使用 DOM CSS 加上 3D 運算，確保對話泡泡也會跟著人物自然上下浮動
     if (bubble) bubble.position.y = 2.6 * sc + Math.sin(time * 0.003 + offset) * 0.15;
 
     if (group.userData.hasHands) {
