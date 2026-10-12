@@ -139,7 +139,7 @@ function spawnFullGrassField() {
 spawnFullGrassField();
 
 // ==========================================
-// 4. 多角色系統與防重複生成更新機制
+// 4. 多角色系統 (左右手分開、3900 目標倒數計算)
 // ==========================================
 const allPlayerGroups = []; 
 let allMembersData = {}; 
@@ -176,13 +176,29 @@ function previewHand(url) {
   updatePreviewUI();
 }
 
-function spawnOrUpdateCharacter(charUrl, handUrl, memberName = '成員', sportType = '健走', mins = '0', customX = 0, customY = 0, customZ = -10, scaleMultiplier = 1) {
+// 計算 3900 分鐘目標與顯示文字
+function getGoalText(minsInput) {
+  const totalMins = parseInt(minsInput) || 0;
+  const target = 3900;
+  const diff = target - totalMins;
+
+  if (diff > 0) {
+    return `還要動 ${diff} 分鐘`;
+  } else if (diff === 0) {
+    return `剛好達成 3900 分鐘！`;
+  } else {
+    return `多動了 ${Math.abs(diff)} 分鐘`;
+  }
+}
+
+function spawnOrUpdateCharacter(charUrl, handUrl, memberName = '成員', mins = '0', customX = 0, customY = 0, customZ = -10, scaleMultiplier = 1) {
   let existingGroup = allPlayerGroups.find(g => g.userData.name === memberName);
+  const goalText = getGoalText(mins);
 
   if (existingGroup) {
     const bubbleChild = existingGroup.children.find(child => child.element && child.element.classList.contains('player-speech-bubble'));
     if (bubbleChild) {
-      bubbleChild.element.textContent = `${sportType} ${mins}分`;
+      bubbleChild.element.textContent = goalText;
     }
     return;
   }
@@ -207,7 +223,7 @@ function spawnOrUpdateCharacter(charUrl, handUrl, memberName = '成員', sportTy
 
   const bubbleDiv = document.createElement('div');
   bubbleDiv.className = 'player-speech-bubble';
-  bubbleDiv.textContent = `${sportType} ${mins}分`;
+  bubbleDiv.textContent = goalText;
   const bubbleLabel = new THREE.CSS2DObject(bubbleDiv);
   bubbleLabel.position.set(0, 2.2 * scaleMultiplier, 0);
   group.add(bubbleLabel);
@@ -235,14 +251,15 @@ function spawnOrUpdateCharacter(charUrl, handUrl, memberName = '成員', sportTy
 
       const handScale = 1.5 * scaleMultiplier * 0.7; 
 
+      // 修正：左右手 X 軸分開（左手負值，右手正值）
       const leftHand = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, alphaTest: 0.1, depthWrite: false }));
       leftHand.scale.set(handScale, handScale, 1);
-      leftHand.position.set(-2.0 * scaleMultiplier, 0, 0.1);
+      leftHand.position.set(-1.8 * scaleMultiplier, 0, 0.1);
       group.add(leftHand);
 
       const rightHand = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, alphaTest: 0.1, depthWrite: false }));
       rightHand.scale.set(handScale, handScale, 1);
-      rightHand.position.set(2.0 * scaleMultiplier, 0, 0.1);
+      rightHand.position.set(1.8 * scaleMultiplier, 0, 0.1);
       group.add(rightHand);
       
       group.userData.hasHands = true;
@@ -329,7 +346,7 @@ window.closeRecordModal = function() {
 }
 
 // ==========================================
-// 6. UI、Firebase 與動動碎碎念卡片輪播
+// 6. UI、Firebase 與碎碎念卡片輪播
 // ==========================================
 const mainContent = document.getElementById('main-content');
 const openPanelBtn = document.getElementById('open-panel-btn');
@@ -360,12 +377,11 @@ window.openModal = function(type) {
     };
     itemsGrid.appendChild(img);
   });
-  modal.classList.remove('hidden');
+  modal.classList.add('hidden');
 }
 
 window.closeModal = function() { modal.classList.add('hidden'); }
 
-// 動動碎碎念獨立卡片輪播系統
 let murmurList = [];
 let currentMurmurStartIndex = 0;
 
@@ -464,7 +480,7 @@ function loadAllMembersFromFirebase() {
           const spreadZ = -8 - (index * 3); 
           const scaleFactor = Math.max(0.6, 1.2 - (index * 0.15)); 
 
-          spawnOrUpdateCharacter(member.charUrl, member.handUrl, name, member.sportType, member.mins, spreadX, spreadY, spreadZ, scaleFactor);
+          spawnOrUpdateCharacter(member.charUrl, member.handUrl, name, member.mins, spreadX, spreadY, spreadZ, scaleFactor);
         }
       });
 
@@ -523,7 +539,7 @@ window.submitData = function() {
       const newX = (Math.random() - 0.5) * 10;
       const newY = (Math.random() - 0.5) * 1.5;
       const newZ = -10 - Math.random() * 6;
-      spawnOrUpdateCharacter(tempCharUrl, tempHandUrl, finalName, sportType, mins || '0', newX, newY, newZ, 1.0);
+      spawnOrUpdateCharacter(tempCharUrl, tempHandUrl, finalName, mins || '0', newX, newY, newZ, 1.0);
 
       alert(`成功儲存！${finalName} 的 2026 今日工事已更新。`);
       mainContent.classList.add('hidden');
@@ -577,9 +593,9 @@ function animate() {
       const sway = Math.sin(time * 0.003 + offset); 
       const swayFast = Math.cos(time * 0.005 + offset);
 
-      leftHand.position.set(-1.8, swayFast * 0.15, 0.1);
+      leftHand.position.set(-1.5, swayFast * 0.15, 0.1);
       leftHand.material.rotation = sway * 0.3;
-      rightHand.position.set(1.8, -swayFast * 0.15, 0.1);
+      rightHand.position.set(1.5, -swayFast * 0.15, 0.1);
       rightHand.material.rotation = -sway * 0.3;
     }
   });
