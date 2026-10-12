@@ -167,7 +167,7 @@ function updateDynamicGrass() {
 }
 
 // ==========================================
-// 4. 多角色系統 (左右手固定左右側、泡泡與倒數計時格式)
+// 4. 多角色系統
 // ==========================================
 const allPlayerGroups = []; 
 let allMembersData = {}; 
@@ -204,24 +204,18 @@ function previewHand(url) {
   updatePreviewUI();
 }
 
-// 3. 頭頂對話泡泡文字格式：努力ㄉ[運動類型]！
 function getBubbleText(sportType) {
   return `努力ㄉ${sportType || '運動'}！`;
 }
 
-// 4. ID下方倒數計時格式
 function getCountdownText(minsInput) {
   const totalMins = parseInt(minsInput) || 0;
   const target = 3900;
   const diff = target - totalMins;
 
-  if (diff > 0) {
-    return `還要動…${diff}分鐘`;
-  } else if (diff === 0) {
-    return `剛好達成 3900 分鐘！`;
-  } else {
-    return `哇喔多動了${Math.abs(diff)}分鐘`;
-  }
+  if (diff > 0) return `還要動…${diff}分鐘`;
+  else if (diff === 0) return `剛好達成 3900 分鐘！`;
+  else return `哇喔多動了${Math.abs(diff)}分鐘`;
 }
 
 function spawnOrUpdateCharacter(charUrl, handUrl, memberName = '成員', sportType = '健走', mins = '0', customX = 0, customY = 0, customZ = -10, scaleMultiplier = 1) {
@@ -252,7 +246,6 @@ function spawnOrUpdateCharacter(charUrl, handUrl, memberName = '成員', sportTy
   };
   scene.add(group);
 
-  // 角色名字
   const nameDiv = document.createElement('div');
   nameDiv.className = 'player-name-tag';
   nameDiv.textContent = memberName;
@@ -260,7 +253,6 @@ function spawnOrUpdateCharacter(charUrl, handUrl, memberName = '成員', sportTy
   nameLabel.position.set(0, -1.8 * scaleMultiplier, 0);
   group.add(nameLabel);
 
-  // ID下方的倒數計時
   const countdownDiv = document.createElement('div');
   countdownDiv.className = 'player-countdown-tag';
   countdownDiv.textContent = countdownText;
@@ -268,7 +260,6 @@ function spawnOrUpdateCharacter(charUrl, handUrl, memberName = '成員', sportTy
   countdownLabel.position.set(0, -1.8 * scaleMultiplier, 0);
   group.add(countdownLabel);
 
-  // 頭頂上的白色對話框泡泡
   const bubbleDiv = document.createElement('div');
   bubbleDiv.className = 'player-speech-bubble';
   bubbleDiv.textContent = bubbleText;
@@ -299,7 +290,6 @@ function spawnOrUpdateCharacter(charUrl, handUrl, memberName = '成員', sportTy
 
       const handScale = 1.5 * scaleMultiplier * 0.7; 
 
-      // 1. 裝備嚴格固定在左右兩側（左手負值、右手正值）
       const leftHand = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, alphaTest: 0.1, depthWrite: false }));
       leftHand.scale.set(handScale, handScale, 1);
       leftHand.position.set(-2.2 * scaleMultiplier, 0, 0.1);
@@ -318,7 +308,7 @@ function spawnOrUpdateCharacter(charUrl, handUrl, memberName = '成員', sportTy
 }
 
 // ==========================================
-// 5. 滑鼠拖曳與放開後掉回草皮系統
+// 5. 滑鼠拖曳與點擊彈窗系統
 // ==========================================
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
@@ -616,7 +606,7 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 // ==========================================
-// 7. 動畫迴圈
+// 7. 動畫迴圈 (完整恢復地形滾動與角色跳動渲染)
 // ==========================================
 let mouseX = 0, mouseY = 0;
 document.addEventListener('mousemove', (e) => {
@@ -654,7 +644,7 @@ function animate() {
 
     group.position.set(walkX, bounceY, baseZ);
 
-    const sprite = group.children[2];
+    const sprite = group.children[3]; // 角色本體 sprite 索引
     if (sprite) {
       sprite.material.rotation = group.userData.isDragging ? 0 : Math.sin(time * 0.003 + offset) * 0.1;
     }
@@ -673,13 +663,15 @@ function animate() {
     }
   });
 
+  // 恢復草地滾動波浪效果
   const pPos = pGeo.attributes.position;
   for (let i = 0; i < pPos.count; i++) {
     const x = pPos.getX(i), y = pPos.getY(i);
     const yOff = y + time * 0.018;
     pPos.setZ(i, Math.sin(x*0.04)*Math.cos(yOff*0.04)*3 + Math.sin(x*0.08)*Math.sin(yOff*0.02)*1.5 + Math.pow(Math.abs(x)/(tWidth/2),2)*5 - 2);
   }
-  pPos.needsUpdate = true; pGeo.computeVertexNormals(); 
+  pPos.needsUpdate = true; 
+  pGeo.computeVertexNormals(); 
 
   camera.position.x += (mouseX * 6 - camera.position.x) * 0.03;
   camera.position.y += ((8 + mouseY * 2) - camera.position.y) * 0.03;
