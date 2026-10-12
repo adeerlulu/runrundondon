@@ -4,8 +4,11 @@ body, html {
 
 #bg-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; }
 
-/* 角色 ID 標籤：往下再多推 10px（從 28px 改為 38px） */
+/* 角色 ID 標籤：水平置中，並往下再多推 20px（從 38px 增至 58px） */
 .player-name-tag {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%) translateY(58px);
   background: rgba(0, 0, 0, 0.7);
   color: white;
   padding: 3px 10px;
@@ -15,11 +18,13 @@ body, html {
   white-space: nowrap;
   pointer-events: none;
   box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-  transform: translateY(38px); 
 }
 
-/* 角色上方對話泡泡 */
+/* 角色上方對話泡泡 (水平置中) */
 .player-speech-bubble {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%) translateY(-45px);
   background: white;
   color: #2d3748;
   padding: 6px 12px;
@@ -30,8 +35,6 @@ body, html {
   pointer-events: none;
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   border: 2px solid #cbd5e0;
-  transform: translateY(-45px); 
-  position: relative;
   animation: floatBubble 2s ease-in-out infinite;
 }
 .player-speech-bubble::after {
@@ -48,8 +51,8 @@ body, html {
 }
 
 @keyframes floatBubble {
-  0%, 100% { transform: translateY(-45px); }
-  50% { transform: translateY(-49px); }
+  0%, 100% { transform: translateX(-50%) translateY(-45px); }
+  50% { transform: translateX(-50%) translateY(-49px); }
 }
 
 /* 動動碎碎念卡片輪播 Bar */
