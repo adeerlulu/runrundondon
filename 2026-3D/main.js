@@ -27,7 +27,7 @@ const grassList = [];
 for (let i = 1; i <= 24; i++) grassList.push(`./grass/grass_${i}.png`);
 
 // ==========================================
-// 2. 場景與渲染器初始化
+// 2. 場景與渲染器初始化 (保留粉紫天空色調)
 // ==========================================
 const config = {
   bgColor: 0xf2eae9, fogColor: 0xf2eae9, terrainColor: 0x828a5c,  
@@ -59,11 +59,35 @@ dirLight.position.set(0, 50, 30);
 scene.add(dirLight);
 
 // ==========================================
-// 3. 地形與草叢系統
+// 3. 地形與草叢系統 (完美還原你喜歡的波浪雜訊地形)
 // ==========================================
+function createNoiseTexture() {
+  const size = 256; const data = new Uint8Array(size * size * 4);
+  for (let i = 0; i < data.length; i += 4) {
+      const noise = Math.floor(Math.random() * 40) + 215; 
+      data[i] = data[i+1] = data[i+2] = noise; data[i+3] = 255;
+  }
+  const tex = new THREE.DataTexture(data, size, size, THREE.RGBAFormat);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping; tex.repeat.set(20, 20); tex.needsUpdate = true;
+  return tex;
+}
+const noiseMap = createNoiseTexture();
+
+const mGeo = new THREE.PlaneGeometry(300, 100, 60, 20);
+const mMat = new THREE.MeshStandardMaterial({ color: config.mountainColor, flatShading: true, map: noiseMap });
+const mPos = mGeo.attributes.position;
+for (let i = 0; i < mPos.count; i++) {
+  const x = mPos.getX(i), y = mPos.getY(i);
+  if (y > 0) mPos.setZ(i, (Math.sin(x*0.02)*15 + Math.sin(x*0.05)*8 + Math.sin(x*0.1)*3) * (y/50)); 
+}
+mGeo.computeVertexNormals();
+const mountains = new THREE.Mesh(mGeo, mMat);
+mountains.rotation.x = -Math.PI/2; mountains.position.set(0, -6, -80);
+scene.add(mountains);
+
 const tWidth = 140, tLength = 200;
-const pGeo = new THREE.PlaneGeometry(tWidth, tLength, 30, 30);
-const pMat = new THREE.MeshStandardMaterial({ color: config.terrainColor, roughness: 1.0, metalness: 0.0 });
+const pGeo = new THREE.PlaneGeometry(tWidth, tLength, 80, 100);
+const pMat = new THREE.MeshStandardMaterial({ color: config.terrainColor, roughness: 1.0, map: noiseMap });
 const terrain = new THREE.Mesh(pGeo, pMat);
 terrain.rotation.x = -Math.PI/2; terrain.position.set(0, -2, -30);
 scene.add(terrain);
@@ -89,6 +113,37 @@ function spawnFullGrassField() {
   }
 }
 spawnFullGrassField();
+
+const dynamicGrassGroup = new THREE.Group();
+scene.add(dynamicGrassGroup);
+const dynamicGrassList = [];
+for (let i = 6; i <= 13; i++) dynamicGrassList.push(`./grass/grass_${i}.png`);
+
+function updateDynamicGrass() {
+  if (dynamicGrassGroup.children.length < 3) {
+    const url = dynamicGrassList[Math.floor(Math.random() * dynamicGrassList.length)];
+    textureLoader.load(url, (tex) => {
+      tex.magFilter = THREE.LinearFilter; tex.minFilter = THREE.LinearFilter;
+      if (THREE.SRGBColorSpace) tex.colorSpace = THREE.SRGBColorSpace;
+      const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, opacity: 0, alphaTest: 0.1, depthWrite: false });
+      const sprite = new THREE.Sprite(mat);
+      sprite.scale.set(3.5, 3.5, 1);
+      sprite.position.set((Math.random() - 0.5) * 80, -1.0 - Math.random() * 1.5, -5 - Math.random() * 40);
+      sprite.userData = { fadeIn: true, opacitySpeed: 0.01 + Math.random() * 0.01 };
+      dynamicGrassGroup.add(sprite);
+    });
+  }
+
+  dynamicGrassGroup.children.forEach((sprite) => {
+    if (sprite.userData.fadeIn) {
+      sprite.material.opacity += sprite.userData.opacitySpeed;
+      if (sprite.material.opacity >= 0.9) sprite.userData.fadeIn = false;
+    } else {
+      sprite.material.opacity -= sprite.userData.opacitySpeed * 0.5;
+      if (sprite.material.opacity <= 0.05) dynamicGrassGroup.remove(sprite);
+    }
+  });
+}
 
 // ==========================================
 // 4. 多角色系統 (絕對綁定對齊、手部分離、文字格式修正)
@@ -273,9 +328,7 @@ function renderMurmurCards() {
     const itemIndex = (currentMurmurStartIndex + i) % murmurList.length;
     const item = murmurList[itemIndex];
 
-    // 最左側的第一則 (i === 0) 視為當前焦點顯示彩色，其餘變淡
     const isActive = (i === 0);
-
     const card = document.createElement('div');
     card.className = `murmur-card ${isActive ? 'active' : 'inactive'}`;
     card.innerHTML = `
@@ -316,7 +369,6 @@ function loadAllMembersFromFirebase() {
       allPlayerGroups.length = 0;
     }
 
-    // 將資料轉為陣列，並依照更新時間由新到舊排序 (最新的在最左側)
     const membersArray = Object.keys(data).map(key => ({ name: key, ...data[key] }));
     membersArray.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
 
@@ -378,7 +430,7 @@ window.submitData = function() {
 window.addEventListener('DOMContentLoaded', () => { loadAllMembersFromFirebase(); startMurmurTicker(); });
 
 // ==========================================
-// 7. 動畫迴圈 (JS負責 3D 動態，包含泡泡懸浮與手部防重疊綁定)
+// 7. 動畫迴圈 (還原完美波浪草皮與動態更新)
 // ==========================================
 let mouseX = 0, mouseY = 0;
 document.addEventListener('mousemove', (e) => { mouseX = (e.clientX / window.innerWidth) * 2 - 1; mouseY = -(e.clientY / window.innerHeight) * 2 + 1; });
@@ -386,6 +438,9 @@ document.addEventListener('mousemove', (e) => { mouseX = (e.clientX / window.inn
 function animate() {
   requestAnimationFrame(animate);
   const time = performance.now(); 
+
+  // ★ 恢復：隨機動態草叢更新
+  updateDynamicGrass();
 
   allPlayerGroups.forEach((group) => {
     const offset = group.userData.randomOffset || 0;
@@ -407,11 +462,9 @@ function animate() {
     const body = group.getObjectByName('bodySprite');
     if (body) body.material.rotation = group.userData.isDragging ? 0 : Math.sin(time * 0.003 + offset) * 0.1;
 
-    // 頭頂泡泡上下懸浮效果 (透過 3D Y軸)
     const bubble = group.getObjectByName('bubbleLabel');
     if (bubble) bubble.position.y = 2.6 * sc + Math.sin(time * 0.003 + offset) * 0.15;
 
-    // 絕對綁定左右手，防重疊
     if (group.userData.hasHands) {
       const leftHand = group.getObjectByName('leftHand');
       const rightHand = group.getObjectByName('rightHand');
@@ -421,6 +474,16 @@ function animate() {
       if(rightHand) { rightHand.position.set(2.2 * sc, -swayFast * 0.15, 0.1); rightHand.material.rotation = -sway * 0.3; }
     }
   });
+
+  // ★ 恢復：超好看的波浪草皮地形滾動
+  const pPos = pGeo.attributes.position;
+  for (let i = 0; i < pPos.count; i++) {
+    const x = pPos.getX(i), y = pPos.getY(i);
+    const yOff = y + time * 0.018;
+    pPos.setZ(i, Math.sin(x*0.04)*Math.cos(yOff*0.04)*3 + Math.sin(x*0.08)*Math.sin(yOff*0.02)*1.5 + Math.pow(Math.abs(x)/(tWidth/2),2)*5 - 2);
+  }
+  pPos.needsUpdate = true; 
+  pGeo.computeVertexNormals(); 
 
   camera.position.x += (mouseX * 6 - camera.position.x) * 0.03; camera.position.y += ((8 + mouseY * 2) - camera.position.y) * 0.03; camera.lookAt(0, 2, -10);
   renderer.render(scene, camera); labelRenderer.render(scene, camera);
