@@ -35,7 +35,7 @@ const handList = [
 // 草叢總圖庫 (包含 1~5, 6~13, 14~24)
 const grassList = [];
 for (let i = 1; i <= 5; i++) grassList.push(`./grass/grass_${i}.png`);
-for (let i = 6; i <= 13; i++) grassList.push(`./grass/grass_${i}.png`); // 新增 6~13
+for (let i = 6; i <= 13; i++) grassList.push(`./grass/grass_${i}.png`); 
 for (let i = 14; i <= 24; i++) grassList.push(`./grass/grass_${i}.png`);
 
 // ==========================================
@@ -132,7 +132,7 @@ function spawnFullGrassField() {
 }
 spawnFullGrassField();
 
-// 特殊動態漸變草叢群組 (grass_6 ~ grass_13，隨角度與時間漸變出現，每次至多三組)
+// 特殊動態漸變草叢群組 (grass_6 ~ grass_13)
 const dynamicGrassGroup = new THREE.Group();
 scene.add(dynamicGrassGroup);
 const dynamicGrassList = [];
@@ -141,7 +141,6 @@ for (let i = 6; i <= 13; i++) {
 }
 
 function updateDynamicGrass() {
-  // 每隔一段時間隨機替換或漸變顯示至多三組 grass_6~13
   if (dynamicGrassGroup.children.length < 3) {
     const url = dynamicGrassList[Math.floor(Math.random() * dynamicGrassList.length)];
     textureLoader.load(url, (tex) => {
@@ -161,7 +160,6 @@ function updateDynamicGrass() {
     });
   }
 
-  // 漸變淡入淡出效果
   dynamicGrassGroup.children.forEach((sprite, index) => {
     if (sprite.userData.fadeIn) {
       sprite.material.opacity += sprite.userData.opacitySpeed;
@@ -176,7 +174,7 @@ function updateDynamicGrass() {
 }
 
 // ==========================================
-// 4. 多角色系統 (左右手正確分開、掉回草皮效果)
+// 4. 多角色系統 (起始 Y 軸向下調整 2.0 單位，約等於畫面 200px 視覺效果)
 // ==========================================
 const allPlayerGroups = []; 
 let allMembersData = {}; 
@@ -235,13 +233,16 @@ function spawnOrUpdateCharacter(charUrl, handUrl, memberName = '成員', mins = 
     return;
   }
 
+  // 將起始 Y 軸向下調整（原本的 baseY 再往下降低 2.0 單位，對應向下 200px 視覺）
+  const adjustedY = customY - 2.0;
+
   const group = new THREE.Group();
   group.userData = { 
     name: memberName,
     baseX: customX, 
-    baseY: customY, 
+    baseY: adjustedY, 
     baseZ: customZ, 
-    targetBaseY: customY, // 掉回草皮用的目標高度
+    targetBaseY: -2.5, // 掉回草皮時的基準高度（配合向下 200px）
     randomOffset: Math.random() * 100,
     isDragging: false,
     isDropping: false
@@ -285,7 +286,6 @@ function spawnOrUpdateCharacter(charUrl, handUrl, memberName = '成員', mins = 
 
       const handScale = 1.5 * scaleMultiplier * 0.7; 
 
-      // 左右手精準分開於身體兩側
       const leftHand = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, alphaTest: 0.1, depthWrite: false }));
       leftHand.scale.set(handScale, handScale, 1);
       leftHand.position.set(-2.2 * scaleMultiplier, 0, 0.1);
@@ -345,14 +345,13 @@ window.addEventListener('mousemove', (event) => {
 
   raycaster.ray.intersectPlane(dragPlane, planeIntersectPoint);
   draggedGroup.userData.baseX = planeIntersectPoint.x;
-  draggedGroup.userData.baseY = Math.max(-0.5, planeIntersectPoint.y); 
+  draggedGroup.userData.baseY = Math.max(-2.5, planeIntersectPoint.y); 
 });
 
 window.addEventListener('mouseup', (event) => {
   if (draggedGroup) {
     draggedGroup.userData.isDragging = false;
-    // 放開後啟動掉回草皮效果 (目標 baseY 設為草皮基準 -0.5)
-    draggedGroup.userData.targetBaseY = -0.5;
+    draggedGroup.userData.targetBaseY = -2.5;
     draggedGroup.userData.isDropping = true;
 
     if (isClickAction) {
@@ -462,216 +461,4 @@ window.slideMurmur = function(direction) {
 };
 
 function startMurmurTicker() {
-  setInterval(() => {
-    if (murmurList.length > 3) {
-      currentMurmurStartIndex = (currentMurmurStartIndex + 1) % murmurList.length;
-      renderMurmurCards();
-    }
-  }, 6000); 
-}
-
-let isLoadedFromFirebase = false;
-function loadAllMembersFromFirebase() {
-  dbRef.on('value', (snapshot) => {
-    userSelect.innerHTML = '<option value="">+ 新成員</option>';
-    const data = snapshot.val();
-    allMembersData = data || {};
-
-    if (!isLoadedFromFirebase) {
-      allPlayerGroups.forEach(g => {
-        scene.remove(g);
-        g.children.forEach(child => {
-          if (child instanceof THREE.CSS2DObject) child.element.remove();
-        });
-      });
-      allPlayerGroups.length = 0;
-    }
-
-    murmurList = [];
-    if (data) {
-      const names = Object.keys(data);
-      names.forEach((name, index) => {
-        const opt = document.createElement('option');
-        opt.value = name;
-        opt.innerText = name;
-        userSelect.appendChild(opt);
-
-        const member = data[name];
-        if (member.murmur) {
-          const dateObj = member.updatedAt ? new Date(member.updatedAt) : new Date();
-          const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-          const day = String(dateObj.getDate()).padStart(2, '0');
-          const hours = String(dateObj.getHours()).padStart(2, '0');
-          const mins = String(dateObj.getMinutes()).padStart(2, '0');
-          const dateStr = `${month}/${day} ${hours}:${mins}`;
-
-          murmurList.push({
-            name: name,
-            murmur: member.murmur,
-            charUrl: member.charUrl,
-            dateStr: dateStr
-          });
-        }
-
-        if (member.charUrl) {
-          const spreadX = (index % 4 - 1.5) * 5.0 + (Math.random() - 0.5) * 1.5; 
-          const spreadY = (index % 3) * 1.2 - 1.0; 
-          const spreadZ = -8 - (index * 3); 
-          const scaleFactor = Math.max(0.6, 1.2 - (index * 0.15)); 
-
-          spawnOrUpdateCharacter(member.charUrl, member.handUrl, name, member.mins, spreadX, spreadY, spreadZ, scaleFactor);
-        }
-      });
-
-      renderMurmurCards();
-      isLoadedFromFirebase = true;
-    }
-  });
-}
-
-userSelect.onchange = (e) => {
-  const selectedName = e.target.value;
-  if (selectedName) {
-    newNameInput.value = selectedName;
-    dbRef.child(selectedName).once('value', (snapshot) => {
-      const val = snapshot.val();
-      if (val) {
-        if (val.mins) document.getElementById('mins').value = val.mins;
-        if (val.sportType) document.getElementById('sport-type').value = val.sportType;
-        if (val.murmur) document.getElementById('murmur-input').value = val.murmur;
-        if (val.charUrl) previewCharacter(val.charUrl);
-        if (val.handUrl) previewHand(val.handUrl);
-      }
-    });
-  } else {
-    newNameInput.value = '';
-    tempCharUrl = '';
-    tempHandUrl = '';
-    document.getElementById('murmur-input').value = '';
-    updatePreviewUI();
-  }
-};
-
-window.submitData = function() {
-  const nameInput = newNameInput.value.trim();
-  const selectUser = userSelect.value;
-  const finalName = nameInput || selectUser;
-  const mins = document.getElementById('mins').value;
-  const sportType = document.getElementById('sport-type').value;
-  const murmur = document.getElementById('murmur-input').value.trim();
-
-  if(!finalName) { alert("請輸入或選擇成員名字！"); return; }
-  if(!tempCharUrl) { alert("請先挑選頭像！"); return; }
-
-  const memberData = {
-    name: finalName,
-    mins: mins || '0',
-    sportType: sportType,
-    murmur: murmur || '今天也有好好運動！',
-    charUrl: tempCharUrl,
-    handUrl: tempHandUrl,
-    updatedAt: Date.now()
-  };
-
-  dbRef.child(finalName).set(memberData)
-    .then(() => {
-      const newX = (Math.random() - 0.5) * 10;
-      const newY = (Math.random() - 0.5) * 1.5;
-      const newZ = -10 - Math.random() * 6;
-      spawnOrUpdateCharacter(tempCharUrl, tempHandUrl, finalName, mins || '0', newX, newY, newZ, 1.0);
-
-      alert(`成功儲存！${finalName} 的 2026 今日工事已更新。`);
-      mainContent.classList.add('hidden');
-      openPanelBtn.classList.remove('hidden');
-    })
-    .catch((error) => { alert("儲存失敗：" + error.message); });
-}
-
-window.addEventListener('DOMContentLoaded', () => {
-  loadAllMembersFromFirebase();
-  startMurmurTicker();
-});
-
-// ==========================================
-// 7. 動畫迴圈 (支援掉回草皮與動態草叢刷新)
-// ==========================================
-let mouseX = 0, mouseY = 0;
-document.addEventListener('mousemove', (e) => {
-  mouseX = (e.clientX / window.innerWidth) * 2 - 1;
-  mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
-});
-
-function animate() {
-  requestAnimationFrame(animate);
-  const time = performance.now(); 
-
-  // 更新動態漸變草叢
-  updateDynamicGrass();
-
-  allPlayerGroups.forEach((group) => {
-    const offset = group.userData.randomOffset || 0;
-    const baseX = group.userData.baseX || 0;
-    let baseY = group.userData.baseY || 0; 
-    const baseZ = group.userData.baseZ || -10;
-
-    // 如果放開滑鼠，執行掉回草皮的平滑下落效果
-    if (group.userData.isDropping) {
-      baseY += (group.userData.targetBaseY - baseY) * 0.1;
-      group.userData.baseY = baseY;
-      if (Math.abs(baseY - group.userData.targetBaseY) < 0.05) {
-        group.userData.isDropping = false;
-      }
-    }
-
-    let walkX = baseX;
-    let bounceY = baseY;
-
-    if (!group.userData.isDragging && !group.userData.isDropping) {
-      walkX = baseX + Math.sin(time * 0.001 + offset) * 1.2;     
-      bounceY = baseY + Math.abs(Math.sin(time * 0.004 + offset)) * 0.4; 
-    }
-
-    group.position.set(walkX, bounceY, baseZ);
-
-    const sprite = group.children[2];
-    if (sprite) {
-      sprite.material.rotation = group.userData.isDragging ? 0 : Math.sin(time * 0.003 + offset) * 0.1;
-    }
-
-    // 左右手精準分開在兩側
-    if (group.userData.hasHands && group.children.length >= 5) {
-      const leftHand = group.children[3];
-      const rightHand = group.children[4];
-      const sway = Math.sin(time * 0.003 + offset); 
-      const swayFast = Math.cos(time * 0.005 + offset);
-
-      leftHand.position.set(-2.0, swayFast * 0.15, 0.1);
-      leftHand.material.rotation = sway * 0.3;
-      rightHand.position.set(2.0, -swayFast * 0.15, 0.1);
-      rightHand.material.rotation = -sway * 0.3;
-    }
-  });
-
-  const pPos = pGeo.attributes.position;
-  for (let i = 0; i < pPos.count; i++) {
-    const x = pPos.getX(i), y = pPos.getY(i);
-    const yOff = y + time * 0.018;
-    pPos.setZ(i, Math.sin(x*0.04)*Math.cos(yOff*0.04)*3 + Math.sin(x*0.08)*Math.sin(yOff*0.02)*1.5 + Math.pow(Math.abs(x)/(tWidth/2),2)*5 - 2);
-  }
-  pPos.needsUpdate = true; pGeo.computeVertexNormals(); 
-
-  camera.position.x += (mouseX * 6 - camera.position.x) * 0.03;
-  camera.position.y += ((8 + mouseY * 2) - camera.position.y) * 0.03;
-  camera.lookAt(0, 2, -10);
-
-  renderer.render(scene, camera);
-  labelRenderer.render(scene, camera);
-}
-animate();
-
-window.addEventListener('resize', () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  labelRenderer.setSize(window.innerWidth, window.innerHeight);
-});
+  setInterval
