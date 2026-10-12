@@ -1,10 +1,13 @@
 body, html {
   margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; font-family: 'Helvetica Neue', Arial, sans-serif;
+  background: linear-gradient(to bottom, #7c93cb 0%, #a4b3d9 35%, #cbcded 65%, #f2eae9 100%);
 }
 
 #bg-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; }
 
-/* 角色 ID 標籤：完美水平置中，位於角色下方第一排 */
+/* ==========================================
+   3D 標籤 UI (交由 JS 控制 3D 座標，不寫 position / transform)
+   ========================================== */
 .player-name-tag {
   background: rgba(0, 0, 0, 0.75);
   color: white;
@@ -15,24 +18,20 @@ body, html {
   white-space: nowrap;
   pointer-events: none;
   box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-  transform: translateX(-50%) translateY(32px);
 }
 
-/* 運動倒數計時標籤：位於 ID 下方的第二排，絕不重疊 */
 .player-countdown-tag {
   background: rgba(44, 82, 130, 0.9);
   color: white;
-  padding: 2px 8px;
+  padding: 3px 9px;
   border-radius: 10px;
   font-size: 10px;
   font-weight: bold;
   white-space: nowrap;
   pointer-events: none;
   box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-  transform: translateX(-50%) translateY(38px);
 }
 
-/* 角色頭上的白色對話框泡泡 (完美水平置中於頭頂) */
 .player-speech-bubble {
   background: rgba(255, 255, 255, 0.9);
   color: #2d3748;
@@ -44,8 +43,6 @@ body, html {
   pointer-events: none;
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   border: 2px solid #cbd5e0;
-  transform: translateX(-50%) translateY(-48px);
-  animation: floatBubble 2s ease-in-out infinite;
 }
 .player-speech-bubble::after {
   content: '';
@@ -60,15 +57,12 @@ body, html {
   width: 0;
 }
 
-@keyframes floatBubble {
-  0%, 100% { transform: translateX(-50%) translateY(-48px); }
-  50% { transform: translateX(-50%) translateY(-52px); }
-}
-
-/* 動動碎碎念卡片輪播 Bar */
+/* ==========================================
+   動動碎碎念 輪播 Bar (往上 100px)
+   ========================================== */
 .ticker-container-card {
   position: fixed;
-  bottom: 15px;
+  bottom: 115px; /* 往上調整至少 100px */
   left: 50%;
   transform: translateX(-50%);
   z-index: 5;
@@ -76,7 +70,7 @@ body, html {
   align-items: center;
   gap: 10px;
   width: 95%;
-  max-width: 650px;
+  max-width: 680px;
   pointer-events: none; 
 }
 
@@ -102,99 +96,91 @@ body, html {
 
 .ticker-cards-wrapper {
   display: flex;
-  gap: 8px;
+  gap: 10px;
   flex: 1;
   overflow: hidden;
   justify-content: center;
+  align-items: center;
   pointer-events: auto;
 }
 
+/* 碎念卡片：60%白霧感與彩色/變淡層次 */
 .murmur-card {
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.6); /* 60% 霧感白 */
   backdrop-filter: blur(8px);
-  border: 1px solid rgba(203, 213, 224, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.5);
   border-radius: 14px;
-  padding: 8px 12px;
+  padding: 10px 14px;
   width: calc(33.333% - 6px);
-  min-width: 160px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  min-width: 175px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  box-sizing: border-box;
-}
-
-.murmur-header {
-  display: flex;
-  align-items: center;
   gap: 6px;
+  box-sizing: border-box;
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
+/* 最新/當前查看的留言 (彩色、放大) */
+.murmur-card.active {
+  opacity: 1;
+  transform: scale(1.05);
+  z-index: 2;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  border-color: rgba(255, 255, 255, 0.9);
+}
+
+/* 其他舊留言 (變淡、縮小) */
+.murmur-card.inactive {
+  opacity: 0.35;
+  transform: scale(0.95);
+  z-index: 1;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.murmur-header { display: flex; align-items: center; gap: 8px; }
 .murmur-avatar {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  object-fit: cover;
-  background: #edf2f7;
-  border: 1px solid #cbd5e0;
+  width: 26px; height: 26px; border-radius: 50%; object-fit: cover;
+  background: #edf2f7; border: 1px solid #cbd5e0;
 }
+.murmur-user-info { display: flex; flex-direction: column; overflow: hidden; }
+.murmur-username { font-size: 12px; font-weight: bold; color: #2c5282; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.murmur-date { font-size: 9px; color: #4a5568; }
 
-.murmur-user-info {
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.murmur-username {
-  font-size: 11px;
-  font-weight: bold;
-  color: #2c5282;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.murmur-date {
-  font-size: 9px;
-  color: #4a5568;
-}
-
+/* 碎念內文高度加高，容納至少 30 字 */
 .murmur-body {
-  font-size: 11px;
+  font-size: 12px;
   color: #1a202c;
-  line-height: 1.3;
+  line-height: 1.5;
   word-break: break-all;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3; /* 最多顯示3行 */
   -webkit-box-orient: vertical;
   overflow: hidden;
+  min-height: 54px; /* 確保高度足夠 */
 }
 
+/* ==========================================
+   今日工事 UI 面板
+   ========================================== */
 .floating-btn {
   position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
-  background: rgba(44, 82, 130, 0.7); 
-  backdrop-filter: blur(6px);
+  background: rgba(44, 82, 130, 0.7); backdrop-filter: blur(6px);
   color: white; border: 1px solid rgba(255,255,255,0.4); 
-  padding: 12px 30px;
-  border-radius: 20px; font-size: 18px; font-weight: bold; cursor: pointer;
+  padding: 12px 30px; border-radius: 20px; font-size: 18px; font-weight: bold; cursor: pointer;
   z-index: 10; box-shadow: 0 4px 15px rgba(0,0,0,0.15); transition: 0.3s;
 }
 .floating-btn:hover { background: rgba(26, 54, 93, 0.85); }
 
 .main-container {
   position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
-  background: rgba(255, 255, 255, 0.7); 
-  backdrop-filter: blur(10px);
-  padding: 25px 20px 20px;
-  border-radius: 20px; box-shadow: 0 10px 35px rgba(0,0,0,0.2);
+  background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(10px);
+  padding: 25px 20px 20px; border-radius: 20px; box-shadow: 0 10px 35px rgba(0,0,0,0.2);
   z-index: 20; width: 90%; max-width: 550px; max-height: 85vh;
-  overflow-y: auto; color: #2d3748; box-sizing: border-box;
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  overflow-y: auto; color: #2d3748; box-sizing: border-box; border: 1px solid rgba(255, 255, 255, 0.6);
 }
 
 .close-x {
-  position: absolute; top: 12px; right: 18px; background: transparent;
-  border: none; font-size: 24px; color: #555; cursor: pointer; line-height: 1;
+  position: absolute; top: 12px; right: 18px; background: transparent; border: none; font-size: 24px; color: #555; cursor: pointer; line-height: 1;
 }
 .close-x:hover { color: #000; }
 
@@ -203,9 +189,7 @@ body, html {
 
 .preview-container { display: flex; justify-content: center; margin-bottom: 12px; }
 .preview-box {
-  width: 90px; height: 90px; background: rgba(237, 242, 247, 0.7); border-radius: 14px;
-  border: 2px dashed #cbd5e0; display: flex; justify-content: center; align-items: center;
-  position: relative; overflow: hidden;
+  width: 90px; height: 90px; background: rgba(237, 242, 247, 0.7); border-radius: 14px; border: 2px dashed #cbd5e0; display: flex; justify-content: center; align-items: center; position: relative; overflow: hidden;
 }
 #preview-avatar { width: 55px; height: 55px; object-fit: contain; z-index: 1; }
 #preview-hand { position: absolute; right: 8px; bottom: 8px; width: 28px; height: 28px; object-fit: contain; z-index: 2; }
@@ -214,35 +198,23 @@ body, html {
 .control-row { display: flex; gap: 12px; align-items: flex-end; margin-top: 10px; }
 .input-box { display: flex; flex-direction: column; flex: 1; }
 .input-box label { font-size: 13px; margin-bottom: 4px; color: #4a5568; font-weight: bold; }
-
 .form-input { padding: 8px 10px; border-radius: 8px; border: 1px solid #cbd5e0; background: rgba(255,255,255,0.8); font-size: 13px; width: 100%; box-sizing: border-box; }
 
 .action-btn { border: none; padding: 10px; border-radius: 10px; cursor: pointer; width: 100%; font-weight: bold; height: 42px; color: white; transition: 0.2s;}
 .primary-btn { background: #2c5282; }
 .secondary-btn { background: #2b6cb0; }
 .submit-btn { background: #38a169; font-size: 15px; margin-top: 5px; }
-.submit-btn:hover { background: #2f855a; }
 
-.modal {
-  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(0, 0, 0, 0.5); z-index: 30; display: flex;
-  justify-content: center; align-items: center;
-}
+.modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 30; display: flex; justify-content: center; align-items: center; }
 .hidden { display: none !important; }
 
 .modal-content {
-  background: rgba(255, 255, 255, 0.7); 
-  backdrop-filter: blur(10px);
-  padding: 25px; border-radius: 15px;
-  width: 80%; max-width: 380px; text-align: center; 
-  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px);
+  padding: 25px; border-radius: 15px; width: 80%; max-width: 380px; text-align: center; 
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2); border: 1px solid rgba(255, 255, 255, 0.6);
 }
 
 .grid-container { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 15px 0; }
-.grid-item {
-  width: 60px; height: 60px; background: rgba(240, 240, 240, 0.8); border-radius: 10px; cursor: pointer;
-  object-fit: contain; border: 3px solid transparent; transition: 0.2s; padding: 4px;
-}
+.grid-item { width: 60px; height: 60px; background: rgba(240, 240, 240, 0.8); border-radius: 10px; cursor: pointer; object-fit: contain; border: 3px solid transparent; transition: 0.2s; padding: 4px; }
 .grid-item:hover { border-color: #2c5282; transform: scale(1.1); }
 .close-btn { background: rgba(204, 204, 204, 0.8); border: none; padding: 8px 16px; border-radius: 10px; cursor: pointer; font-weight: bold; margin-top: 10px;}
