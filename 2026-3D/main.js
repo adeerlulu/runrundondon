@@ -27,15 +27,19 @@ const grassList = [];
 for (let i = 1; i <= 24; i++) grassList.push(`./grass/grass_${i}.png`);
 
 // ==========================================
-// 2. 場景與渲染器初始化 (保留粉紫天空色調)
+// 2. 場景與渲染器初始化 (還原良好光照與透明背景)
 // ==========================================
 const config = {
-  bgColor: 0xf2eae9, fogColor: 0xf2eae9, terrainColor: 0x828a5c,  
-  mountainColor: 0x6e7855, lightColor: 0xfff9e6, ambientColor: 0x6e737c   
+  bgColor: 0xf2eae9, 
+  fogColor: 0xf2eae9, // 霧氣配合天空底部顏色
+  terrainColor: 0x828a5c,  
+  mountainColor: 0x6e7855, 
+  lightColor: 0xfff9e6, 
+  ambientColor: 0x5d604b // 還原為你原本設定的沉穩環境光，防止草皮被漂白
 };
 const scene = new THREE.Scene();
 scene.background = null; 
-scene.fog = new THREE.Fog(config.fogColor, 15, 120);
+scene.fog = new THREE.Fog(config.fogColor, 10, 120);
 
 const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.set(0, 8, 25);
@@ -45,6 +49,7 @@ const canvas = document.querySelector('#bg-canvas');
 const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setClearColor(0x000000, 0); // 確保 3D 畫布完全透明，透出 CSS 漸層天空
 
 const labelRenderer = new THREE.CSS2DRenderer();
 labelRenderer.setSize(window.innerWidth, window.innerHeight);
@@ -53,13 +58,14 @@ labelRenderer.domElement.style.top = '0px';
 labelRenderer.domElement.style.pointerEvents = 'none'; 
 document.body.appendChild(labelRenderer.domElement);
 
-scene.add(new THREE.AmbientLight(0xffffff, 1.8));
-const dirLight = new THREE.DirectionalLight(0xfffaee, 0.8);
-dirLight.position.set(0, 50, 30);
+// 還原為原本的光照強度與角度
+scene.add(new THREE.AmbientLight(config.ambientColor, 1.8));
+const dirLight = new THREE.DirectionalLight(config.lightColor, 2.0);
+dirLight.position.set(0, 20, -30);
 scene.add(dirLight);
 
 // ==========================================
-// 3. 地形與草叢系統 (完美還原你喜歡的波浪雜訊地形)
+// 3. 地形與草叢系統 (完全還原你的波浪雜訊地形)
 // ==========================================
 function createNoiseTexture() {
   const size = 256; const data = new Uint8Array(size * size * 4);
@@ -146,7 +152,7 @@ function updateDynamicGrass() {
 }
 
 // ==========================================
-// 4. 多角色系統 (絕對綁定對齊、手部分離、文字格式修正)
+// 4. 多角色系統
 // ==========================================
 const allPlayerGroups = []; 
 let allMembersData = {}; 
@@ -192,19 +198,16 @@ function spawnOrUpdateCharacter(charUrl, handUrl, memberName = '成員', sportTy
   };
   scene.add(group);
 
-  // 1. 名字標籤 (位於角色下方)
   const nameDiv = document.createElement('div'); nameDiv.className = 'player-name-tag'; nameDiv.textContent = memberName;
   const nameLabel = new THREE.CSS2DObject(nameDiv); nameLabel.name = 'nameLabel';
   nameLabel.position.set(0, -1.9 * scaleMultiplier, 0); 
   group.add(nameLabel);
 
-  // 2. 倒數計時標籤 (位於名字正下方，絕對不重疊)
   const countdownDiv = document.createElement('div'); countdownDiv.className = 'player-countdown-tag'; countdownDiv.textContent = countdownText;
   const countdownLabel = new THREE.CSS2DObject(countdownDiv); countdownLabel.name = 'countdownLabel';
   countdownLabel.position.set(0, -2.7 * scaleMultiplier, 0); 
   group.add(countdownLabel);
 
-  // 3. 頭頂對話泡泡 (完美置中於頭頂)
   const bubbleDiv = document.createElement('div'); bubbleDiv.className = 'player-speech-bubble'; bubbleDiv.textContent = bubbleText;
   const bubbleLabel = new THREE.CSS2DObject(bubbleDiv); bubbleLabel.name = 'bubbleLabel';
   bubbleLabel.position.set(0, 2.6 * scaleMultiplier, 0);
@@ -215,7 +218,7 @@ function spawnOrUpdateCharacter(charUrl, handUrl, memberName = '成員', sportTy
     if (THREE.SRGBColorSpace) tex.colorSpace = THREE.SRGBColorSpace;
     const spriteMaterial = new THREE.SpriteMaterial({ map: tex, transparent: true, alphaTest: 0.1, depthWrite: false });
     const sprite = new THREE.Sprite(spriteMaterial);
-    sprite.name = 'bodySprite'; // 綁定名稱確保精準抓取
+    sprite.name = 'bodySprite'; 
     const finalScale = 4 * scaleMultiplier;
     sprite.scale.set(finalScale, finalScale, 1);
     group.add(sprite);
@@ -228,13 +231,13 @@ function spawnOrUpdateCharacter(charUrl, handUrl, memberName = '成員', sportTy
       const handScale = 1.5 * scaleMultiplier * 0.7; 
 
       const leftHand = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, alphaTest: 0.1, depthWrite: false }));
-      leftHand.name = 'leftHand'; // 絕對綁定左手
+      leftHand.name = 'leftHand'; 
       leftHand.scale.set(handScale, handScale, 1);
       leftHand.position.set(-2.2 * scaleMultiplier, 0, 0.1);
       group.add(leftHand);
 
       const rightHand = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, alphaTest: 0.1, depthWrite: false }));
-      rightHand.name = 'rightHand'; // 絕對綁定右手
+      rightHand.name = 'rightHand'; 
       rightHand.scale.set(handScale, handScale, 1);
       rightHand.position.set(2.2 * scaleMultiplier, 0, 0.1);
       group.add(rightHand);
@@ -290,7 +293,7 @@ function showRecordModal(data) {
 window.closeRecordModal = function() { document.getElementById('record-modal').classList.add('hidden'); }
 
 // ==========================================
-// 6. UI、Firebase 與左至右排序漸變輪播
+// 6. UI、Firebase
 // ==========================================
 const mainContent = document.getElementById('main-content');
 const openPanelBtn = document.getElementById('open-panel-btn');
@@ -327,7 +330,6 @@ function renderMurmurCards() {
   for (let i = 0; i < displayCount; i++) {
     const itemIndex = (currentMurmurStartIndex + i) % murmurList.length;
     const item = murmurList[itemIndex];
-
     const isActive = (i === 0);
     const card = document.createElement('div');
     card.className = `murmur-card ${isActive ? 'active' : 'inactive'}`;
@@ -430,7 +432,7 @@ window.submitData = function() {
 window.addEventListener('DOMContentLoaded', () => { loadAllMembersFromFirebase(); startMurmurTicker(); });
 
 // ==========================================
-// 7. 動畫迴圈 (還原完美波浪草皮與動態更新)
+// 7. 動畫迴圈
 // ==========================================
 let mouseX = 0, mouseY = 0;
 document.addEventListener('mousemove', (e) => { mouseX = (e.clientX / window.innerWidth) * 2 - 1; mouseY = -(e.clientY / window.innerHeight) * 2 + 1; });
@@ -439,7 +441,6 @@ function animate() {
   requestAnimationFrame(animate);
   const time = performance.now(); 
 
-  // ★ 恢復：隨機動態草叢更新
   updateDynamicGrass();
 
   allPlayerGroups.forEach((group) => {
@@ -475,7 +476,6 @@ function animate() {
     }
   });
 
-  // ★ 恢復：超好看的波浪草皮地形滾動
   const pPos = pGeo.attributes.position;
   for (let i = 0; i < pPos.count; i++) {
     const x = pPos.getX(i), y = pPos.getY(i);
