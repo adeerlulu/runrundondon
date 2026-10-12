@@ -16,7 +16,7 @@ firebase.initializeApp(firebaseConfig);
 const dbRef = firebase.database().ref('2026_records'); 
 
 // ==========================================
-// 1. 圖庫資料設定 (包含草叢 6~13 漸變群組)
+// 1. 圖庫資料設定
 // ==========================================
 const characterList = [
   './character/ani/ani_1.png',
@@ -32,10 +32,9 @@ const handList = [
   './character/hand/blue_hand_thumb.png'
 ];
 
-// 草叢總圖庫 (包含 1~5, 6~13, 14~24)
 const grassList = [];
 for (let i = 1; i <= 5; i++) grassList.push(`./grass/grass_${i}.png`);
-for (let i = 6; i <= 13; i++) grassList.push(`./grass/grass_${i}.png`); 
+for (let i = 6; i <= 13; i++) grassList.push(`./grass/grass_${i}.png`);
 for (let i = 14; i <= 24; i++) grassList.push(`./grass/grass_${i}.png`);
 
 // ==========================================
@@ -72,7 +71,7 @@ dirLight.position.set(0, 20, -30);
 scene.add(dirLight);
 
 // ==========================================
-// 3. 地形與草叢動態漸變散佈系統 (保留你原本完美的草皮)
+// 3. 地形與草叢系統
 // ==========================================
 function createNoiseTexture() {
   const size = 256; const data = new Uint8Array(size * size * 4);
@@ -109,7 +108,6 @@ const textureLoader = new THREE.TextureLoader();
 const grassGroup = new THREE.Group();
 scene.add(grassGroup);
 
-// 生成基礎滿版草叢
 function spawnFullGrassField() {
   for (let i = 0; i < 35; i++) {
     const randomGrassUrl = grassList[Math.floor(Math.random() * grassList.length)];
@@ -132,13 +130,10 @@ function spawnFullGrassField() {
 }
 spawnFullGrassField();
 
-// 特殊動態漸變草叢群組 (grass_6 ~ grass_13)
 const dynamicGrassGroup = new THREE.Group();
 scene.add(dynamicGrassGroup);
 const dynamicGrassList = [];
-for (let i = 6; i <= 13; i++) {
-  dynamicGrassList.push(`./grass/grass_${i}.png`);
-}
+for (let i = 6; i <= 13; i++) dynamicGrassList.push(`./grass/grass_${i}.png`);
 
 function updateDynamicGrass() {
   if (dynamicGrassGroup.children.length < 3) {
@@ -160,21 +155,19 @@ function updateDynamicGrass() {
     });
   }
 
-  dynamicGrassGroup.children.forEach((sprite, index) => {
+  dynamicGrassGroup.children.forEach((sprite) => {
     if (sprite.userData.fadeIn) {
       sprite.material.opacity += sprite.userData.opacitySpeed;
       if (sprite.material.opacity >= 0.9) sprite.userData.fadeIn = false;
     } else {
       sprite.material.opacity -= sprite.userData.opacitySpeed * 0.5;
-      if (sprite.material.opacity <= 0.05) {
-        dynamicGrassGroup.remove(sprite);
-      }
+      if (sprite.material.opacity <= 0.05) dynamicGrassGroup.remove(sprite);
     }
   });
 }
 
 // ==========================================
-// 4. 多角色系統 (起始 Y 軸往下調整 200px / 2.0 單位)
+// 4. 多角色系統 (左右手固定左右側、泡泡與倒數計時格式)
 // ==========================================
 const allPlayerGroups = []; 
 let allMembersData = {}; 
@@ -211,44 +204,55 @@ function previewHand(url) {
   updatePreviewUI();
 }
 
-function getGoalText(minsInput) {
+// 3. 頭頂對話泡泡文字格式：努力ㄉ[運動類型]！
+function getBubbleText(sportType) {
+  return `努力ㄉ${sportType || '運動'}！`;
+}
+
+// 4. ID下方倒數計時格式
+function getCountdownText(minsInput) {
   const totalMins = parseInt(minsInput) || 0;
   const target = 3900;
   const diff = target - totalMins;
 
-  if (diff > 0) return `還要動 ${diff} 分鐘`;
-  else if (diff === 0) return `剛好達成 3900 分鐘！`;
-  else return `多動了 ${Math.abs(diff)} 分鐘`;
+  if (diff > 0) {
+    return `還要動…${diff}分鐘`;
+  } else if (diff === 0) {
+    return `剛好達成 3900 分鐘！`;
+  } else {
+    return `哇喔多動了${Math.abs(diff)}分鐘`;
+  }
 }
 
-function spawnOrUpdateCharacter(charUrl, handUrl, memberName = '成員', mins = '0', customX = 0, customY = 0, customZ = -10, scaleMultiplier = 1) {
+function spawnOrUpdateCharacter(charUrl, handUrl, memberName = '成員', sportType = '健走', mins = '0', customX = 0, customY = 0, customZ = -10, scaleMultiplier = 1) {
   let existingGroup = allPlayerGroups.find(g => g.userData.name === memberName);
-  const goalText = getGoalText(mins);
+  const bubbleText = getBubbleText(sportType);
+  const countdownText = getCountdownText(mins);
 
   if (existingGroup) {
     const bubbleChild = existingGroup.children.find(child => child.element && child.element.classList.contains('player-speech-bubble'));
-    if (bubbleChild) {
-      bubbleChild.element.textContent = goalText;
-    }
+    if (bubbleChild) bubbleChild.element.textContent = bubbleText;
+
+    const countdownChild = existingGroup.children.find(child => child.element && child.element.classList.contains('player-countdown-tag'));
+    if (countdownChild) countdownChild.element.textContent = countdownText;
     return;
   }
 
-  // 起始 Y 軸往下調整 200px (2.0 單位)
   const adjustedY = customY - 2.0;
-
   const group = new THREE.Group();
   group.userData = { 
     name: memberName,
     baseX: customX, 
     baseY: adjustedY, 
     baseZ: customZ, 
-    targetBaseY: -2.5, // 掉回草皮時的基準高度
+    targetBaseY: -2.5, 
     randomOffset: Math.random() * 100,
     isDragging: false,
     isDropping: false
   };
   scene.add(group);
 
+  // 角色名字
   const nameDiv = document.createElement('div');
   nameDiv.className = 'player-name-tag';
   nameDiv.textContent = memberName;
@@ -256,9 +260,18 @@ function spawnOrUpdateCharacter(charUrl, handUrl, memberName = '成員', mins = 
   nameLabel.position.set(0, -1.8 * scaleMultiplier, 0);
   group.add(nameLabel);
 
+  // ID下方的倒數計時
+  const countdownDiv = document.createElement('div');
+  countdownDiv.className = 'player-countdown-tag';
+  countdownDiv.textContent = countdownText;
+  const countdownLabel = new THREE.CSS2DObject(countdownDiv);
+  countdownLabel.position.set(0, -1.8 * scaleMultiplier, 0);
+  group.add(countdownLabel);
+
+  // 頭頂上的白色對話框泡泡
   const bubbleDiv = document.createElement('div');
   bubbleDiv.className = 'player-speech-bubble';
-  bubbleDiv.textContent = goalText;
+  bubbleDiv.textContent = bubbleText;
   const bubbleLabel = new THREE.CSS2DObject(bubbleDiv);
   bubbleLabel.position.set(0, 2.2 * scaleMultiplier, 0);
   group.add(bubbleLabel);
@@ -286,6 +299,7 @@ function spawnOrUpdateCharacter(charUrl, handUrl, memberName = '成員', mins = 
 
       const handScale = 1.5 * scaleMultiplier * 0.7; 
 
+      // 1. 裝備嚴格固定在左右兩側（左手負值、右手正值）
       const leftHand = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, alphaTest: 0.1, depthWrite: false }));
       leftHand.scale.set(handScale, handScale, 1);
       leftHand.position.set(-2.2 * scaleMultiplier, 0, 0.1);
@@ -384,13 +398,13 @@ window.closeRecordModal = function() {
 }
 
 // ==========================================
-// 6. UI、Firebase 與既有成員隱藏新名字欄位、按鈕變色與自動關閉
+// 6. UI、Firebase 與動態選單控制
 // ==========================================
 const mainContent = document.getElementById('main-content');
 const openPanelBtn = document.getElementById('open-panel-btn');
 const closePanelBtn = document.getElementById('close-panel-btn');
 const userSelect = document.getElementById('user-select');
-const newNameBox = document.getElementById('new-name-box'); // 新成員輸入框容器
+const newNameBox = document.getElementById('new-name-box'); 
 const newNameInput = document.getElementById('new-name');
 
 openPanelBtn.onclick = () => { mainContent.classList.remove('hidden'); openPanelBtn.classList.add('hidden'); };
@@ -519,7 +533,7 @@ function loadAllMembersFromFirebase() {
           const spreadZ = -8 - (index * 3); 
           const scaleFactor = Math.max(0.6, 1.2 - (index * 0.15)); 
 
-          spawnOrUpdateCharacter(member.charUrl, member.handUrl, name, member.mins, spreadX, spreadY, spreadZ, scaleFactor);
+          spawnOrUpdateCharacter(member.charUrl, member.handUrl, name, member.sportType, member.mins, spreadX, spreadY, spreadZ, scaleFactor);
         }
       });
 
@@ -529,7 +543,6 @@ function loadAllMembersFromFirebase() {
   });
 }
 
-// 選擇既有成員時隱藏新成員名字欄位
 userSelect.onchange = (e) => {
   const selectedName = e.target.value;
   if (selectedName) {
@@ -555,7 +568,6 @@ userSelect.onchange = (e) => {
   }
 };
 
-// 確認送出：無傳統彈窗，按鈕變色並在 1 秒後自動關閉
 window.submitData = function() {
   const nameInput = newNameInput.value.trim();
   const selectUser = userSelect.value;
@@ -582,14 +594,12 @@ window.submitData = function() {
       const newX = (Math.random() - 0.5) * 10;
       const newY = (Math.random() - 0.5) * 1.5;
       const newZ = -10 - Math.random() * 6;
-      spawnOrUpdateCharacter(tempCharUrl, tempHandUrl, finalName, mins || '0', newX, newY, newZ, 1.0);
+      spawnOrUpdateCharacter(tempCharUrl, tempHandUrl, finalName, sportType, mins || '0', newX, newY, newZ, 1.0);
 
-      // 按鈕變色為已送出
       const submitBtn = document.getElementById('submit-btn');
       submitBtn.style.background = '#2b6cb0';
       submitBtn.innerText = '已送出！';
 
-      // 1 秒後自動關閉介面並恢復按鈕狀態
       setTimeout(() => {
         mainContent.classList.add('hidden');
         openPanelBtn.classList.remove('hidden');
@@ -649,9 +659,10 @@ function animate() {
       sprite.material.rotation = group.userData.isDragging ? 0 : Math.sin(time * 0.003 + offset) * 0.1;
     }
 
-    if (group.userData.hasHands && group.children.length >= 5) {
-      const leftHand = group.children[3];
-      const rightHand = group.children[4];
+    // 左右手精準分開在兩側
+    if (group.userData.hasHands && group.children.length >= 6) {
+      const leftHand = group.children[4];
+      const rightHand = group.children[5];
       const sway = Math.sin(time * 0.003 + offset); 
       const swayFast = Math.cos(time * 0.005 + offset);
 
