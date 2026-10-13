@@ -83,6 +83,27 @@ body.night-mode #night-sky {
 }
 
 /* ==========================================
+   3D 告示牌文字
+   ========================================== */
+.board-text {
+  color: #38423b;
+  font-size: 14px;
+  font-weight: 900;
+  text-align: center;
+  line-height: 1.2;
+  pointer-events: none;
+  text-shadow: 1px 1px 3px rgba(255, 255, 255, 0.6);
+  transform: translateY(-5px);
+}
+#total-mins-num {
+  font-size: 34px;
+  color: #e25e48;
+  display: inline-block;
+  margin: 2px 0;
+  text-shadow: 2px 2px 0px #fff;
+}
+
+/* ==========================================
    動動碎碎念 輪播 Bar
    ========================================== */
 .ticker-container-card {
@@ -132,12 +153,12 @@ body.night-mode #night-sky {
 }
 
 /* ==========================================
-   隨機 Logo 按鈕 (移至右上方)
+   隨機 Logo 按鈕
    ========================================== */
 .floating-btn {
   position: absolute; 
   top: 20px; 
-  right: 20px; /* 網頁版固定在右上方 */
+  right: 20px; 
   background: transparent; 
   border: none; 
   padding: 0; 
@@ -145,28 +166,15 @@ body.night-mode #night-sky {
   z-index: 10; 
   transition: 0.3s;
 }
-.floating-btn:hover { 
-  transform: scale(1.08); /* 移除了 translateX，直接放大即可 */
-}
-.floating-btn img {
-  height: 60px; 
-  width: auto;
-  object-fit: contain;
-  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.25)); 
-}
+.floating-btn:hover { transform: scale(1.08); }
+.floating-btn img { height: 60px; width: auto; object-fit: contain; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.25)); }
 
 /* RWD 手機版微調 */
 @media (max-width: 768px) {
   .murmur-card.inactive { display: none !important; }
   .murmur-card { width: 100%; min-width: unset; border-radius: 10px; }
-  
-  .floating-btn {
-    top: 15px; 
-    right: 15px; /* 手機版稍微向內縮 */
-  }
-  .floating-btn img {
-    height: 50px; /* 手機版稍微縮小一點 Logo 避免擋住畫面 */
-  }
+  .floating-btn { top: 15px; right: 15px; }
+  .floating-btn img { height: 50px; }
 }
 
 /* ==========================================
