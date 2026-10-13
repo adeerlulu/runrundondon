@@ -92,8 +92,7 @@ body.night-mode #night-sky {
   text-align: center;
   line-height: 1;
   pointer-events: none;
-  text-shadow: 0px 0px 0px rgba(0, 0, 0, 0.8);
-  white-space: nowrap; /* 確保數字和單位絕對不會被斷行 */
+    white-space: nowrap; 
   transform: translateY(-8px);
 }
 #total-mins-num {
@@ -101,8 +100,7 @@ body.night-mode #night-sky {
   color: #ffffff;
   display: inline-block;
   margin-right: 3px;
-  text-shadow: 2px 2px 3px rgba(0, 0, 0, 0.9);
-}
+  }
 
 /* ==========================================
    動動碎碎念 輪播 Bar
