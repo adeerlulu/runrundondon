@@ -209,7 +209,8 @@ function animateTotalMins() {
   
   if (totalMinsAnimId) cancelAnimationFrame(totalMinsAnimId);
   
-  const duration = 2000; // 動畫時長 2 秒
+  // ★ 數字動畫時長改為 600 毫秒，大幅提升滾動速度
+  const duration = 600; 
   let startTimestamp = null;
   
   const step = (timestamp) => {
@@ -262,21 +263,18 @@ function createBillboard() {
       const bH = tex2.image.height * scaleMulti;
       
       board.scale.set(bW, bH, 1);
-      // 精準設定：看板中心點為棍子最頂端往下 50px
       const topOffset = 50 * scaleMulti;
       const boardY = pH - topOffset - (bH / 2);
       board.position.set(0, boardY, 0.05); 
       billboardGroup.add(board);
 
-      // 加入 3D 文字看板
       const boardTextDiv = document.createElement('div');
       boardTextDiv.className = 'board-text';
       boardTextDiv.innerHTML = `各位總共動了<br><span id="total-mins-num">${currentTotalMinsDisplay}</span><br>分鐘!!!`;
       const boardLabel = new THREE.CSS2DObject(boardTextDiv);
-      boardLabel.position.set(0, boardY, 0.1); // 放於看板正中央，微推向 Z 軸避免被圖片吃掉
+      boardLabel.position.set(0, boardY, 0.1); 
       billboardGroup.add(boardLabel);
 
-      // 圖檔與文字載入完成後觸發一次數字滾動
       animateTotalMins();
     });
   });
@@ -431,7 +429,7 @@ function showRecordModal(data) {
 window.closeRecordModal = function() { document.getElementById('record-modal').classList.add('hidden'); }
 
 // ==========================================
-// 6. UI、Firebase 與表單自動修正
+// 6. UI、Firebase
 // ==========================================
 const mainContent = document.getElementById('main-content');
 const openPanelBtn = document.getElementById('open-panel-btn');
@@ -513,12 +511,11 @@ function loadAllMembersFromFirebase() {
     membersArray.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
 
     murmurList = [];
-    let calculatedTotalMins = 0; // ★ 計算總時數
+    let calculatedTotalMins = 0; 
 
     membersArray.forEach((member, index) => {
       const opt = document.createElement('option'); opt.value = member.name; opt.innerText = member.name; userSelect.appendChild(opt);
 
-      // 加總所有人的運動分鐘數
       calculatedTotalMins += (parseInt(member.mins) || 0);
 
       if (member.murmur) {
@@ -534,7 +531,6 @@ function loadAllMembersFromFirebase() {
       }
     });
     
-    // 更新看板上的數字動畫
     updateTotalMinsDisplay(calculatedTotalMins);
     
     renderMurmurCards(); isLoadedFromFirebase = true;
