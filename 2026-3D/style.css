@@ -87,10 +87,10 @@ body.night-mode #night-sky {
    ========================================== */
 .board-text {
   color: #ffffff;
-  font-size: 11px; /* 稍微縮小字體以完美符合板子寬度 */
+  font-size: 9px; /* 稍微縮小字體以完美符合板子寬度 */
   font-weight: 900;
   text-align: center;
-  line-height: 1.4;
+  line-height: 1.2;
   pointer-events: none;
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
   white-space: nowrap; /* 確保數字和單位絕對不會被斷行 */
