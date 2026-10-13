@@ -1,22 +1,27 @@
 // ==========================================
-// 0. 日夜時間過渡與夜空濾鏡植入
+// 0. 日夜時間過渡與天空背景層 (不會蓋住 3D 畫布！)
 // ==========================================
+const daySky = document.createElement('div');
+daySky.id = 'day-sky';
+document.body.insertBefore(daySky, document.body.firstChild);
+
 const nightSky = document.createElement('div');
 nightSky.id = 'night-sky';
 document.body.insertBefore(nightSky, document.body.firstChild);
 
+let sceneFog; // 先宣告，等場景建立後再更新
+
 function updateTimeMode() {
   const hour = new Date().getHours();
-  // 晚上 18:00 (含) 到早上 05:00 (不含，即 04:59) 為夜晚
+  // 晚上 18:00 (含) 到早上 05:00 (不含) 為夜晚
   if (hour >= 18 || hour < 5) {
     document.body.classList.add('night-mode');
+    if(sceneFog) sceneFog.color.setHex(0xfcc0c7); // 讓霧氣稍微帶點夜晚的粉紫感
   } else {
     document.body.classList.remove('night-mode');
+    if(sceneFog) sceneFog.color.setHex(0xf2eae9); // 白天的霧氣色
   }
 }
-// 進入網頁立刻偵測一次，之後每分鐘更新一次
-updateTimeMode();
-setInterval(updateTimeMode, 60000);
 
 // ==========================================
 // 0.1 Firebase 初始化設定
@@ -61,7 +66,8 @@ const config = {
 };
 const scene = new THREE.Scene();
 scene.background = null; 
-scene.fog = new THREE.Fog(config.fogColor, 10, 120);
+sceneFog = new THREE.Fog(config.fogColor, 10, 120);
+scene.fog = sceneFog;
 
 const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.set(0, 8, 25);
@@ -71,7 +77,7 @@ const canvas = document.querySelector('#bg-canvas');
 const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-renderer.setClearColor(0x000000, 0); 
+renderer.setClearColor(0x000000, 0); // 確保 WebGL 完全透明
 
 const labelRenderer = new THREE.CSS2DRenderer();
 labelRenderer.setSize(window.innerWidth, window.innerHeight);
@@ -456,6 +462,7 @@ window.submitData = function() {
     }).catch(e => alert("儲存失敗：" + e.message));
 }
 
+// 首次載入執行
 window.addEventListener('DOMContentLoaded', () => { 
   const labels = document.querySelectorAll('label');
   labels.forEach(lbl => {
@@ -467,6 +474,8 @@ window.addEventListener('DOMContentLoaded', () => {
     murmurInput.placeholder = '只能碎念30字...';
     murmurInput.maxLength = 30; 
   }
+  
+  updateTimeMode();
   loadAllMembersFromFirebase(); 
   startMurmurTicker(); 
 });
