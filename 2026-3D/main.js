@@ -41,7 +41,6 @@ const dbRef = firebase.database().ref('2026_records');
 // ==========================================
 // 1. 圖庫資料與專屬色票設定
 // ==========================================
-// 自動產生 ani_1.png 到 ani_16.png
 const characterList = [];
 for (let i = 1; i <= 16; i++) {
   characterList.push(`./character/ani/ani_${i}.png`);
@@ -184,6 +183,53 @@ function updateDynamicGrass() {
     }
   });
 }
+
+// ==========================================
+// 3.1 裝飾：3D 告示牌系統
+// ==========================================
+function createBillboard() {
+  const billboardGroup = new THREE.Group();
+  // 將告示牌放置在偏左後方的草地上
+  billboardGroup.position.set(-8, -1.8, -16); 
+  scene.add(billboardGroup);
+
+  textureLoader.load('./deco/borad_1.png', (tex1) => {
+    tex1.magFilter = THREE.LinearFilter; tex1.minFilter = THREE.LinearFilter;
+    if (THREE.SRGBColorSpace) tex1.colorSpace = THREE.SRGBColorSpace;
+    
+    const poleMat = new THREE.SpriteMaterial({ map: tex1, transparent: true, alphaTest: 0.1, depthWrite: false });
+    const pole = new THREE.Sprite(poleMat);
+    
+    // 取得圖片實際比例，將 1px 轉換為 0.012 的 3D 空間等比縮放
+    const scaleMulti = 0.012; 
+    const pW = tex1.image.width * scaleMulti;
+    const pH = tex1.image.height * scaleMulti;
+    
+    pole.scale.set(pW, pH, 1);
+    // 將棍子底部對齊草地表面 (將中心點往上拉高高度的一半)
+    pole.position.set(0, pH / 2, 0); 
+    billboardGroup.add(pole);
+
+    textureLoader.load('./deco/borad_2.png', (tex2) => {
+      tex2.magFilter = THREE.LinearFilter; tex2.minFilter = THREE.LinearFilter;
+      if (THREE.SRGBColorSpace) tex2.colorSpace = THREE.SRGBColorSpace;
+      
+      const boardMat = new THREE.SpriteMaterial({ map: tex2, transparent: true, alphaTest: 0.1, depthWrite: false });
+      const board = new THREE.Sprite(boardMat);
+      
+      const bW = tex2.image.width * scaleMulti;
+      const bH = tex2.image.height * scaleMulti;
+      
+      board.scale.set(bW, bH, 1);
+      // X 軸設為 0 以完美置中於棍子
+      // 棍子的最頂端高度為 pH，往下 50px (50 * scaleMulti)，再減去板子本身的一半高度即可對齊中心
+      const topOffset = 50 * scaleMulti;
+      board.position.set(0, pH - topOffset - (bH / 2), 0.05); // Z軸微調 0.05 確保牌子永遠貼在棍子前方
+      billboardGroup.add(board);
+    });
+  });
+}
+createBillboard();
 
 // ==========================================
 // 4. 多角色系統
@@ -333,7 +379,7 @@ function showRecordModal(data) {
 window.closeRecordModal = function() { document.getElementById('record-modal').classList.add('hidden'); }
 
 // ==========================================
-// 6. UI、Firebase
+// 6. UI、Firebase 與表單自動修正
 // ==========================================
 const mainContent = document.getElementById('main-content');
 const openPanelBtn = document.getElementById('open-panel-btn');
@@ -478,16 +524,15 @@ window.addEventListener('DOMContentLoaded', () => {
     if(lbl.innerText.includes('今日運動時數')) lbl.innerText = '今日運動時數(分鐘)';
     if(lbl.innerText.includes('今日 Murmur')) lbl.innerText = '今日 Murmur';
   });
-  
   const murmurInput = document.getElementById('murmur-input');
   if (murmurInput) {
     murmurInput.placeholder = '只能碎念30字...';
     murmurInput.maxLength = 30; 
   }
   
-    const openPanelBtn = document.getElementById('open-panel-btn');
+  const openPanelBtn = document.getElementById('open-panel-btn');
   if (openPanelBtn) {
-    const randomLogoId = Math.floor(Math.random() * 4) + 1; // 產生 1, 2, 3, 4
+    const randomLogoId = Math.floor(Math.random() * 4) + 1; 
     openPanelBtn.innerHTML = `<img src="./logo/logo_${randomLogoId}.png" alt="今日工事">`;
   }
   
