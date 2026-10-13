@@ -15,7 +15,7 @@ firebase.initializeApp(firebaseConfig);
 const dbRef = firebase.database().ref('2026_records'); 
 
 // ==========================================
-// 1. 圖庫資料設定
+// 1. 圖庫資料與專屬色票設定
 // ==========================================
 const characterList = [ './character/ani/ani_1.png', './character/ani/ani_2.png' ];
 const handList = [
@@ -25,6 +25,9 @@ const handList = [
 ];
 const grassList = [];
 for (let i = 1; i <= 24; i++) grassList.push(`./grass/grass_${i}.png`);
+
+// 你提供的絕美漸層色票，用於隨機運動項目顏色
+const sportColors = ['#5C74A4', '#8582A9', '#A58B98', '#CBA3B9', '#BCA1BE', '#C28487', '#E28C7D', '#F5BCA9'];
 
 // ==========================================
 // 2. 場景與渲染器初始化
@@ -153,7 +156,7 @@ function updateDynamicGrass() {
 }
 
 // ==========================================
-// 4. 多角色系統
+// 4. 多角色系統 (加入色票與修改負債文字)
 // ==========================================
 const allPlayerGroups = []; 
 let allMembersData = {}; 
@@ -170,22 +173,29 @@ function updatePreviewUI() {
 function previewCharacter(url) { tempCharUrl = url; updatePreviewUI(); document.getElementById('hand-box').style.display = 'flex'; }
 function previewHand(url) { tempHandUrl = url; updatePreviewUI(); }
 
-function getBubbleText(sportType) { return `努力ㄉ${sportType || '運動'}！`; }
+// 隨機從色票陣列中挑選顏色套用至運動項目
+function getBubbleHTML(sportType) {
+  const color = sportColors[Math.floor(Math.random() * sportColors.length)];
+  return `努力ㄉ<span style="color:${color}; font-size:14px; font-weight:900;">${sportType || '運動'}</span>！`;
+}
+
+// 倒數文字改為「負債」
 function getCountdownText(minsInput) {
   const diff = 3900 - (parseInt(minsInput) || 0);
-  if (diff > 0) return `還要動…${diff}分鐘`;
+  if (diff > 0) return `負債${diff}分鐘`;
   else if (diff === 0) return `剛好達成 3900 分鐘！`;
   else return `哇喔多動了${Math.abs(diff)}分鐘`;
 }
 
 function spawnOrUpdateCharacter(charUrl, handUrl, memberName = '成員', sportType = '健走', mins = '0', customX = 0, customY = 0, customZ = -10, scaleMultiplier = 1) {
   let existingGroup = allPlayerGroups.find(g => g.userData.name === memberName);
-  const bubbleText = getBubbleText(sportType);
+  const bubbleHTML = getBubbleHTML(sportType);
   const countdownText = getCountdownText(mins);
 
   if (existingGroup) {
     const bubbleLabel = existingGroup.getObjectByName('bubbleLabel');
-    if (bubbleLabel) bubbleLabel.element.textContent = bubbleText;
+    // 使用 innerHTML 以渲染 span 標籤顏色
+    if (bubbleLabel) bubbleLabel.element.innerHTML = bubbleHTML;
     const countdownLabel = existingGroup.getObjectByName('countdownLabel');
     if (countdownLabel) countdownLabel.element.textContent = countdownText;
     return;
@@ -209,7 +219,7 @@ function spawnOrUpdateCharacter(charUrl, handUrl, memberName = '成員', sportTy
   countdownLabel.position.set(0, -2.7 * scaleMultiplier, 0); 
   group.add(countdownLabel);
 
-  const bubbleDiv = document.createElement('div'); bubbleDiv.className = 'player-speech-bubble'; bubbleDiv.textContent = bubbleText;
+  const bubbleDiv = document.createElement('div'); bubbleDiv.className = 'player-speech-bubble'; bubbleDiv.innerHTML = bubbleHTML;
   const bubbleLabel = new THREE.CSS2DObject(bubbleDiv); bubbleLabel.name = 'bubbleLabel';
   bubbleLabel.position.set(0, 2.6 * scaleMultiplier, 0);
   group.add(bubbleLabel);
@@ -294,7 +304,7 @@ function showRecordModal(data) {
 window.closeRecordModal = function() { document.getElementById('record-modal').classList.add('hidden'); }
 
 // ==========================================
-// 6. UI、Firebase 與左至右排序漸變輪播
+// 6. UI、Firebase
 // ==========================================
 const mainContent = document.getElementById('main-content');
 const openPanelBtn = document.getElementById('open-panel-btn');
@@ -325,7 +335,7 @@ let currentMurmurStartIndex = 0;
 function renderMurmurCards() {
   const wrapper = document.getElementById('ticker-cards-wrapper');
   if (!wrapper) return; wrapper.innerHTML = '';
-  if (murmurList.length === 0) { wrapper.innerHTML = '<div style="color:#2c5282; font-size:13px; font-weight:bold;">目前還沒有人留下碎碎念喔！</div>'; return; }
+  if (murmurList.length === 0) { wrapper.innerHTML = '<div style="color:#6a7c73; font-size:13px; font-weight:bold;">目前還沒有人留下碎碎念喔！</div>'; return; }
 
   const displayCount = Math.min(3, murmurList.length);
   for (let i = 0; i < displayCount; i++) {
@@ -425,7 +435,7 @@ window.submitData = function() {
   dbRef.child(finalName).set({ name: finalName, mins: mins || '0', sportType: sportType, murmur: murmur || '今天也有好好運動！', charUrl: tempCharUrl, handUrl: tempHandUrl, updatedAt: Date.now() })
     .then(() => {
       spawnOrUpdateCharacter(tempCharUrl, tempHandUrl, finalName, sportType, mins || '0', (Math.random() - 0.5)*10, (Math.random() - 0.5)*1.5, -10 - Math.random()*6, 1.0);
-      const submitBtn = document.getElementById('submit-btn'); submitBtn.style.background = '#2b6cb0'; submitBtn.innerText = '已送出！';
+      const submitBtn = document.getElementById('submit-btn'); submitBtn.style.background = '#7f9188'; submitBtn.innerText = '已送出！';
       setTimeout(() => { mainContent.classList.add('hidden'); openPanelBtn.classList.remove('hidden'); submitBtn.style.background = '#38a169'; submitBtn.innerText = '確認送出'; }, 1000);
     }).catch(e => alert("儲存失敗：" + e.message));
 }
@@ -433,7 +443,7 @@ window.submitData = function() {
 window.addEventListener('DOMContentLoaded', () => { loadAllMembersFromFirebase(); startMurmurTicker(); });
 
 // ==========================================
-// 7. 動畫迴圈 (移除 computeVertexNormals 以消除滾動陰影)
+// 7. 動畫迴圈
 // ==========================================
 let mouseX = 0, mouseY = 0;
 document.addEventListener('mousemove', (e) => { mouseX = (e.clientX / window.innerWidth) * 2 - 1; mouseY = -(e.clientY / window.innerHeight) * 2 + 1; });
@@ -484,7 +494,6 @@ function animate() {
     pPos.setZ(i, Math.sin(x*0.04)*Math.cos(yOff*0.04)*3 + Math.sin(x*0.08)*Math.sin(yOff*0.02)*1.5 + Math.pow(Math.abs(x)/(tWidth/2),2)*5 - 2);
   }
   pPos.needsUpdate = true; 
-  // 刻意移除 pGeo.computeVertexNormals(); 以停止陰影隨波浪滾動的現象
 
   camera.position.x += (mouseX * 6 - camera.position.x) * 0.03; camera.position.y += ((8 + mouseY * 2) - camera.position.y) * 0.03; camera.lookAt(0, 2, -10);
   renderer.render(scene, camera); labelRenderer.render(scene, camera);
