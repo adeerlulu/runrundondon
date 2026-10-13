@@ -31,7 +31,7 @@ body.night-mode #night-sky {
 }
 
 /* ==========================================
-   3D 標籤 UI (移除 Transform，交給 3D 精準定位)
+   3D 標籤 UI
    ========================================== */
 .player-name-tag {
   background: rgba(0, 0, 0, 0.75);
@@ -74,7 +74,7 @@ body.night-mode #night-sky {
   position: absolute;
   bottom: -6px;
   left: 50%;
-  transform: translateX(-50%); /* 泡泡內部的箭頭居中 */
+  transform: translateX(-50%); 
   border-width: 6px 6px 0;
   border-style: solid;
   border-color: #cbd5e0 transparent;
@@ -137,93 +137,10 @@ body.night-mode #night-sky {
 }
 
 /* ==========================================
-   今日工事 UI 面板 
+   隨機 Logo 按鈕 (透明背景、只顯示圖片)
    ========================================== */
 .floating-btn {
-  position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
-  background: rgba(154, 170, 163, 0.8); backdrop-filter: blur(6px);
-  color: white; border: 1px solid rgba(255,255,255,0.4); 
-  padding: 12px 30px; border-radius: 20px; font-size: 18px; font-weight: bold; cursor: pointer;
-  z-index: 10; box-shadow: 0 4px 15px rgba(0,0,0,0.15); transition: 0.3s;
-}
-.floating-btn:hover { background: rgba(127, 145, 136, 0.9); }
-
-.main-container {
-  position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
-  background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(10px);
-  padding: 25px 20px 20px; border-radius: 20px; box-shadow: 0 10px 35px rgba(0,0,0,0.2);
-  z-index: 20; width: 90%; max-width: 550px; max-height: 85vh;
-  overflow-y: auto; color: #2d3748; box-sizing: border-box; border: 1px solid rgba(255, 255, 255, 0.6);
-}
-
-.close-x { position: absolute; top: 12px; right: 18px; background: transparent; border: none; font-size: 24px; color: #555; cursor: pointer; line-height: 1; }
-.close-x:hover { color: #000; }
-.section-header { margin-bottom: 10px; border-bottom: 2px solid rgba(154, 170, 163, 0.5); padding-bottom: 5px; }
-.section-title { font-size: 18px; font-weight: bold; color: #6a7c73; }
-
-.preview-container { display: flex; justify-content: center; margin-bottom: 12px; }
-.preview-box { width: 90px; height: 90px; background: rgba(237, 242, 247, 0.7); border-radius: 14px; border: 2px dashed #cbd5e0; display: flex; justify-content: center; align-items: center; position: relative; overflow: hidden; }
-#preview-avatar { width: 55px; height: 55px; object-fit: contain; z-index: 1; }
-#preview-hand { position: absolute; right: 8px; bottom: 8px; width: 28px; height: 28px; object-fit: contain; z-index: 2; }
-#preview-placeholder { font-size: 11px; color: #718096; text-align: center; }
-
-/* 強制顯示裝備選取區 */
-#hand-box { display: flex !important; }
-
-.control-row { display: flex; gap: 12px; align-items: flex-end; margin-top: 10px; }
-.input-box { display: flex; flex-direction: column; flex: 1; }
-.input-box label { font-size: 13px; margin-bottom: 4px; color: #4a5568; font-weight: bold; }
-
-/* ==========================================
-   美化表單輸入與下拉選單 (主題綠色系)
-   ========================================== */
-.form-input { 
-  padding: 8px 12px; 
-  border-radius: 10px; 
-  border: 2px solid #cbd5e0; 
-  background: rgba(255,255,255,0.9); 
-  font-size: 13px; 
-  width: 100%; 
-  height: 42px; 
-  box-sizing: border-box; 
-  transition: all 0.3s ease;
-  color: #2d3748;
-  font-weight: bold;
-}
-.form-input:focus {
-  outline: none;
-  border-color: #9AAAA3;
-  box-shadow: 0 0 8px rgba(154, 170, 163, 0.4);
-}
-select.form-input {
-  appearance: none;
-  -webkit-appearance: none;
-  /* 替換為專屬顏色的下拉箭頭 Icon */
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237f9188' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-  background-size: 16px;
-  cursor: pointer;
-}
-select.form-input:hover {
-  border-color: #9AAAA3;
-}
-
-.action-btn { border: none; padding: 10px; border-radius: 10px; cursor: pointer; width: 100%; font-weight: bold; height: 42px; color: white; transition: 0.2s; box-sizing: border-box;}
-.primary-btn { background: #9AAAA3; }
-.secondary-btn { background: #7f9188; }
-.submit-btn { background: #38a169; font-size: 15px; margin-top: 5px; }
-
-.modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 30; display: flex; justify-content: center; align-items: center; }
-.hidden { display: none !important; }
-
-.modal-content {
-  background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px);
-  padding: 25px; border-radius: 15px; width: 80%; max-width: 380px; text-align: center; 
-  box-shadow: 0 10px 25px rgba(0,0,0,0.2); border: 1px solid rgba(255, 255, 255, 0.6);
-}
-
-.grid-container { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 15px 0; }
-.grid-item { width: 60px; height: 60px; background: rgba(240, 240, 240, 0.8); border-radius: 10px; cursor: pointer; object-fit: contain; border: 3px solid transparent; transition: 0.2s; padding: 4px; }
-.grid-item:hover { border-color: #9AAAA3; transform: scale(1.1); }
-.close-btn { background: rgba(204, 204, 204, 0.8); border: none; padding: 8px 16px; border-radius: 10px; cursor: pointer; font-weight: bold; margin-top: 10px;}
+  position: absolute; top: 15px; left: 50%; transform: translateX(-50%);
+  background: transparent; /* 移除原本的背景色與毛玻璃 */
+  border: none; 
+  padding: 0;
