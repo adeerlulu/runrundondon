@@ -9,7 +9,7 @@ body, html {
 }
 
 /* ==========================================
-   3D 標籤 UI (完全交由 JS 3D 座標控制，不寫 transform)
+   3D 標籤 UI
    ========================================== */
 .player-name-tag {
   background: rgba(0, 0, 0, 0.75);
@@ -21,10 +21,11 @@ body, html {
   white-space: nowrap;
   pointer-events: none;
   box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  transform: translateX(-50%) translateY(32px);
 }
 
 .player-countdown-tag {
-  background: rgba(154, 170, 163, 0.9); /* #9AAAA3 */
+  background: rgba(154, 170, 163, 0.9);
   color: white;
   padding: 3px 9px;
   border-radius: 10px;
@@ -33,6 +34,7 @@ body, html {
   white-space: nowrap;
   pointer-events: none;
   box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  transform: translateX(-50%) translateY(56px); 
 }
 
 .player-speech-bubble {
@@ -46,18 +48,25 @@ body, html {
   pointer-events: none;
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   border: 2px solid #cbd5e0;
+  transform: translateX(-50%) translateY(-48px);
+  animation: floatBubble 2s ease-in-out infinite;
 }
 .player-speech-bubble::after {
   content: '';
   position: absolute;
   bottom: -6px;
   left: 50%;
-  transform: translateX(-50%); /* 這個是泡泡內部的小箭頭，保留沒問題 */
+  transform: translateX(-50%);
   border-width: 6px 6px 0;
   border-style: solid;
   border-color: #cbd5e0 transparent;
   display: block;
   width: 0;
+}
+
+@keyframes floatBubble {
+  0%, 100% { transform: translateX(-50%) translateY(-48px); }
+  50% { transform: translateX(-50%) translateY(-52px); }
 }
 
 /* ==========================================
@@ -97,11 +106,12 @@ body, html {
 }
 .ticker-nav-btn:hover { background: #7f9188; transform: scale(1.1); }
 
+/* 修正陰影被切斷：移除原本的 overflow: hidden，加上 padding 給陰影空間 */
 .ticker-cards-wrapper {
   display: flex;
   gap: 10px;
   flex: 1;
-  overflow: hidden;
+  padding: 15px 5px; 
   justify-content: center;
   align-items: center;
   pointer-events: auto;
@@ -111,7 +121,7 @@ body, html {
   background: rgba(255, 255, 255, 0.6); 
   backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.5);
-  border-radius: 14px;
+  border-radius: 10px; /* 統一改為導圓角 10px */
   padding: 10px 14px;
   width: calc(33.333% - 6px);
   min-width: 175px;
@@ -122,12 +132,14 @@ body, html {
   transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
+/* 最新/當前查看的留言：加強透明度(背景更實心)，加上莫蘭迪綠色框 */
 .murmur-card.active {
   opacity: 1;
   transform: scale(1.05);
   z-index: 2;
+  background: rgba(255, 255, 255, 0.95); /* 增強不透明度 */
   box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-  border-color: rgba(255, 255, 255, 0.9);
+  border: 2px solid #7f9188; /* 莫蘭迪綠色邊框 */
 }
 
 .murmur-card.inactive {
@@ -159,7 +171,7 @@ body, html {
 }
 
 /* ==========================================
-   RWD 手機版：隱藏其他卡片，只顯示最新/當前一則
+   RWD 手機版：隱藏其他卡片，只顯示最新一則，且保留圓角
    ========================================== */
 @media (max-width: 768px) {
   .murmur-card.inactive {
@@ -168,6 +180,7 @@ body, html {
   .murmur-card {
     width: 100%;
     min-width: unset;
+    border-radius: 10px; /* 確保圓角不跑版 */
   }
 }
 
@@ -211,9 +224,31 @@ body, html {
 .control-row { display: flex; gap: 12px; align-items: flex-end; margin-top: 10px; }
 .input-box { display: flex; flex-direction: column; flex: 1; }
 .input-box label { font-size: 13px; margin-bottom: 4px; color: #4a5568; font-weight: bold; }
-.form-input { padding: 8px 10px; border-radius: 8px; border: 1px solid #cbd5e0; background: rgba(255,255,255,0.8); font-size: 13px; width: 100%; box-sizing: border-box; }
 
-.action-btn { border: none; padding: 10px; border-radius: 10px; cursor: pointer; width: 100%; font-weight: bold; height: 42px; color: white; transition: 0.2s;}
+/* 修正欄位高度：確保表單輸入與右側按鈕高度完全相同 */
+.form-input { 
+  padding: 8px 10px; 
+  border-radius: 8px; 
+  border: 1px solid #cbd5e0; 
+  background: rgba(255,255,255,0.8); 
+  font-size: 13px; 
+  width: 100%; 
+  height: 42px; /* 固定高度為 42px */
+  box-sizing: border-box; 
+}
+
+.action-btn { 
+  border: none; 
+  padding: 10px; 
+  border-radius: 10px; 
+  cursor: pointer; 
+  width: 100%; 
+  font-weight: bold; 
+  height: 42px; /* 與 .form-input 齊平 */
+  color: white; 
+  transition: 0.2s;
+  box-sizing: border-box;
+}
 .primary-btn { background: #9AAAA3; }
 .secondary-btn { background: #7f9188; }
 .submit-btn { background: #38a169; font-size: 15px; margin-top: 5px; }
