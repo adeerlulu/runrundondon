@@ -209,7 +209,7 @@ function animateTotalMins() {
   
   if (totalMinsAnimId) cancelAnimationFrame(totalMinsAnimId);
   
-  const duration = 600; 
+  const duration = 300; 
   let startTimestamp = null;
   
   const step = (timestamp) => {
