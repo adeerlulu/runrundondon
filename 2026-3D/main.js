@@ -26,7 +26,6 @@ const handList = [
 const grassList = [];
 for (let i = 1; i <= 24; i++) grassList.push(`./grass/grass_${i}.png`);
 
-// 你提供的絕美漸層色票，用於隨機運動項目顏色
 const sportColors = ['#5C74A4', '#8582A9', '#A58B98', '#CBA3B9', '#BCA1BE', '#C28487', '#E28C7D', '#F5BCA9'];
 
 // ==========================================
@@ -156,7 +155,7 @@ function updateDynamicGrass() {
 }
 
 // ==========================================
-// 4. 多角色系統 (加入色票與修改負債文字)
+// 4. 多角色系統
 // ==========================================
 const allPlayerGroups = []; 
 let allMembersData = {}; 
@@ -173,13 +172,11 @@ function updatePreviewUI() {
 function previewCharacter(url) { tempCharUrl = url; updatePreviewUI(); document.getElementById('hand-box').style.display = 'flex'; }
 function previewHand(url) { tempHandUrl = url; updatePreviewUI(); }
 
-// 隨機從色票陣列中挑選顏色套用至運動項目
 function getBubbleHTML(sportType) {
   const color = sportColors[Math.floor(Math.random() * sportColors.length)];
   return `努力ㄉ<span style="color:${color}; font-size:14px; font-weight:900;">${sportType || '運動'}</span>！`;
 }
 
-// 倒數文字改為「負債」
 function getCountdownText(minsInput) {
   const diff = 3900 - (parseInt(minsInput) || 0);
   if (diff > 0) return `負債${diff}分鐘`;
@@ -194,7 +191,6 @@ function spawnOrUpdateCharacter(charUrl, handUrl, memberName = '成員', sportTy
 
   if (existingGroup) {
     const bubbleLabel = existingGroup.getObjectByName('bubbleLabel');
-    // 使用 innerHTML 以渲染 span 標籤顏色
     if (bubbleLabel) bubbleLabel.element.innerHTML = bubbleHTML;
     const countdownLabel = existingGroup.getObjectByName('countdownLabel');
     if (countdownLabel) countdownLabel.element.textContent = countdownText;
@@ -304,7 +300,7 @@ function showRecordModal(data) {
 window.closeRecordModal = function() { document.getElementById('record-modal').classList.add('hidden'); }
 
 // ==========================================
-// 6. UI、Firebase
+// 6. UI、Firebase 與表單自動修正
 // ==========================================
 const mainContent = document.getElementById('main-content');
 const openPanelBtn = document.getElementById('open-panel-btn');
@@ -413,9 +409,10 @@ userSelect.onchange = (e) => {
     dbRef.child(selectedName).once('value', (snapshot) => {
       const val = snapshot.val();
       if (val) {
-        if(val.mins) document.getElementById('mins').value = val.mins;
-        if(val.sportType) document.getElementById('sport-type').value = val.sportType;
-        if(val.murmur) document.getElementById('murmur-input').value = val.murmur;
+        // ★ 選擇老成員時：清空舊資料，逼迫重新填寫，只保留頭像和裝備預覽
+        document.getElementById('mins').value = '';
+        document.getElementById('sport-type').value = '健走'; 
+        document.getElementById('murmur-input').value = '';
         if(val.charUrl) previewCharacter(val.charUrl);
         if(val.handUrl) previewHand(val.handUrl);
       }
@@ -440,7 +437,25 @@ window.submitData = function() {
     }).catch(e => alert("儲存失敗：" + e.message));
 }
 
-window.addEventListener('DOMContentLoaded', () => { loadAllMembersFromFirebase(); startMurmurTicker(); });
+// ==========================================
+// 自動尋找並取代 HTML 中的舊有標籤文字
+// ==========================================
+window.addEventListener('DOMContentLoaded', () => { 
+  const labels = document.querySelectorAll('label');
+  labels.forEach(lbl => {
+    if(lbl.innerText.includes('今日運動時數')) lbl.innerText = '今日運動時數(分鐘)';
+    if(lbl.innerText.includes('今日 Murmur')) lbl.innerText = '今日 Murmur';
+  });
+
+  const murmurInput = document.getElementById('murmur-input');
+  if (murmurInput) {
+    murmurInput.placeholder = '只能碎念30字...';
+    murmurInput.maxLength = 30; // 鎖定最多輸入 30 字
+  }
+
+  loadAllMembersFromFirebase(); 
+  startMurmurTicker(); 
+});
 
 // ==========================================
 // 7. 動畫迴圈
