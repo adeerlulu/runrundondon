@@ -5,7 +5,6 @@ body, html {
 
 #bg-canvas { 
   position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; 
-  /* 將漸層顏色節點往上提，確保在地平線以上完成漸變 */
   background: linear-gradient(to bottom, #7c93cb 0%, #a4b3d9 15%, #cbcded 35%, #f2eae9 55%, #f2eae9 100%);
 }
 
@@ -22,10 +21,12 @@ body, html {
   white-space: nowrap;
   pointer-events: none;
   box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  transform: translateX(-50%) translateY(32px);
 }
 
+/* 拉開間距：將 Y 軸下推至 56px */
 .player-countdown-tag {
-  background: rgba(44, 82, 130, 0.9);
+  background: rgba(154, 170, 163, 0.9); /* #9AAAA3 RGB轉換 */
   color: white;
   padding: 3px 9px;
   border-radius: 10px;
@@ -34,10 +35,11 @@ body, html {
   white-space: nowrap;
   pointer-events: none;
   box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  transform: translateX(-50%) translateY(56px); 
 }
 
 .player-speech-bubble {
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.95);
   color: #2d3748;
   padding: 6px 12px;
   border-radius: 12px;
@@ -47,6 +49,8 @@ body, html {
   pointer-events: none;
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   border: 2px solid #cbd5e0;
+  transform: translateX(-50%) translateY(-48px);
+  animation: floatBubble 2s ease-in-out infinite;
 }
 .player-speech-bubble::after {
   content: '';
@@ -59,6 +63,11 @@ body, html {
   border-color: #cbd5e0 transparent;
   display: block;
   width: 0;
+}
+
+@keyframes floatBubble {
+  0%, 100% { transform: translateX(-50%) translateY(-48px); }
+  50% { transform: translateX(-50%) translateY(-52px); }
 }
 
 /* ==========================================
@@ -79,7 +88,7 @@ body, html {
 }
 
 .ticker-nav-btn {
-  background: rgba(44, 82, 130, 0.7);
+  background: rgba(154, 170, 163, 0.8); /* #9AAAA3 */
   color: white;
   border: none;
   width: 34px;
@@ -96,7 +105,7 @@ body, html {
   justify-content: center;
   flex-shrink: 0;
 }
-.ticker-nav-btn:hover { background: #1a365d; transform: scale(1.1); }
+.ticker-nav-btn:hover { background: #7f9188; transform: scale(1.1); }
 
 .ticker-cards-wrapper {
   display: flex;
@@ -144,7 +153,7 @@ body, html {
   background: #edf2f7; border: 1px solid #cbd5e0;
 }
 .murmur-user-info { display: flex; flex-direction: column; overflow: hidden; }
-.murmur-username { font-size: 12px; font-weight: bold; color: #2c5282; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.murmur-username { font-size: 12px; font-weight: bold; color: #6a7c73; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .murmur-date { font-size: 9px; color: #4a5568; }
 
 .murmur-body {
@@ -160,16 +169,30 @@ body, html {
 }
 
 /* ==========================================
-   今日工事 UI 面板
+   RWD 手機版：隱藏其他卡片，只顯示最新/當前一則
+   ========================================== */
+@media (max-width: 768px) {
+  .murmur-card.inactive {
+    display: none !important;
+  }
+  .murmur-card {
+    width: 100%;
+    min-width: unset;
+  }
+}
+
+/* ==========================================
+   今日工事 UI 面板 (按鈕全面替換為 #9AAAA3 系列)
    ========================================== */
 .floating-btn {
   position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
-  background: rgba(44, 82, 130, 0.7); backdrop-filter: blur(6px);
+  background: rgba(154, 170, 163, 0.8); /* #9AAAA3 */
+  backdrop-filter: blur(6px);
   color: white; border: 1px solid rgba(255,255,255,0.4); 
   padding: 12px 30px; border-radius: 20px; font-size: 18px; font-weight: bold; cursor: pointer;
   z-index: 10; box-shadow: 0 4px 15px rgba(0,0,0,0.15); transition: 0.3s;
 }
-.floating-btn:hover { background: rgba(26, 54, 93, 0.85); }
+.floating-btn:hover { background: rgba(127, 145, 136, 0.9); }
 
 .main-container {
   position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
@@ -184,8 +207,8 @@ body, html {
 }
 .close-x:hover { color: #000; }
 
-.section-header { margin-bottom: 10px; border-bottom: 2px solid rgba(44, 82, 130, 0.5); padding-bottom: 5px; }
-.section-title { font-size: 18px; font-weight: bold; color: #2c5282; }
+.section-header { margin-bottom: 10px; border-bottom: 2px solid rgba(154, 170, 163, 0.5); padding-bottom: 5px; }
+.section-title { font-size: 18px; font-weight: bold; color: #6a7c73; }
 
 .preview-container { display: flex; justify-content: center; margin-bottom: 12px; }
 .preview-box {
@@ -201,8 +224,8 @@ body, html {
 .form-input { padding: 8px 10px; border-radius: 8px; border: 1px solid #cbd5e0; background: rgba(255,255,255,0.8); font-size: 13px; width: 100%; box-sizing: border-box; }
 
 .action-btn { border: none; padding: 10px; border-radius: 10px; cursor: pointer; width: 100%; font-weight: bold; height: 42px; color: white; transition: 0.2s;}
-.primary-btn { background: #2c5282; }
-.secondary-btn { background: #2b6cb0; }
+.primary-btn { background: #9AAAA3; }
+.secondary-btn { background: #7f9188; }
 .submit-btn { background: #38a169; font-size: 15px; margin-top: 5px; }
 
 .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 30; display: flex; justify-content: center; align-items: center; }
@@ -216,5 +239,5 @@ body, html {
 
 .grid-container { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 15px 0; }
 .grid-item { width: 60px; height: 60px; background: rgba(240, 240, 240, 0.8); border-radius: 10px; cursor: pointer; object-fit: contain; border: 3px solid transparent; transition: 0.2s; padding: 4px; }
-.grid-item:hover { border-color: #2c5282; transform: scale(1.1); }
+.grid-item:hover { border-color: #9AAAA3; transform: scale(1.1); }
 .close-btn { background: rgba(204, 204, 204, 0.8); border: none; padding: 8px 16px; border-radius: 10px; cursor: pointer; font-weight: bold; margin-top: 10px;}
