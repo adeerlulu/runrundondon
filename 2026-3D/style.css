@@ -83,31 +83,25 @@ body.night-mode #night-sky {
 }
 
 /* ==========================================
-   3D 告示牌文字 (全白字、限制範圍)
+   3D 告示牌文字 (解除寬度限制、強制不斷行)
    ========================================== */
 .board-text {
-  color: #ffffff; /* 全部改為白字 */
-  font-size: 13px;
+  color: #ffffff;
+  font-size: 11px; /* 稍微縮小字體以完美符合板子寬度 */
   font-weight: 900;
   text-align: center;
-  line-height: 1.2;
+  line-height: 1.4;
   pointer-events: none;
-  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.8); /* 加上黑色陰影讓白字更凸顯 */
-  /* 嚴格限制寬高，不超出板子範圍 */
-  width: 100px;
-  height: 60px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  overflow: hidden; 
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+  white-space: nowrap; /* 確保數字和單位絕對不會被斷行 */
   transform: translateY(-8px);
 }
 #total-mins-num {
-  font-size: 26px; /* 稍微縮小避免爆板 */
-  color: #ffffff; /* 數字也改為全白 */
+  font-size: 20px; /* 數字配合調整，避免過大撐破版面 */
+  color: #ffffff;
   display: inline-block;
-  margin: 1px 0;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9);
+  margin-right: 3px;
+  text-shadow: 2px 2px 3px rgba(0, 0, 0, 0.9);
 }
 
 /* ==========================================
