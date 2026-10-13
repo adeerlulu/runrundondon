@@ -9,7 +9,7 @@ body, html {
 }
 
 /* ==========================================
-   3D 標籤 UI
+   3D 標籤 UI (完全交由 JS 3D 座標控制，不寫 transform)
    ========================================== */
 .player-name-tag {
   background: rgba(0, 0, 0, 0.75);
@@ -21,12 +21,10 @@ body, html {
   white-space: nowrap;
   pointer-events: none;
   box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-  transform: translateX(-50%) translateY(32px);
 }
 
-/* 拉開間距：將 Y 軸下推至 56px */
 .player-countdown-tag {
-  background: rgba(154, 170, 163, 0.9); /* #9AAAA3 RGB轉換 */
+  background: rgba(154, 170, 163, 0.9); /* #9AAAA3 */
   color: white;
   padding: 3px 9px;
   border-radius: 10px;
@@ -35,7 +33,6 @@ body, html {
   white-space: nowrap;
   pointer-events: none;
   box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-  transform: translateX(-50%) translateY(56px); 
 }
 
 .player-speech-bubble {
@@ -49,25 +46,18 @@ body, html {
   pointer-events: none;
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   border: 2px solid #cbd5e0;
-  transform: translateX(-50%) translateY(-48px);
-  animation: floatBubble 2s ease-in-out infinite;
 }
 .player-speech-bubble::after {
   content: '';
   position: absolute;
   bottom: -6px;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-50%); /* 這個是泡泡內部的小箭頭，保留沒問題 */
   border-width: 6px 6px 0;
   border-style: solid;
   border-color: #cbd5e0 transparent;
   display: block;
   width: 0;
-}
-
-@keyframes floatBubble {
-  0%, 100% { transform: translateX(-50%) translateY(-48px); }
-  50% { transform: translateX(-50%) translateY(-52px); }
 }
 
 /* ==========================================
@@ -88,7 +78,7 @@ body, html {
 }
 
 .ticker-nav-btn {
-  background: rgba(154, 170, 163, 0.8); /* #9AAAA3 */
+  background: rgba(154, 170, 163, 0.8); 
   color: white;
   border: none;
   width: 34px;
@@ -182,11 +172,11 @@ body, html {
 }
 
 /* ==========================================
-   今日工事 UI 面板 (按鈕全面替換為 #9AAAA3 系列)
+   今日工事 UI 面板 
    ========================================== */
 .floating-btn {
   position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
-  background: rgba(154, 170, 163, 0.8); /* #9AAAA3 */
+  background: rgba(154, 170, 163, 0.8); 
   backdrop-filter: blur(6px);
   color: white; border: 1px solid rgba(255,255,255,0.4); 
   padding: 12px 30px; border-radius: 20px; font-size: 18px; font-weight: bold; cursor: pointer;
