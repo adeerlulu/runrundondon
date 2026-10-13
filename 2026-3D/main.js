@@ -478,17 +478,17 @@ window.addEventListener('DOMContentLoaded', () => {
     if(lbl.innerText.includes('今日運動時數')) lbl.innerText = '今日運動時數(分鐘)';
     if(lbl.innerText.includes('今日 Murmur')) lbl.innerText = '今日 Murmur';
   });
+  
   const murmurInput = document.getElementById('murmur-input');
   if (murmurInput) {
     murmurInput.placeholder = '只能碎念30字...';
     murmurInput.maxLength = 30; 
   }
   
-  // ★ 隨機生成 1 到 4 的 logo，並套用指定的檔案路徑
-  const openPanelBtn = document.getElementById('open-panel-btn');
+    const openPanelBtn = document.getElementById('open-panel-btn');
   if (openPanelBtn) {
     const randomLogoId = Math.floor(Math.random() * 4) + 1; // 產生 1, 2, 3, 4
-    openPanelBtn.innerHTML = `<img src="./2026-3D/logo/logo_${randomLogoId}.png" alt="今日工事">`;
+    openPanelBtn.innerHTML = `<img src="./logo/logo_${randomLogoId}.png" alt="今日工事">`;
   }
   
   updateTimeMode();
