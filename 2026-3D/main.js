@@ -209,14 +209,13 @@ function animateTotalMins() {
   
   if (totalMinsAnimId) cancelAnimationFrame(totalMinsAnimId);
   
-  // ★ 數字動畫時長改為 600 毫秒，大幅提升滾動速度
   const duration = 600; 
   let startTimestamp = null;
   
   const step = (timestamp) => {
     if (!startTimestamp) startTimestamp = timestamp;
     const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-    const easeProgress = progress * (2 - progress); // 緩出特效
+    const easeProgress = progress * (2 - progress); 
     const currentVal = Math.floor(easeProgress * (end - start) + start);
     
     const currentObj = document.getElementById('total-mins-num');
@@ -270,7 +269,8 @@ function createBillboard() {
 
       const boardTextDiv = document.createElement('div');
       boardTextDiv.className = 'board-text';
-      boardTextDiv.innerHTML = `各位總共動了<br><span id="total-mins-num">${currentTotalMinsDisplay}</span><br>分鐘!!!`;
+      // ★ 移除了數字與分鐘之間的換行標籤 <br>，確保它們在同一行
+      boardTextDiv.innerHTML = `各位總共動了<br><span id="total-mins-num">${currentTotalMinsDisplay}</span> 分鐘!!!`;
       const boardLabel = new THREE.CSS2DObject(boardTextDiv);
       boardLabel.position.set(0, boardY, 0.1); 
       billboardGroup.add(boardLabel);
