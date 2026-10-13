@@ -251,25 +251,24 @@ function createBillboard() {
     pole.position.set(0, pH / 2, 0); 
     billboardGroup.add(pole);
 
-    textureLoader.load('./deco/borad_2.png', (tex2) => {
+textureLoader.load('./deco/borad_2.png', (tex2) => {
       tex2.magFilter = THREE.LinearFilter; tex2.minFilter = THREE.LinearFilter;
       if (THREE.SRGBColorSpace) tex2.colorSpace = THREE.SRGBColorSpace;
       
       const boardMat = new THREE.SpriteMaterial({ map: tex2, transparent: true, alphaTest: 0.1, depthWrite: false });
       const board = new THREE.Sprite(boardMat);
       
-      const bW = tex2.image.width * scaleMulti;
-      const bH = tex2.image.height * scaleMulti;
+            const bW = tex2.image.width * scaleMulti * 1.05;
+      const bH = tex2.image.height * scaleMulti * 1.05;
       
       board.scale.set(bW, bH, 1);
       const topOffset = 50 * scaleMulti;
-      const boardY = pH - topOffset - (bH / 2);
+           const boardY = pH - topOffset - (bH / 2);
       board.position.set(0, boardY, 0.05); 
       billboardGroup.add(board);
 
       const boardTextDiv = document.createElement('div');
       boardTextDiv.className = 'board-text';
-      // ★ 移除了數字與分鐘之間的換行標籤 <br>，確保它們在同一行
       boardTextDiv.innerHTML = `各位總共動了<br><span id="total-mins-num">${currentTotalMinsDisplay}</span> 分鐘!!!`;
       const boardLabel = new THREE.CSS2DObject(boardTextDiv);
       boardLabel.position.set(0, boardY, 0.1); 
