@@ -131,29 +131,42 @@ body.night-mode #night-sky {
   overflow: hidden; min-height: 34px; 
 }
 
-@media (max-width: 768px) {
-  .murmur-card.inactive { display: none !important; }
-  .murmur-card { width: 100%; min-width: unset; border-radius: 10px; }
-}
-
 /* ==========================================
-   隨機 Logo 按鈕 (透明背景、只顯示圖片)
+   隨機 Logo 按鈕 (移至右上方)
    ========================================== */
 .floating-btn {
-  position: absolute; top: 15px; left: 50%; transform: translateX(-50%);
-  background: transparent; /* 移除原本的背景色與毛玻璃 */
+  position: absolute; 
+  top: 20px; 
+  right: 20px; /* 網頁版固定在右上方 */
+  background: transparent; 
   border: none; 
   padding: 0; 
   cursor: pointer;
   z-index: 10; 
   transition: 0.3s;
 }
-.floating-btn:hover { transform: translateX(-50%) scale(1.05); }
+.floating-btn:hover { 
+  transform: scale(1.08); /* 移除了 translateX，直接放大即可 */
+}
 .floating-btn img {
-  height: 60px; /* 這裡可調整 Logo 圖片的顯示高度 */
+  height: 60px; 
   width: auto;
   object-fit: contain;
-  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.25)); /* 為去背 Logo 加上陰影 */
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.25)); 
+}
+
+/* RWD 手機版微調 */
+@media (max-width: 768px) {
+  .murmur-card.inactive { display: none !important; }
+  .murmur-card { width: 100%; min-width: unset; border-radius: 10px; }
+  
+  .floating-btn {
+    top: 15px; 
+    right: 15px; /* 手機版稍微向內縮 */
+  }
+  .floating-btn img {
+    height: 50px; /* 手機版稍微縮小一點 Logo 避免擋住畫面 */
+  }
 }
 
 /* ==========================================
