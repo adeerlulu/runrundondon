@@ -209,7 +209,7 @@ function animateTotalMins() {
   
   if (totalMinsAnimId) cancelAnimationFrame(totalMinsAnimId);
   
-  const duration = 300; 
+  const duration = 600; 
   let startTimestamp = null;
   
   const step = (timestamp) => {
@@ -251,19 +251,19 @@ function createBillboard() {
     pole.position.set(0, pH / 2, 0); 
     billboardGroup.add(pole);
 
-textureLoader.load('./deco/borad_2.png', (tex2) => {
+    textureLoader.load('./deco/borad_2.png', (tex2) => {
       tex2.magFilter = THREE.LinearFilter; tex2.minFilter = THREE.LinearFilter;
       if (THREE.SRGBColorSpace) tex2.colorSpace = THREE.SRGBColorSpace;
       
       const boardMat = new THREE.SpriteMaterial({ map: tex2, transparent: true, alphaTest: 0.1, depthWrite: false });
       const board = new THREE.Sprite(boardMat);
       
-            const bW = tex2.image.width * scaleMulti * 1.05;
+      const bW = tex2.image.width * scaleMulti * 1.05;
       const bH = tex2.image.height * scaleMulti * 1.05;
       
       board.scale.set(bW, bH, 1);
       const topOffset = 50 * scaleMulti;
-           const boardY = pH - topOffset - (bH / 2);
+      const boardY = pH - topOffset - (bH / 2);
       board.position.set(0, boardY, 0.05); 
       billboardGroup.add(board);
 
@@ -281,7 +281,7 @@ textureLoader.load('./deco/borad_2.png', (tex2) => {
 createBillboard();
 
 // ==========================================
-// 4. 多角色系統
+// 4. 多角色系統與貪吃蛇小夥伴
 // ==========================================
 const allPlayerGroups = []; 
 let allMembersData = {}; 
@@ -312,6 +312,49 @@ function getCountdownText(minsInput) {
   else return `哇喔多動了${Math.abs(diff)}分鐘`;
 }
 
+// 建立與更新小夥伴的函數
+function buildCompanions(group, mins, sc) {
+  if (group.userData.companions) {
+    group.userData.companions.forEach(c => group.remove(c));
+  }
+  group.userData.companions = [];
+  
+  const minsInt = parseInt(mins) || 0;
+  const toLoad = [];
+  
+  // 依據時數載入對應數量的小夥伴 (依照你的目錄拼寫 colletction)
+  if (minsInt >= 1) toLoad.push('./colletction/collection_1.png');
+  if (minsInt >= 5) toLoad.push('./colletction/collection_2.png');
+  if (minsInt >= 10) toLoad.push('./colletction/collection_3.png');
+  if (minsInt >= 20) toLoad.push('./colletction/collection_4.png');
+  if (minsInt >= 30) toLoad.push('./colletction/collection_5.png');
+  if (minsInt >= 40) toLoad.push('./colletction/collection_6.png');
+  if (minsInt >= 50) toLoad.push('./colletction/collection_7.png');
+  if (minsInt >= 60) toLoad.push('./colletction/collection_8.png');
+
+  toLoad.forEach((url, i) => {
+    textureLoader.load(url, (tex) => {
+      tex.magFilter = THREE.LinearFilter; tex.minFilter = THREE.LinearFilter;
+      if (THREE.SRGBColorSpace) tex.colorSpace = THREE.SRGBColorSpace;
+      
+      const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, alphaTest: 0.1, depthWrite: false });
+      const sp = new THREE.Sprite(mat);
+      const scale = 1.3 * sc; // 小夥伴比例稍微比手小一點
+      sp.scale.set(scale, scale, 1);
+      
+      // 設定在右側的初始座標 (頭像在 0，右手在 2.2，小夥伴從 3.2 開始往右排)
+      const baseX = (3.2 + i * 1.2) * sc; 
+      sp.position.set(baseX, 0, -0.1 - i*0.01); // 越後面的Z軸微退，避免穿插
+      
+      // 儲存物理屬性以便在 animate() 中製造延遲貪吃蛇效果
+      sp.userData = { index: i, localX: baseX, localY: 0, baseX: baseX };
+      
+      group.add(sp);
+      group.userData.companions.push(sp);
+    });
+  });
+}
+
 function spawnOrUpdateCharacter(charUrl, handUrl, memberName = '成員', sportType = '健走', mins = '0', customX = 0, customY = 0, customZ = -10, scaleMultiplier = 1) {
   let existingGroup = allPlayerGroups.find(g => g.userData.name === memberName);
   const bubbleHTML = getBubbleHTML(sportType);
@@ -322,6 +365,12 @@ function spawnOrUpdateCharacter(charUrl, handUrl, memberName = '成員', sportTy
     if (bubbleLabel) bubbleLabel.element.innerHTML = bubbleHTML;
     const countdownLabel = existingGroup.getObjectByName('countdownLabel');
     if (countdownLabel) countdownLabel.element.textContent = countdownText;
+    
+    // 如果時數有變更，重新計算並刷新小夥伴
+    if (existingGroup.userData.mins !== mins) {
+      existingGroup.userData.mins = mins;
+      buildCompanions(existingGroup, mins, scaleMultiplier);
+    }
     return;
   }
 
@@ -329,7 +378,8 @@ function spawnOrUpdateCharacter(charUrl, handUrl, memberName = '成員', sportTy
   const group = new THREE.Group();
   group.userData = { 
     name: memberName, baseX: customX, baseY: adjustedY, baseZ: customZ, 
-    targetBaseY: -2.5, randomOffset: Math.random() * 100, isDragging: false, isDropping: false, scale: scaleMultiplier
+    targetBaseY: -2.5, randomOffset: Math.random() * 100, isDragging: false, isDropping: false, scale: scaleMultiplier,
+    mins: mins // 記錄時數以供比對
   };
   scene.add(group);
 
@@ -379,6 +429,9 @@ function spawnOrUpdateCharacter(charUrl, handUrl, memberName = '成員', sportTy
       group.userData.hasHands = true;
     });
   }
+  
+  // 建立貪吃蛇小夥伴
+  buildCompanions(group, mins, scaleMultiplier);
   allPlayerGroups.push(group);
 }
 
@@ -598,7 +651,7 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 // ==========================================
-// 7. 動畫迴圈
+// 7. 動畫迴圈 (加入小夥伴貪吃蛇物理運算)
 // ==========================================
 let mouseX = 0, mouseY = 0;
 document.addEventListener('mousemove', (e) => { mouseX = (e.clientX / window.innerWidth) * 2 - 1; mouseY = -(e.clientY / window.innerHeight) * 2 + 1; });
@@ -624,6 +677,16 @@ function animate() {
       walkX = baseX + Math.sin(time * 0.001 + offset) * 1.2;     
       bounceY = baseY + Math.abs(Math.sin(time * 0.004 + offset)) * 0.4; 
     }
+    
+    // 計算群組與上一個 frame 的位移，用來製造拖曳時的貪吃蛇拉伸感
+    const currentGlobalPos = group.position.clone();
+    let dx = 0; let dy = 0;
+    if (group.userData.lastGlobalPos) {
+        dx = currentGlobalPos.x - group.userData.lastGlobalPos.x;
+        dy = currentGlobalPos.y - group.userData.lastGlobalPos.y;
+    }
+    group.userData.lastGlobalPos = currentGlobalPos;
+
     group.position.set(walkX, bounceY, baseZ);
 
     const body = group.getObjectByName('bodySprite');
@@ -639,6 +702,29 @@ function animate() {
       const swayFast = Math.cos(time * 0.005 + offset);
       if(leftHand) { leftHand.position.set(-2.2 * sc, swayFast * 0.15, 0.1); leftHand.material.rotation = sway * 0.3; }
       if(rightHand) { rightHand.position.set(2.2 * sc, -swayFast * 0.15, 0.1); rightHand.material.rotation = -sway * 0.3; }
+    }
+    
+    // ★ 處理小夥伴貪吃蛇動態
+    if (group.userData.companions && group.userData.companions.length > 0) {
+      group.userData.companions.forEach((comp, i) => {
+        // 利用反向位移製造拖拉時「被留在原地」的延遲感
+        comp.userData.localX -= dx * 0.9; 
+        comp.userData.localY -= dy * 0.9;
+        
+        const targetX = comp.userData.baseX;
+        // 加入延遲的上下波浪起伏 (依據索引 phase shift)
+        const targetY = Math.sin(time * 0.004 + offset - (i + 1) * 0.6) * 0.4 * sc;
+        
+        // 使用彈簧物理平滑吸附回原位 (越後面的小夥伴彈簧越軟，跟隨越慢)
+        const spring = 0.1 + (i * 0.02); 
+        comp.userData.localX += (targetX - comp.userData.localX) * spring;
+        comp.userData.localY += (targetY - comp.userData.localY) * spring;
+        
+        // 增加拖拉時向後仰的旋轉特效
+        comp.material.rotation = (comp.userData.localX - targetX) * -0.15; 
+        
+        comp.position.set(comp.userData.localX, comp.userData.localY, -0.1 - (i*0.01));
+      });
     }
   });
 
