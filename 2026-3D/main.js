@@ -185,11 +185,54 @@ function updateDynamicGrass() {
 }
 
 // ==========================================
-// 3.1 裝飾：3D 告示牌系統
+// 3.1 裝飾：3D 告示牌與動態加總數字系統
 // ==========================================
+let currentTotalMinsDisplay = 0;
+let targetTotalMins = 0;
+let totalMinsAnimId = null;
+
+function updateTotalMinsDisplay(newTotal) {
+  targetTotalMins = newTotal;
+  animateTotalMins();
+}
+
+function animateTotalMins() {
+  const obj = document.getElementById('total-mins-num');
+  if (!obj) return;
+  
+  const start = currentTotalMinsDisplay;
+  const end = targetTotalMins;
+  if (start === end) {
+    obj.innerText = end;
+    return;
+  }
+  
+  if (totalMinsAnimId) cancelAnimationFrame(totalMinsAnimId);
+  
+  const duration = 2000; // 動畫時長 2 秒
+  let startTimestamp = null;
+  
+  const step = (timestamp) => {
+    if (!startTimestamp) startTimestamp = timestamp;
+    const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+    const easeProgress = progress * (2 - progress); // 緩出特效
+    const currentVal = Math.floor(easeProgress * (end - start) + start);
+    
+    const currentObj = document.getElementById('total-mins-num');
+    if (currentObj) currentObj.innerText = currentVal;
+    
+    if (progress < 1) {
+      totalMinsAnimId = window.requestAnimationFrame(step);
+    } else {
+      currentTotalMinsDisplay = end;
+      if (currentObj) currentObj.innerText = end;
+    }
+  };
+  totalMinsAnimId = window.requestAnimationFrame(step);
+}
+
 function createBillboard() {
   const billboardGroup = new THREE.Group();
-  // 將告示牌放置在偏左後方的草地上
   billboardGroup.position.set(-8, -1.8, -16); 
   scene.add(billboardGroup);
 
@@ -200,13 +243,11 @@ function createBillboard() {
     const poleMat = new THREE.SpriteMaterial({ map: tex1, transparent: true, alphaTest: 0.1, depthWrite: false });
     const pole = new THREE.Sprite(poleMat);
     
-    // 取得圖片實際比例，將 1px 轉換為 0.012 的 3D 空間等比縮放
     const scaleMulti = 0.012; 
     const pW = tex1.image.width * scaleMulti;
     const pH = tex1.image.height * scaleMulti;
     
     pole.scale.set(pW, pH, 1);
-    // 將棍子底部對齊草地表面 (將中心點往上拉高高度的一半)
     pole.position.set(0, pH / 2, 0); 
     billboardGroup.add(pole);
 
@@ -221,11 +262,22 @@ function createBillboard() {
       const bH = tex2.image.height * scaleMulti;
       
       board.scale.set(bW, bH, 1);
-      // X 軸設為 0 以完美置中於棍子
-      // 棍子的最頂端高度為 pH，往下 50px (50 * scaleMulti)，再減去板子本身的一半高度即可對齊中心
+      // 精準設定：看板中心點為棍子最頂端往下 50px
       const topOffset = 50 * scaleMulti;
-      board.position.set(0, pH - topOffset - (bH / 2), 0.05); // Z軸微調 0.05 確保牌子永遠貼在棍子前方
+      const boardY = pH - topOffset - (bH / 2);
+      board.position.set(0, boardY, 0.05); 
       billboardGroup.add(board);
+
+      // 加入 3D 文字看板
+      const boardTextDiv = document.createElement('div');
+      boardTextDiv.className = 'board-text';
+      boardTextDiv.innerHTML = `各位總共動了<br><span id="total-mins-num">${currentTotalMinsDisplay}</span><br>分鐘!!!`;
+      const boardLabel = new THREE.CSS2DObject(boardTextDiv);
+      boardLabel.position.set(0, boardY, 0.1); // 放於看板正中央，微推向 Z 軸避免被圖片吃掉
+      billboardGroup.add(boardLabel);
+
+      // 圖檔與文字載入完成後觸發一次數字滾動
+      animateTotalMins();
     });
   });
 }
@@ -461,8 +513,13 @@ function loadAllMembersFromFirebase() {
     membersArray.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
 
     murmurList = [];
+    let calculatedTotalMins = 0; // ★ 計算總時數
+
     membersArray.forEach((member, index) => {
       const opt = document.createElement('option'); opt.value = member.name; opt.innerText = member.name; userSelect.appendChild(opt);
+
+      // 加總所有人的運動分鐘數
+      calculatedTotalMins += (parseInt(member.mins) || 0);
 
       if (member.murmur) {
         const dateObj = member.updatedAt ? new Date(member.updatedAt) : new Date();
@@ -476,6 +533,10 @@ function loadAllMembersFromFirebase() {
         spawnOrUpdateCharacter(member.charUrl, member.handUrl, member.name, member.sportType, member.mins, spreadX, spreadY, spreadZ, scaleFactor);
       }
     });
+    
+    // 更新看板上的數字動畫
+    updateTotalMinsDisplay(calculatedTotalMins);
+    
     renderMurmurCards(); isLoadedFromFirebase = true;
   });
 }
