@@ -333,7 +333,7 @@ function showRecordModal(data) {
 window.closeRecordModal = function() { document.getElementById('record-modal').classList.add('hidden'); }
 
 // ==========================================
-// 6. UI、Firebase 與表單自動修正
+// 6. UI、Firebase
 // ==========================================
 const mainContent = document.getElementById('main-content');
 const openPanelBtn = document.getElementById('open-panel-btn');
@@ -469,7 +469,9 @@ window.submitData = function() {
     }).catch(e => alert("儲存失敗：" + e.message));
 }
 
+// ==========================================
 // 首次載入執行
+// ==========================================
 window.addEventListener('DOMContentLoaded', () => { 
   const labels = document.querySelectorAll('label');
   labels.forEach(lbl => {
@@ -482,11 +484,11 @@ window.addEventListener('DOMContentLoaded', () => {
     murmurInput.maxLength = 30; 
   }
   
-  // ★ 隨機生成 1 或是 2 的 logo 並放進開啓按鈕
+  // ★ 隨機生成 1 到 4 的 logo，並套用指定的檔案路徑
   const openPanelBtn = document.getElementById('open-panel-btn');
   if (openPanelBtn) {
-    const randomLogoId = Math.floor(Math.random() * 2) + 1; // 產生 1 或 2
-    openPanelBtn.innerHTML = `<img src="./logo/logo_${randomLogoId}.png" alt="今日工事">`;
+    const randomLogoId = Math.floor(Math.random() * 4) + 1; // 產生 1, 2, 3, 4
+    openPanelBtn.innerHTML = `<img src="./2026-3D/logo/logo_${randomLogoId}.png" alt="今日工事">`;
   }
   
   updateTimeMode();
