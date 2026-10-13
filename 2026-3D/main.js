@@ -1,5 +1,5 @@
 // ==========================================
-// 0. 日夜時間過渡與天空背景層 (不會蓋住 3D 畫布！)
+// 0. 日夜時間過渡與天空背景層 
 // ==========================================
 const daySky = document.createElement('div');
 daySky.id = 'day-sky';
@@ -9,17 +9,16 @@ const nightSky = document.createElement('div');
 nightSky.id = 'night-sky';
 document.body.insertBefore(nightSky, document.body.firstChild);
 
-let sceneFog; // 先宣告，等場景建立後再更新
+let sceneFog;
 
 function updateTimeMode() {
   const hour = new Date().getHours();
-  // 晚上 18:00 (含) 到早上 05:00 (不含) 為夜晚
   if (hour >= 18 || hour < 5) {
     document.body.classList.add('night-mode');
-    if(sceneFog) sceneFog.color.setHex(0xfcc0c7); // 讓霧氣稍微帶點夜晚的粉紫感
+    if(sceneFog) sceneFog.color.setHex(0xfcc0c7); 
   } else {
     document.body.classList.remove('night-mode');
-    if(sceneFog) sceneFog.color.setHex(0xf2eae9); // 白天的霧氣色
+    if(sceneFog) sceneFog.color.setHex(0xf2eae9); 
   }
 }
 
@@ -77,7 +76,7 @@ const canvas = document.querySelector('#bg-canvas');
 const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-renderer.setClearColor(0x000000, 0); // 確保 WebGL 完全透明
+renderer.setClearColor(0x000000, 0); 
 
 const labelRenderer = new THREE.CSS2DRenderer();
 labelRenderer.setSize(window.innerWidth, window.innerHeight);
@@ -181,21 +180,23 @@ function updateDynamicGrass() {
 }
 
 // ==========================================
-// 4. 多角色系統
+// 4. 多角色系統 (改由 3D 控制標籤精準定位)
 // ==========================================
 const allPlayerGroups = []; 
 let allMembersData = {}; 
 let tempCharUrl = ''; let tempHandUrl = '';
 
 function updatePreviewUI() {
-  document.getElementById('preview-avatar').style.display = tempCharUrl ? 'block' : 'none';
-  if(tempCharUrl) document.getElementById('preview-avatar').src = tempCharUrl;
-  document.getElementById('preview-placeholder').style.display = tempCharUrl ? 'none' : 'block';
-  document.getElementById('preview-hand').style.display = tempHandUrl ? 'block' : 'none';
-  if(tempHandUrl) document.getElementById('preview-hand').src = tempHandUrl;
+  const avatarImg = document.getElementById('preview-avatar');
+  const handImg = document.getElementById('preview-hand');
+  const placeholder = document.getElementById('preview-placeholder');
+  
+  if(avatarImg) { avatarImg.style.display = tempCharUrl ? 'block' : 'none'; if(tempCharUrl) avatarImg.src = tempCharUrl; }
+  if(placeholder) { placeholder.style.display = tempCharUrl ? 'none' : 'block'; }
+  if(handImg) { handImg.style.display = tempHandUrl ? 'block' : 'none'; if(tempHandUrl) handImg.src = tempHandUrl; }
 }
 
-function previewCharacter(url) { tempCharUrl = url; updatePreviewUI(); document.getElementById('hand-box').style.display = 'flex'; }
+function previewCharacter(url) { tempCharUrl = url; updatePreviewUI(); }
 function previewHand(url) { tempHandUrl = url; updatePreviewUI(); }
 
 function getBubbleHTML(sportType) {
@@ -231,19 +232,20 @@ function spawnOrUpdateCharacter(charUrl, handUrl, memberName = '成員', sportTy
   };
   scene.add(group);
 
+  // 精準設定標籤的 3D 相對高度
   const nameDiv = document.createElement('div'); nameDiv.className = 'player-name-tag'; nameDiv.textContent = memberName;
   const nameLabel = new THREE.CSS2DObject(nameDiv); nameLabel.name = 'nameLabel';
-  nameLabel.position.set(0, -1.9 * scaleMultiplier, 0); 
+  nameLabel.position.set(0, -2.1 * scaleMultiplier, 0); 
   group.add(nameLabel);
 
   const countdownDiv = document.createElement('div'); countdownDiv.className = 'player-countdown-tag'; countdownDiv.textContent = countdownText;
   const countdownLabel = new THREE.CSS2DObject(countdownDiv); countdownLabel.name = 'countdownLabel';
-  countdownLabel.position.set(0, -2.7 * scaleMultiplier, 0); 
+  countdownLabel.position.set(0, -2.8 * scaleMultiplier, 0); 
   group.add(countdownLabel);
 
   const bubbleDiv = document.createElement('div'); bubbleDiv.className = 'player-speech-bubble'; bubbleDiv.innerHTML = bubbleHTML;
   const bubbleLabel = new THREE.CSS2DObject(bubbleDiv); bubbleLabel.name = 'bubbleLabel';
-  bubbleLabel.position.set(0, 2.6 * scaleMultiplier, 0);
+  bubbleLabel.position.set(0, 2.5 * scaleMultiplier, 0);
   group.add(bubbleLabel);
 
   textureLoader.load(charUrl, (tex) => {
@@ -326,7 +328,7 @@ function showRecordModal(data) {
 window.closeRecordModal = function() { document.getElementById('record-modal').classList.add('hidden'); }
 
 // ==========================================
-// 6. UI、Firebase 與表單自動修正
+// 6. UI、Firebase
 // ==========================================
 const mainContent = document.getElementById('main-content');
 const openPanelBtn = document.getElementById('open-panel-btn');
@@ -462,7 +464,9 @@ window.submitData = function() {
     }).catch(e => alert("儲存失敗：" + e.message));
 }
 
+// ==========================================
 // 首次載入執行
+// ==========================================
 window.addEventListener('DOMContentLoaded', () => { 
   const labels = document.querySelectorAll('label');
   labels.forEach(lbl => {
@@ -481,7 +485,7 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 // ==========================================
-// 7. 動畫迴圈
+// 7. 動畫迴圈 (泡泡與手部皆使用精準定位)
 // ==========================================
 let mouseX = 0, mouseY = 0;
 document.addEventListener('mousemove', (e) => { mouseX = (e.clientX / window.innerWidth) * 2 - 1; mouseY = -(e.clientY / window.innerHeight) * 2 + 1; });
@@ -512,8 +516,9 @@ function animate() {
     const body = group.getObjectByName('bodySprite');
     if (body) body.material.rotation = group.userData.isDragging ? 0 : Math.sin(time * 0.003 + offset) * 0.1;
 
+    // 將泡泡在 3D 的高度利用 Y 軸平滑浮動
     const bubble = group.getObjectByName('bubbleLabel');
-    if (bubble) bubble.position.y = 2.6 * sc + Math.sin(time * 0.003 + offset) * 0.15;
+    if (bubble) bubble.position.y = (2.5 + Math.sin(time * 0.003 + offset) * 0.15) * sc;
 
     if (group.userData.hasHands) {
       const leftHand = group.getObjectByName('leftHand');
