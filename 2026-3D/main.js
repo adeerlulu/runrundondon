@@ -64,7 +64,7 @@ dirLight.position.set(0, 20, -30);
 scene.add(dirLight);
 
 // ==========================================
-// 3. 地形與草叢系統 (草叢尺寸縮小 50%)
+// 3. 地形與草叢系統
 // ==========================================
 function createNoiseTexture() {
   const size = 256; const data = new Uint8Array(size * size * 4);
@@ -108,7 +108,6 @@ function spawnFullGrassField() {
       tex.magFilter = THREE.LinearFilter; tex.minFilter = THREE.LinearFilter; tex.generateMipmaps = true;
       if (THREE.SRGBColorSpace) tex.colorSpace = THREE.SRGBColorSpace;
       const zDepth = -2 - Math.random() * 63;
-      // 尺寸縮小 50%
       const baseScale = (zDepth > -15) ? (4.5 + Math.random() * 2.5) : (2.0 + Math.random() * 2.5);
       const scaleFactor = baseScale * 0.5; 
       
@@ -135,7 +134,6 @@ function updateDynamicGrass() {
       if (THREE.SRGBColorSpace) tex.colorSpace = THREE.SRGBColorSpace;
       const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, opacity: 0, alphaTest: 0.1, depthWrite: false });
       const sprite = new THREE.Sprite(mat);
-      // 動態漸變草叢也縮小 50%
       sprite.scale.set(1.75, 1.75, 1);
       sprite.position.set((Math.random() - 0.5) * 80, -1.0 - Math.random() * 1.5, -5 - Math.random() * 40);
       sprite.userData = { fadeIn: true, opacitySpeed: 0.01 + Math.random() * 0.01 };
@@ -435,7 +433,7 @@ window.submitData = function() {
 window.addEventListener('DOMContentLoaded', () => { loadAllMembersFromFirebase(); startMurmurTicker(); });
 
 // ==========================================
-// 7. 動畫迴圈
+// 7. 動畫迴圈 (移除 computeVertexNormals 以消除滾動陰影)
 // ==========================================
 let mouseX = 0, mouseY = 0;
 document.addEventListener('mousemove', (e) => { mouseX = (e.clientX / window.innerWidth) * 2 - 1; mouseY = -(e.clientY / window.innerHeight) * 2 + 1; });
@@ -486,7 +484,7 @@ function animate() {
     pPos.setZ(i, Math.sin(x*0.04)*Math.cos(yOff*0.04)*3 + Math.sin(x*0.08)*Math.sin(yOff*0.02)*1.5 + Math.pow(Math.abs(x)/(tWidth/2),2)*5 - 2);
   }
   pPos.needsUpdate = true; 
-  pGeo.computeVertexNormals(); 
+  // 刻意移除 pGeo.computeVertexNormals(); 以停止陰影隨波浪滾動的現象
 
   camera.position.x += (mouseX * 6 - camera.position.x) * 0.03; camera.position.y += ((8 + mouseY * 2) - camera.position.y) * 0.03; camera.lookAt(0, 2, -10);
   renderer.render(scene, camera); labelRenderer.render(scene, camera);
