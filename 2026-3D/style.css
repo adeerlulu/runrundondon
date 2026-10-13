@@ -1,11 +1,27 @@
 body, html {
   margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; font-family: 'Helvetica Neue', Arial, sans-serif;
-  background: transparent;
+  /* 白天天空漸層寫在 body 上 */
+  background: linear-gradient(to bottom, #7c93cb 0%, #a4b3d9 15%, #cbcded 35%, #f2eae9 55%, #f2eae9 100%);
 }
 
 #bg-canvas { 
   position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; 
-  background: linear-gradient(to bottom, #7c93cb 0%, #a4b3d9 15%, #cbcded 35%, #f2eae9 55%, #f2eae9 100%);
+  background: transparent;
+}
+
+/* ==========================================
+   時間過渡：夜晚天空濾鏡
+   ========================================== */
+#night-sky {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -2;
+  /* 使用你提供的深夜色票漸層 */
+  background: linear-gradient(to bottom, #002C7C 0%, #3C508C 25%, #78749C 50%, #B498AC 75%, #FCC0C7 100%);
+  opacity: 0;
+  transition: opacity 4s ease-in-out; /* 4秒超平滑緩慢過渡 */
+  pointer-events: none;
+}
+body.night-mode #night-sky {
+  opacity: 1; /* 進入夜晚時顯示 */
 }
 
 /* ==========================================
@@ -106,7 +122,6 @@ body, html {
 }
 .ticker-nav-btn:hover { background: #7f9188; transform: scale(1.1); }
 
-/* 修正陰影被切斷：移除原本的 overflow: hidden，加上 padding 給陰影空間 */
 .ticker-cards-wrapper {
   display: flex;
   gap: 10px;
@@ -121,10 +136,11 @@ body, html {
   background: rgba(255, 255, 255, 0.6); 
   backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.5);
-  border-radius: 10px; /* 統一改為導圓角 10px */
+  border-radius: 10px;
   padding: 10px 14px;
   width: calc(33.333% - 6px);
-  min-width: 175px;
+  /* 寬度增加 20px */
+  min-width: 195px;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -132,14 +148,14 @@ body, html {
   transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
-/* 最新/當前查看的留言：加強透明度(背景更實心)，加上莫蘭迪綠色框 */
 .murmur-card.active {
   opacity: 1;
   transform: scale(1.05);
   z-index: 2;
-  background: rgba(255, 255, 255, 0.95); /* 增強不透明度 */
+  /* 焦點卡片背景透明度調整為 60% */
+  background: rgba(255, 255, 255, 0.6); 
   box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-  border: 2px solid #7f9188; /* 莫蘭迪綠色邊框 */
+  border: 2px solid #7f9188; 
 }
 
 .murmur-card.inactive {
@@ -164,14 +180,15 @@ body, html {
   line-height: 1.5;
   word-break: break-all;
   display: -webkit-box;
-  -webkit-line-clamp: 3; 
+  /* 高度減少 20px */
+  -webkit-line-clamp: 2; 
   -webkit-box-orient: vertical;
   overflow: hidden;
-  min-height: 54px; 
+  min-height: 34px; 
 }
 
 /* ==========================================
-   RWD 手機版：隱藏其他卡片，只顯示最新一則，且保留圓角
+   RWD 手機版
    ========================================== */
 @media (max-width: 768px) {
   .murmur-card.inactive {
@@ -180,7 +197,7 @@ body, html {
   .murmur-card {
     width: 100%;
     min-width: unset;
-    border-radius: 10px; /* 確保圓角不跑版 */
+    border-radius: 10px; 
   }
 }
 
@@ -224,31 +241,9 @@ body, html {
 .control-row { display: flex; gap: 12px; align-items: flex-end; margin-top: 10px; }
 .input-box { display: flex; flex-direction: column; flex: 1; }
 .input-box label { font-size: 13px; margin-bottom: 4px; color: #4a5568; font-weight: bold; }
+.form-input { padding: 8px 10px; border-radius: 8px; border: 1px solid #cbd5e0; background: rgba(255,255,255,0.8); font-size: 13px; width: 100%; height: 42px; box-sizing: border-box; }
 
-/* 修正欄位高度：確保表單輸入與右側按鈕高度完全相同 */
-.form-input { 
-  padding: 8px 10px; 
-  border-radius: 8px; 
-  border: 1px solid #cbd5e0; 
-  background: rgba(255,255,255,0.8); 
-  font-size: 13px; 
-  width: 100%; 
-  height: 42px; /* 固定高度為 42px */
-  box-sizing: border-box; 
-}
-
-.action-btn { 
-  border: none; 
-  padding: 10px; 
-  border-radius: 10px; 
-  cursor: pointer; 
-  width: 100%; 
-  font-weight: bold; 
-  height: 42px; /* 與 .form-input 齊平 */
-  color: white; 
-  transition: 0.2s;
-  box-sizing: border-box;
-}
+.action-btn { border: none; padding: 10px; border-radius: 10px; cursor: pointer; width: 100%; font-weight: bold; height: 42px; color: white; transition: 0.2s; box-sizing: border-box;}
 .primary-btn { background: #9AAAA3; }
 .secondary-btn { background: #7f9188; }
 .submit-btn { background: #38a169; font-size: 15px; margin-top: 5px; }
