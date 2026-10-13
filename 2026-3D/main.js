@@ -1,5 +1,25 @@
 // ==========================================
-// 0. Firebase 初始化設定
+// 0. 日夜時間過渡與夜空濾鏡植入
+// ==========================================
+const nightSky = document.createElement('div');
+nightSky.id = 'night-sky';
+document.body.insertBefore(nightSky, document.body.firstChild);
+
+function updateTimeMode() {
+  const hour = new Date().getHours();
+  // 晚上 18:00 (含) 到早上 05:00 (不含，即 04:59) 為夜晚
+  if (hour >= 18 || hour < 5) {
+    document.body.classList.add('night-mode');
+  } else {
+    document.body.classList.remove('night-mode');
+  }
+}
+// 進入網頁立刻偵測一次，之後每分鐘更新一次
+updateTimeMode();
+setInterval(updateTimeMode, 60000);
+
+// ==========================================
+// 0.1 Firebase 初始化設定
 // ==========================================
 const firebaseConfig = {
   apiKey: "AIzaSyDqX_tZqqfw0txXpd-b4AWuolhgQgU6lLU",
@@ -409,7 +429,6 @@ userSelect.onchange = (e) => {
     dbRef.child(selectedName).once('value', (snapshot) => {
       const val = snapshot.val();
       if (val) {
-        // ★ 選擇老成員時：清空舊資料，逼迫重新填寫，只保留頭像和裝備預覽
         document.getElementById('mins').value = '';
         document.getElementById('sport-type').value = '健走'; 
         document.getElementById('murmur-input').value = '';
@@ -437,22 +456,17 @@ window.submitData = function() {
     }).catch(e => alert("儲存失敗：" + e.message));
 }
 
-// ==========================================
-// 自動尋找並取代 HTML 中的舊有標籤文字
-// ==========================================
 window.addEventListener('DOMContentLoaded', () => { 
   const labels = document.querySelectorAll('label');
   labels.forEach(lbl => {
     if(lbl.innerText.includes('今日運動時數')) lbl.innerText = '今日運動時數(分鐘)';
     if(lbl.innerText.includes('今日 Murmur')) lbl.innerText = '今日 Murmur';
   });
-
   const murmurInput = document.getElementById('murmur-input');
   if (murmurInput) {
     murmurInput.placeholder = '只能碎念30字...';
-    murmurInput.maxLength = 30; // 鎖定最多輸入 30 字
+    murmurInput.maxLength = 30; 
   }
-
   loadAllMembersFromFirebase(); 
   startMurmurTicker(); 
 });
