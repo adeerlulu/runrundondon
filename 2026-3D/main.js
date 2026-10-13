@@ -41,12 +41,18 @@ const dbRef = firebase.database().ref('2026_records');
 // ==========================================
 // 1. 圖庫資料與專屬色票設定
 // ==========================================
-const characterList = [ './character/ani/ani_1.png', './character/ani/ani_2.png' ];
+// 自動產生 ani_1.png 到 ani_16.png
+const characterList = [];
+for (let i = 1; i <= 16; i++) {
+  characterList.push(`./character/ani/ani_${i}.png`);
+}
+
 const handList = [
   './character/hand/blue_hand_closed.png', './character/hand/blue_hand_open.png',
   './character/hand/blue_hand_peace.png', './character/hand/blue_hand_point.png',
   './character/hand/blue_hand_rock.png', './character/hand/blue_hand_thumb.png'
 ];
+
 const grassList = [];
 for (let i = 1; i <= 24; i++) grassList.push(`./grass/grass_${i}.png`);
 
@@ -180,7 +186,7 @@ function updateDynamicGrass() {
 }
 
 // ==========================================
-// 4. 多角色系統 (改由 3D 控制標籤精準定位)
+// 4. 多角色系統
 // ==========================================
 const allPlayerGroups = []; 
 let allMembersData = {}; 
@@ -232,20 +238,19 @@ function spawnOrUpdateCharacter(charUrl, handUrl, memberName = '成員', sportTy
   };
   scene.add(group);
 
-  // 精準設定標籤的 3D 相對高度
   const nameDiv = document.createElement('div'); nameDiv.className = 'player-name-tag'; nameDiv.textContent = memberName;
   const nameLabel = new THREE.CSS2DObject(nameDiv); nameLabel.name = 'nameLabel';
-  nameLabel.position.set(0, -2.1 * scaleMultiplier, 0); 
+  nameLabel.position.set(0, -1.9 * scaleMultiplier, 0); 
   group.add(nameLabel);
 
   const countdownDiv = document.createElement('div'); countdownDiv.className = 'player-countdown-tag'; countdownDiv.textContent = countdownText;
   const countdownLabel = new THREE.CSS2DObject(countdownDiv); countdownLabel.name = 'countdownLabel';
-  countdownLabel.position.set(0, -2.8 * scaleMultiplier, 0); 
+  countdownLabel.position.set(0, -2.7 * scaleMultiplier, 0); 
   group.add(countdownLabel);
 
   const bubbleDiv = document.createElement('div'); bubbleDiv.className = 'player-speech-bubble'; bubbleDiv.innerHTML = bubbleHTML;
   const bubbleLabel = new THREE.CSS2DObject(bubbleDiv); bubbleLabel.name = 'bubbleLabel';
-  bubbleLabel.position.set(0, 2.5 * scaleMultiplier, 0);
+  bubbleLabel.position.set(0, 2.6 * scaleMultiplier, 0);
   group.add(bubbleLabel);
 
   textureLoader.load(charUrl, (tex) => {
@@ -328,7 +333,7 @@ function showRecordModal(data) {
 window.closeRecordModal = function() { document.getElementById('record-modal').classList.add('hidden'); }
 
 // ==========================================
-// 6. UI、Firebase
+// 6. UI、Firebase 與表單自動修正
 // ==========================================
 const mainContent = document.getElementById('main-content');
 const openPanelBtn = document.getElementById('open-panel-btn');
@@ -464,9 +469,7 @@ window.submitData = function() {
     }).catch(e => alert("儲存失敗：" + e.message));
 }
 
-// ==========================================
 // 首次載入執行
-// ==========================================
 window.addEventListener('DOMContentLoaded', () => { 
   const labels = document.querySelectorAll('label');
   labels.forEach(lbl => {
@@ -479,13 +482,20 @@ window.addEventListener('DOMContentLoaded', () => {
     murmurInput.maxLength = 30; 
   }
   
+  // ★ 隨機生成 1 或是 2 的 logo 並放進開啓按鈕
+  const openPanelBtn = document.getElementById('open-panel-btn');
+  if (openPanelBtn) {
+    const randomLogoId = Math.floor(Math.random() * 2) + 1; // 產生 1 或 2
+    openPanelBtn.innerHTML = `<img src="./logo/logo_${randomLogoId}.png" alt="今日工事">`;
+  }
+  
   updateTimeMode();
   loadAllMembersFromFirebase(); 
   startMurmurTicker(); 
 });
 
 // ==========================================
-// 7. 動畫迴圈 (泡泡與手部皆使用精準定位)
+// 7. 動畫迴圈
 // ==========================================
 let mouseX = 0, mouseY = 0;
 document.addEventListener('mousemove', (e) => { mouseX = (e.clientX / window.innerWidth) * 2 - 1; mouseY = -(e.clientY / window.innerHeight) * 2 + 1; });
@@ -516,7 +526,6 @@ function animate() {
     const body = group.getObjectByName('bodySprite');
     if (body) body.material.rotation = group.userData.isDragging ? 0 : Math.sin(time * 0.003 + offset) * 0.1;
 
-    // 將泡泡在 3D 的高度利用 Y 軸平滑浮動
     const bubble = group.getObjectByName('bubbleLabel');
     if (bubble) bubble.position.y = (2.5 + Math.sin(time * 0.003 + offset) * 0.15) * sc;
 
